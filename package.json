@@ -1,0 +1,22 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite"
+  },
+  "author": "",
+  "dependencies": {
+    "@0x-jerry/utils": "^1.16.2",
+    "@vue/reactivity": "^3.2.47",
+    "@vueuse/core": "^9.13.0",
+    "chalk": "^5.2.0",
+    "lodash": "^4.17.21"
+  },
+  "description": "",
+  "devDependencies": {
+    "vite": "^4.2.1",
+    "vite-plugin-inspect": "^0.7.19"
+  }
+}
