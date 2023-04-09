@@ -1,4 +1,4 @@
-import { ref } from '@vue/reactivity'
+import { computed, ref } from '@vue/reactivity'
 import { h, Fragment } from './jsx'
 
 const Counter = () => {
@@ -6,11 +6,16 @@ const Counter = () => {
 
   const click = () => {
     count.value++
+    console.log('click', count.value)
   }
 
   return (
     <>
-      <button onClick={click}>{{ count }}</button>
+      <button onClick={click}>{count}</button>
+      <div>
+        double:
+        {computed(() => count.value * 2)}
+      </div>
     </>
   )
 }

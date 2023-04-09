@@ -88,9 +88,6 @@ function createTextEl(content: MaybeRef<PrimitiveType>) {
   }
 
   const updaters: (() => void)[] = []
-  const runner = effect(() => {
-    updaters.forEach((fn) => fn())
-  })
 
   if (isRef(content)) {
     updaters.push(() => {
@@ -99,6 +96,10 @@ function createTextEl(content: MaybeRef<PrimitiveType>) {
   } else {
     el.textContent = String(content ?? '')
   }
+
+  const runner = effect(() => {
+    updaters.forEach((fn) => fn())
+  })
 
   el._ = vEl
 
@@ -111,7 +112,10 @@ export enum FragmentType {
   If
 }
 
-export function createFragment(type: FragmentType = FragmentType.None, children?: VNode[]) {
+export function createFragment(
+  type: FragmentType = FragmentType.None,
+  children?: VNode[]
+) {
   const el = document.createDocumentFragment() as VFragment
 
   const vEl: Element = {
@@ -148,11 +152,13 @@ function createChildren(el: ParentNode, children?: VNode[]) {
 
 function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
   if (/^on/.test(key)) {
+    const eventName = key.slice(2).toLowerCase()
+
     if (oldValue) {
-      el.removeEventListener(key, oldValue)
+      el.removeEventListener(eventName, oldValue)
     }
 
-    el.addEventListener(key, value)
+    el.addEventListener(eventName, value)
     return
   }
 

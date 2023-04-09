@@ -9,7 +9,6 @@ export function h(
   ...children: VNode[]
 ): VNode {
   if (!isString(type)) {
-    console.log(type, props, children)
     const _p = {
       ...props,
       children
