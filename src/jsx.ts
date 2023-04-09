@@ -1,4 +1,4 @@
-import { isString, makePair } from '@0x-jerry/utils'
+import { JsonPrimitive, Optional, isString, makePair } from '@0x-jerry/utils'
 import {
   VNode,
   createEl,
@@ -42,11 +42,11 @@ export function Fragment(props: { children?: any[] }): VNode {
 }
 
 export function vCase(
-  condition: MaybeRef<string | boolean | number>,
+  condition: MaybeRef<JsonPrimitive>,
   /**
    * should return jsx
    */
-  cases: Record<string, () => any>
+  cases: Record<string, Optional<() => any>>
 ) {
   const el = createTextEl('')
 
@@ -90,6 +90,12 @@ export function vCase(
 
   return el
 }
+
+export const vIf = (
+  condition: MaybeRef<JsonPrimitive>,
+  truthy?: () => any,
+  falsy?: () => any
+) => vCase(condition, { true: truthy, false: falsy })
 
 export function vFor<T>(
   list: MaybeRef<T[]>,
