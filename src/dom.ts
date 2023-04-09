@@ -1,27 +1,45 @@
-import { PrimitiveType, isPrimitive, isString } from '@0x-jerry/utils'
+import { PrimitiveType, isPrimitive, walkTree } from '@0x-jerry/utils'
 import { effect, isReactive, isRef, stop, unref } from '@vue/reactivity'
 import { MaybeRef } from '@vueuse/core'
 
-export type Element = {
+export type VElement = {
   unmount(): void
   state: Map<string, any>
 }
 
-export type VHTMLElement = HTMLElement & {
-  _: Element
+interface VElementEventMap {
+  unmount: Event
 }
 
-export type VText = Text & {
-  _: Element
+type MixVElement = {
+  _: VElement
+
+  // custom event
+  addEventListener<K extends keyof VElementEventMap>(
+    type: K,
+    listener: (this: HTMLElement, ev: VElementEventMap[K]) => any,
+    options?: boolean | AddEventListenerOptions
+  ): void
+  removeEventListener<K extends keyof VElementEventMap>(
+    type: K,
+    listener: (this: HTMLElement, ev: VElementEventMap[K]) => any,
+    options?: boolean | EventListenerOptions
+  ): void
 }
 
-export type VFragment = DocumentFragment & {
-  /**
-   * fragment type: for or if
-   */
-  _t: FragmentType
-  _: Element
-}
+export type VHTMLElement = HTMLElement & MixVElement
+
+export type VText = Text & MixVElement
+
+export type VFragment = DocumentFragment &
+  MixVElement & {
+    /**
+     * fragment type: for or if
+     */
+    _t: FragmentType
+  }
+
+export type VInternalElements = VText | VFragment | VHTMLElement
 
 export type VNode =
   | VHTMLElement
@@ -37,14 +55,8 @@ export function createEl(
 ): HTMLElement {
   const el = document.createElement(type) as VHTMLElement
 
-  const vEl: Element = {
-    state: new Map(),
-    unmount() {
-      stop(runner)
-    }
-  }
-
-  const updaters: (() => void)[] = []
+  const vEl = createVElement(el)
+  const u = createUpdater()
 
   Object.entries(props || {}).forEach(([key, value]) => {
     const _reactive = isReactive(value) || isRef(value)
@@ -63,12 +75,12 @@ export function createEl(
       vEl.state.set(key, value)
     }
 
-    updaters.push(updater)
+    u.updaters.push(updater)
   })
 
-  const runner = effect(() => {
-    updaters.forEach((fn) => fn())
-  })
+  u.run()
+
+  el.addEventListener('unmount', u.stop)
 
   el._ = vEl
 
@@ -80,26 +92,21 @@ export function createEl(
 function createTextEl(content: MaybeRef<PrimitiveType>) {
   const el = document.createTextNode('') as VText
 
-  const vEl: Element = {
-    unmount() {
-      stop(runner)
-    },
-    state: new Map()
-  }
+  const vEl = createVElement(el)
 
-  const updaters: (() => void)[] = []
+  const u = createUpdater()
 
   if (isRef(content)) {
-    updaters.push(() => {
+    u.updaters.push(() => {
       el.textContent = String(unref(content) ?? '')
     })
   } else {
     el.textContent = String(content ?? '')
   }
 
-  const runner = effect(() => {
-    updaters.forEach((fn) => fn())
-  })
+  u.run()
+
+  el.addEventListener('unmount', u.stop)
 
   el._ = vEl
 
@@ -118,8 +125,10 @@ export function createFragment(
 ) {
   const el = document.createDocumentFragment() as VFragment
 
-  const vEl: Element = {
-    unmount() {},
+  const vEl: VElement = {
+    unmount() {
+      el.dispatchEvent(new Event('unmount'))
+    },
     state: new Map()
   }
 
@@ -167,4 +176,43 @@ function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
   } else {
     el.setAttribute(key, value)
   }
+}
+
+function createVElement(el: Node) {
+  const vEl: VElement = {
+    unmount() {
+      el.dispatchEvent(new Event('unmount'))
+    },
+    state: new Map()
+  }
+
+  return vEl
+}
+
+function createUpdater() {
+  const updaters: (() => void)[] = []
+
+  const runner = effect(
+    () => {
+      updaters.forEach((fn) => fn())
+    },
+    {
+      lazy: true
+    }
+  )
+
+  return {
+    updaters,
+    run: runner,
+    stop() {
+      stop(runner)
+    }
+  }
+}
+
+export function unmount(el: VInternalElements) {
+  walkTree(el, (item) => {
+    const ctx = item._
+    ctx.unmount()
+  })
 }

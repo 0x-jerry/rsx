@@ -1,5 +1,7 @@
-import { isString } from '@0x-jerry/utils'
-import { VNode, createEl, createFragment } from './dom'
+import { Optional, isString } from '@0x-jerry/utils'
+import { FragmentType, VNode, createEl, createFragment } from './dom'
+import { MaybeRef } from '@vueuse/core'
+import { isRef } from '@vue/reactivity'
 
 type FunctionalComponent = (props?: any) => VNode
 
@@ -29,3 +31,17 @@ export function Fragment(props: { children?: any[] }): VNode {
 
   return el
 }
+
+export function vIf(
+  condition: MaybeRef<boolean>,
+  truety: Optional<() => VNode>,
+  falsy: Optional<() => VNode>
+) {
+  const el = createFragment(FragmentType.If)
+
+  if (isRef(condition)) {
+
+  }
+}
+
+export function vFor() {}
