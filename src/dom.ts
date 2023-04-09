@@ -31,22 +31,11 @@ export type VHTMLElement = HTMLElement & MixVElement
 
 export type VText = Text & MixVElement
 
-export type VFragment = HTMLElement &
-  MixVElement & {
-    /**
-     * fragment type: for or if
-     */
-    _t: FragmentType
-  }
+export type VFragment = HTMLElement & MixVElement
 
 export type VInternalElements = VText | VFragment | VHTMLElement
 
-export type VNode =
-  | VHTMLElement
-  | VFragment
-  | VText
-  | HTMLElement
-  | MaybeRef<PrimitiveType>
+export type VNode = VInternalElements | HTMLElement | MaybeRef<PrimitiveType>
 
 export function createEl(
   type: string,
@@ -113,16 +102,7 @@ export function createTextEl(content: MaybeRef<PrimitiveType>) {
   return el
 }
 
-export enum FragmentType {
-  None,
-  For,
-  If
-}
-
-export function createFragment(
-  type: FragmentType = FragmentType.None,
-  children?: VNode[]
-) {
+export function createFragment(children?: VNode[]) {
   const el = document.createElement('div') as any as VFragment
   el.style.display = 'contents'
 
@@ -134,7 +114,6 @@ export function createFragment(
   }
 
   el._ = vEl
-  el._t = type
 
   createChildren(el, children)
 

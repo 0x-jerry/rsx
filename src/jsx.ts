@@ -1,6 +1,5 @@
-import { Optional, isString, makePair } from '@0x-jerry/utils'
+import { isString, makePair } from '@0x-jerry/utils'
 import {
-  FragmentType,
   VNode,
   createEl,
   createFragment,
@@ -37,7 +36,7 @@ export function h(
 }
 
 export function Fragment(props: { children?: any[] }): VNode {
-  const el = createFragment(FragmentType.None, props.children)
+  const el = createFragment(props.children)
 
   return el
 }
