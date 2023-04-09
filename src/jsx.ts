@@ -100,7 +100,7 @@ export function vFor<T>(
    */
   render: (item: T, idx: number) => any
 ) {
-  const el = createFragment(FragmentType.For)
+  const el = createTextEl('')
 
   const u = createUpdater()
 
@@ -113,6 +113,8 @@ export function vFor<T>(
 
   const key2el = new Map<string, ChildElement>()
   const el2key = new Map<ChildElement, string>()
+
+  let renderedChildren: ChildElement[] = []
 
   if (isRef(list)) {
     u.updaters.push(() => {
@@ -134,7 +136,9 @@ export function vFor<T>(
         return el
       })
 
-      for (const child of Array.from(el.childNodes) as ChildElement[]) {
+      for (const child of renderedChildren) {
+        child.remove()
+
         if (child._r) {
           // reset reuse flag
           child._r = false
@@ -143,18 +147,24 @@ export function vFor<T>(
 
         // should delete
         unmount(child)
+
         const keyValue = el2key.get(child)!
 
         el2key.delete(child)
         key2el.delete(keyValue)
       }
 
-      el.innerHTML = ''
-      el.append(...newList)
+      renderedChildren = newList
+
+      // re-render all items
+      newList.forEach((item) => {
+        el.parentElement?.insertBefore(item, el)
+      })
     })
   }
 
-  u.run()
+  // should waiting `el` to append to it's parent
+  Promise.resolve().then(() => u.run())
 
   el.addEventListener('unmount', u.stop)
 
