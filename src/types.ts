@@ -1,5 +1,3 @@
-import { VElement, VNode } from 'million'
+import { Ref } from "@vue/reactivity";
 
-export type DefineComponent = (props: any, children: any[]) => () => VElement
-
-export type JSXFC = (props: { parent?: any } | null | undefined, ...children: any[]) => JSX.Element
+export type MaybeRef<T> = T | Ref<T>

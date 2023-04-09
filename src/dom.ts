@@ -1,6 +1,6 @@
 import { PrimitiveType, isObject, isPrimitive, walkTree } from '@0x-jerry/utils'
 import { effect, isReactive, isRef, stop, unref } from '@vue/reactivity'
-import { MaybeRef } from '@vueuse/core'
+import { MaybeRef } from './types'
 
 export type VElement = {
   unmount(): void

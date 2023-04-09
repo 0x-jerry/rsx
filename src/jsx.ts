@@ -8,9 +8,9 @@ import {
   isInternalElements,
   unmount
 } from './dom'
-import { MaybeRef } from '@vueuse/core'
 import { isRef, unref } from '@vue/reactivity'
 import { VInternalElements } from './dom'
+import { MaybeRef } from './types'
 
 type FunctionalComponent = (props?: any) => VNode
 
