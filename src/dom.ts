@@ -68,7 +68,7 @@ export function createEl(
 
       el.addEventListener('input', (e) => {
         const v = (e.target as HTMLInputElement).value
-        value.value = v
+        value.value = modifier === 'trim' ? v.trim() : v
       })
 
       return
