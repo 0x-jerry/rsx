@@ -1,4 +1,4 @@
-import { PrimitiveType, isPrimitive, walkTree } from '@0x-jerry/utils'
+import { PrimitiveType, isObject, isPrimitive, walkTree } from '@0x-jerry/utils'
 import { effect, isReactive, isRef, stop, unref } from '@vue/reactivity'
 import { MaybeRef } from '@vueuse/core'
 
@@ -31,7 +31,7 @@ export type VHTMLElement = HTMLElement & MixVElement
 
 export type VText = Text & MixVElement
 
-export type VFragment = DocumentFragment &
+export type VFragment = HTMLElement &
   MixVElement & {
     /**
      * fragment type: for or if
@@ -123,7 +123,8 @@ export function createFragment(
   type: FragmentType = FragmentType.None,
   children?: VNode[]
 ) {
-  const el = document.createDocumentFragment() as VFragment
+  const el = document.createElement('div') as any as VFragment
+  el.style.display = 'contents'
 
   const vEl: VElement = {
     unmount() {
@@ -189,7 +190,7 @@ function createVElement(el: Node) {
   return vEl
 }
 
-function createUpdater() {
+export function createUpdater() {
   const updaters: (() => void)[] = []
 
   const runner = effect(
@@ -215,4 +216,8 @@ export function unmount(el: VInternalElements) {
     const ctx = item._
     ctx.unmount()
   })
+}
+
+export function isInternalElements(o: unknown): o is VInternalElements {
+  return isObject(o) && '_' in o
 }
