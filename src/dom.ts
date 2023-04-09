@@ -193,12 +193,22 @@ function createVElement(el: Node) {
 export function createUpdater() {
   const updaters: (() => void)[] = []
 
+  let pending: Promise<void> | null = null
+
   const runner = effect(
     () => {
       updaters.forEach((fn) => fn())
     },
     {
-      lazy: true
+      lazy: true,
+      scheduler() {
+        if (pending) return
+
+        pending = Promise.resolve().then(() => {
+          runner()
+          pending = null
+        })
+      }
     }
   )
 

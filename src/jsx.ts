@@ -76,6 +76,9 @@ export function vIf(
         el.appendChild(newChild)
       }
     })
+  } else {
+    const newChild = condition ? truthy?.() : falsy?.()
+    el.appendChild(newChild)
   }
 
   u.run()
@@ -85,4 +88,71 @@ export function vIf(
   return el
 }
 
-export function vFor() {}
+export function vFor<T>(
+  list: MaybeRef<T[]>,
+  key: keyof T,
+  /**
+   * should return jsx
+   */
+  render: (item: T, idx: number) => any
+) {
+  const el = createFragment(FragmentType.For)
+
+  const u = createUpdater()
+
+  type ChildElement = VInternalElements & {
+    /**
+     * if should reuse
+     */
+    _r?: boolean
+  }
+
+  const key2el = new Map<string, ChildElement>()
+  const el2key = new Map<ChildElement, string>()
+
+  if (isRef(list)) {
+    u.updaters.push(() => {
+      const newList = unref(list).map((n, idx) => {
+        const keyValue = String(n[key])
+
+        if (key2el.has(keyValue)) {
+          const reuseEl = key2el.get(keyValue)!
+          reuseEl._r = true
+
+          return reuseEl
+        }
+
+        const el = render(n, idx) as VInternalElements & { _r?: boolean }
+
+        key2el.set(keyValue, el)
+        el2key.set(el, keyValue)
+
+        return el
+      })
+
+      for (const child of Array.from(el.childNodes) as ChildElement[]) {
+        if (child._r) {
+          // reset reuse flag
+          child._r = false
+          continue
+        }
+
+        // should delete
+        unmount(child)
+        const keyValue = el2key.get(child)!
+
+        el2key.delete(child)
+        key2el.delete(keyValue)
+      }
+
+      el.innerHTML = ''
+      el.append(...newList)
+    })
+  }
+
+  u.run()
+
+  el.addEventListener('unmount', u.stop)
+
+  return el
+}

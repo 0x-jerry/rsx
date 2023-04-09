@@ -1,5 +1,5 @@
 import { computed, ref } from '@vue/reactivity'
-import { h, Fragment, vIf } from './jsx'
+import { h, Fragment, vIf, vFor } from './jsx'
 
 const Counter = () => {
   const count = ref(0)
@@ -21,6 +21,22 @@ const Counter = () => {
     show.value = !show.value
   }
 
+  const list = ref(
+    new Array(10).fill(0).map((_, idx) => ({ key: idx.toString() }))
+  )
+
+  let seq = true
+  const makeRandomData = () => {
+    seq = !seq
+    list.value = list.value.sort((a, b) =>
+      seq ? a.key.localeCompare(b.key) : b.key.localeCompare(a.key)
+    )
+  }
+
+  const testVFor = vFor(list, 'key', (item) => {
+    return <span>{item.key}</span>
+  })
+
   return (
     <>
       <button onClick={click}>{count}</button>
@@ -30,10 +46,15 @@ const Counter = () => {
       </div>
       <hr />
 
-      <h1>test condition</h1>
+      <h1>Test condition</h1>
       <button onClick={toggleShow}>toggle</button>
       {show}
+
       {testVIf}
+
+      <h1>Test loop</h1>
+      <button onClick={makeRandomData}>random</button>
+      {testVFor}
     </>
   )
 }
