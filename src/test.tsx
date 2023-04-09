@@ -36,6 +36,8 @@ const Counter = () => {
     return <span>{item.key}</span>
   })
 
+  const inputValue = ref('123')
+
   return (
     <>
       <button onClick={click}>{count}</button>
@@ -54,6 +56,9 @@ const Counter = () => {
       <h1>Test loop</h1>
       <button onClick={makeRandomData}>random</button>
       {testVFor}
+      <h1>Value binding</h1>
+      <input $value:trim={inputValue}></input>
+      <span>input value is: {inputValue}</span>
     </>
   )
 }

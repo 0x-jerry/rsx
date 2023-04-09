@@ -48,6 +48,32 @@ export function createEl(
   const u = createUpdater()
 
   Object.entries(props || {}).forEach(([key, value]) => {
+    // todo, just test input binding, need refactor
+    // deal with something like: <input $value:trim={refValue} />
+    if (key.includes('$') && isRef(value)) {
+      const [keyName, modifier] = key.slice(1).split(':')
+
+      const _value = unref(value)
+
+      console.log(keyName, modifier, _value)
+
+      u.updaters.push(() => {
+        const old = vEl.state.get(keyName)
+
+        // todo: check old !== value
+        updateEl(el, keyName, _value, old)
+
+        vEl.state.set(keyName, _value)
+      })
+
+      el.addEventListener('input', (e) => {
+        const v = (e.target as HTMLInputElement).value
+        value.value = v
+      })
+
+      return
+    }
+
     const _reactive = isReactive(value) || isRef(value)
 
     if (!_reactive) {
@@ -55,16 +81,14 @@ export function createEl(
       return
     }
 
-    const updater = () => {
+    u.updaters.push(() => {
       const old = vEl.state.get(key)
 
       // todo: check old !== value
       updateEl(el, key, value, old)
 
       vEl.state.set(key, value)
-    }
-
-    u.updaters.push(updater)
+    })
   })
 
   u.run()
