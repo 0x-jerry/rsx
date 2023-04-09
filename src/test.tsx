@@ -1,5 +1,5 @@
 import { computed, ref } from '@vue/reactivity'
-import { h, Fragment, vIf, vFor } from './jsx'
+import { h, Fragment, vCase, vFor } from './jsx'
 
 const Counter = () => {
   const count = ref(0)
@@ -11,11 +11,10 @@ const Counter = () => {
     console.log('click', count.value)
   }
 
-  const testVIf = vIf(
-    show,
-    () => <div>this is true</div>,
-    () => <div>this is false</div>
-  )
+  const testVCase = vCase(show, {
+    true: () => <div>this is true</div>,
+    false: () => <div>this is false</div>
+  })
 
   const toggleShow = () => {
     show.value = !show.value
@@ -50,7 +49,7 @@ const Counter = () => {
       <button onClick={toggleShow}>toggle</button>
       {show}
 
-      {testVIf}
+      {testVCase}
 
       <h1>Test loop</h1>
       <button onClick={makeRandomData}>random</button>

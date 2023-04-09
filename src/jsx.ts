@@ -1,9 +1,10 @@
-import { Optional, isString } from '@0x-jerry/utils'
+import { Optional, isString, makePair } from '@0x-jerry/utils'
 import {
   FragmentType,
   VNode,
   createEl,
   createFragment,
+  createTextEl,
   createUpdater,
   isInternalElements,
   unmount
@@ -41,47 +42,50 @@ export function Fragment(props: { children?: any[] }): VNode {
   return el
 }
 
-export function vIf(
-  condition: MaybeRef<boolean>,
+export function vCase(
+  condition: MaybeRef<string | boolean | number>,
   /**
    * should return jsx
    */
-  truthy: Optional<() => any>,
-  /**
-   * should return jsx
-   */
-  falsy: Optional<() => any>
+  cases: Record<string, () => any>
 ) {
-  const el = createFragment(FragmentType.If)
+  const el = createTextEl('')
+
+  const pair = makePair(cases)
 
   const u = createUpdater()
 
+  let renderedEl: VInternalElements | null = null
+
   if (isRef(condition)) {
     u.updaters.push(() => {
-      const child = el.firstChild
+      const oldChild = renderedEl
 
-      if (isInternalElements(child)) {
-        unmount(child)
+      if (isInternalElements(oldChild)) {
+        unmount(oldChild)
       }
 
-      const newChild = unref(condition) ? truthy?.() : falsy?.()
+      const newChild = pair(String(unref(condition)))
 
-      if (child) {
+      if (oldChild) {
         if (newChild) {
-          el.replaceChild(newChild, child)
+          el.parentElement?.replaceChild(newChild, oldChild)
         } else {
-          el.removeChild(child)
+          el.removeChild(oldChild)
         }
       } else if (newChild) {
-        el.appendChild(newChild)
+        el.parentElement?.insertBefore(newChild, el)
       }
+
+      renderedEl = newChild
     })
   } else {
-    const newChild = condition ? truthy?.() : falsy?.()
-    el.appendChild(newChild)
+    const newChild = pair(String(unref(condition)))
+    el.parentElement?.insertBefore(newChild, el)
   }
 
-  u.run()
+  // should waiting `el` to append to it's parent
+  Promise.resolve().then(() => u.run())
 
   el.addEventListener('unmount', u.stop)
 

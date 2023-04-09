@@ -89,7 +89,7 @@ export function createEl(
   return el
 }
 
-function createTextEl(content: MaybeRef<PrimitiveType>) {
+export function createTextEl(content: MaybeRef<PrimitiveType>) {
   const el = document.createTextNode('') as VText
 
   const vEl = createVElement(el)
