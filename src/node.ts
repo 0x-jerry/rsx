@@ -79,7 +79,9 @@ export function createNativeElement(
     el.remove()
   })
 
-  moveChildren(el, children)
+  const _children = moveChildren(el, children)
+
+  _children.forEach(item => getContext(item).emit('mounted'))
 
   return el
 }
@@ -92,13 +94,9 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
 
   const u = createUpdaterScope()
 
-  if (isRef(content)) {
-    u.add(() => {
-      el.textContent = String(unref(content) ?? '')
-    })
-  } else {
-    el.textContent = String(content ?? '')
-  }
+  u.add(() => {
+    el.textContent = String(unref(content) ?? '')
+  })
 
   ctx.on('mounted', u.run)
   ctx.on('unmounted', () => {

@@ -4,7 +4,8 @@ import { DComponent } from '../node'
 import { createTextElement } from '../node'
 import { getContext, isFragment } from '../node'
 import { MaybeRef } from '../types'
-import { isRef, unref } from '@vue/reactivity'
+import { computed, effect, isRef, unref } from '@vue/reactivity'
+import { stop } from '@vue/reactivity'
 
 export function vMap<T>(
   list: MaybeRef<T[]>,
@@ -21,8 +22,6 @@ export function vMap<T>(
 
   const ctx = getContext(el)
 
-  const u = createUpdaterScope()
-
   type ChildElement = DComponent & {
     /**
      * if should reuse
@@ -35,43 +34,48 @@ export function vMap<T>(
 
   let renderedChildren: ChildElement[] = []
 
-  if (isRef(list)) {
-    u.add(() => {
-      const newList: ChildElement[] = generateNewList()
+  const keys = computed(() => unref(list).map((n) => n[key]))
 
-      // todo Minimum movement algorithm
+  // fix me, infinite loop, should only diff keys.
 
-      renderedChildren.forEach((child) => {
-        const keyValue = el2key.get(child)!
-        if (child._r) {
-          // reset reuse flag
-          child._r = false
-          return
-        }
+  let oldKeys: string[] | null = null
 
-        // unmount
-        getContext(child).emit('unmounted')
+  const runner = effect(
+    () => {
+      if (!oldKeys) oldKeys = keys.value as string[]
+      else {
+        console.log(oldKeys, keys.value)
 
-        el2key.delete(child)
-        key2el.delete(keyValue)
-      })
+        oldKeys = keys.value as string[]
+      }
 
-      const parent = anchorEnd.parentElement!
+      Promise.resolve().then(update)
+    },
+    {
+      lazy: true,
+    },
+  )
 
-      newList.forEach((item) => {
-        if (isFragment(item)) {
-          item.moveTo(parent, anchorEnd)
-        } else {
-          parent.insertBefore(item, anchorEnd)
-        }
-      })
-
-      renderedChildren = newList
-
-      el.children = [anchorStart, ...newList, anchorEnd]
-    })
-  } else {
+  function update() {
     const newList: ChildElement[] = generateNewList()
+
+    // todo Minimum movement algorithm
+
+    renderedChildren.forEach((child) => {
+      const keyValue = el2key.get(child)!
+      if (child._r) {
+        // reset reuse flag
+        child._r = false
+        return
+      }
+
+      // unmount
+      getContext(child).emit('unmounted')
+
+      el2key.delete(child)
+      key2el.delete(keyValue)
+    })
+
     const parent = anchorEnd.parentElement!
 
     newList.forEach((item) => {
@@ -81,13 +85,16 @@ export function vMap<T>(
         parent.insertBefore(item, anchorEnd)
       }
     })
+
     renderedChildren = newList
+
+    el.children = [anchorStart,...newList, anchorEnd]
   }
 
-  ctx.on('mounted', u.run)
+  ctx.on('mounted', runner)
 
   getContext(anchorEnd).on('unmounted', () => {
-    u.stop()
+    stop(runner)
 
     renderedChildren.forEach((item) => {
       getContext(item).emit('unmounted')

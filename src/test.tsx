@@ -1,4 +1,4 @@
-import { computed, ref, toRaw } from '@vue/reactivity'
+import { computed, ref, toRaw, toRef } from '@vue/reactivity'
 import { h, Fragment } from './jsx'
 import { vCase, vMap } from './internalComponents'
 import { mount } from './op'
@@ -18,7 +18,7 @@ const TestFor = () => {
   const testVMap = vMap(list, 'key', (item) => {
     return (
       <>
-        <span>{item.key}</span>,
+        <span>{toRef(item, 'id')}</span>,
       </>
     )
   })
@@ -38,12 +38,23 @@ const TestFor = () => {
     console.log('removed', toRaw(removed))
   }
 
+  function changeItem() {
+    const _idx = ~~(Math.random() * list.value.length)
+
+    const item = list.value.at(_idx)
+
+    if (item) {
+      console.log(item.key, item.id, '=>', item.id + 100)
+      item.id += 100
+    }
+  }
   return (
     <>
       <h1>Test loop</h1>
       <button onClick={makeRandomData}>random</button>
       <button onClick={add}>add</button>
       <button onClick={remove}>remove</button>
+      <button onClick={changeItem}>change</button>
       {testVMap}
     </>
   )
