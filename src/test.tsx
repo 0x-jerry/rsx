@@ -4,26 +4,29 @@ import { vCase, vMap } from './internalComponents'
 import { mount } from './op'
 
 const TestFor = () => {
-  let idx = 0
+  let id = 0
 
-  const list = ref(new Array(10).fill(0).map(() => ({ key: String(idx++) })))
+  const list = ref(new Array(10).fill(0).map(() => ({ id, key: String(id++) })))
 
   let seq = true
 
   const makeRandomData = () => {
     seq = !seq
-    list.value = list.value.sort((a, b) =>
-      seq ? a.key.localeCompare(b.key) : b.key.localeCompare(a.key),
-    )
+    list.value = list.value.sort((a, b) => (seq ? a.id - b.id : b.id - a.id))
   }
 
   const testVMap = vMap(list, 'key', (item) => {
-    return <span>{item.key}</span>
+    return (
+      <>
+        <span>{item.key}</span>,
+      </>
+    )
   })
 
   function add() {
     list.value.push({
-      key: String(idx++),
+      id,
+      key: String(id++),
     })
   }
 

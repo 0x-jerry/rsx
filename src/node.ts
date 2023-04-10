@@ -28,14 +28,14 @@ export type DText = Text & MixDComponent
 
 export type DFragment = MixDComponent & {
   _fg: true
-  children: (DComponent | Node)[]
+  children: DComponent[]
   getLastElement(): Node | null
   moveTo(parent: ParentNode, anchor?: Node): void
 }
 
 export type DComponent = DText | DFragment | DElement
 
-export type DNode = DComponent | HTMLElement | MaybeRef<PrimitiveType>
+export type DNode = DComponent | MaybeRef<PrimitiveType>
 
 export function createNativeElement(
   type: string,
@@ -76,9 +76,7 @@ export function createNativeElement(
       getContext(item).emit('unmounted', true)
     })
 
-    if (!fromParent) {
-      el.remove()
-    }
+    el.remove()
   })
 
   moveChildren(el, children)
@@ -103,13 +101,18 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
   }
 
   ctx.on('mounted', u.run)
-  ctx.on('unmounted', u.stop)
+  ctx.on('unmounted', () => {
+    u.stop()
+    el.remove()
+  })
 
   return el
 }
 
 export function createFragment(children: DNode[]) {
   const ctx = createNodeContext()
+
+  let mounted = false
 
   const el: DFragment = {
     _: ctx,
@@ -125,7 +128,18 @@ export function createFragment(children: DNode[]) {
       return last || null
     },
     moveTo(parent, anchor) {
-      moveChildren(parent, children, anchor)
+      const _children = moveChildren(
+        parent,
+        mounted ? el.children : children,
+        anchor,
+      )
+      el.children = _children
+
+      if (!mounted) {
+        mounted = true
+
+        el.children.forEach((item) => getContext(item).emit('mounted'))
+      }
     },
   }
 
@@ -208,44 +222,42 @@ function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
 }
 
 function moveChildren(parent: ParentNode, children?: DNode[], anchor?: Node) {
+  const _children: DComponent[] = []
+
   for (const child of children || []) {
-    if (isRef(child)) {
-      const childEl = createTextElement(child)
+    const childEl = normalizeNode(child)
 
-      mount(childEl)
-
-      getContext(childEl).emit('mounted')
-      continue
-    }
-
-    if (isPrimitive(child)) {
-      const childEl = createTextElement(child)
-
-      mount(childEl)
-      getContext(childEl).emit('mounted')
-    } else if (isDComponent(child)) {
-      if (isFragment(child)) {
-        child.moveTo(parent, anchor)
-      } else {
-        mount(child)
-      }
-
-      getContext(child).emit('mounted')
+    if (isFragment(childEl)) {
+      childEl.moveTo(parent, anchor)
     } else {
-      mount(child)
-      console.warn(
-        `find pure dom element child, may cause unexpected behavior.`,
-        child,
-      )
+      move(childEl)
     }
+
+    _children.push(childEl)
   }
 
-  function mount(child: Node) {
+  return _children
+
+  function move(child: Node) {
     if (anchor) {
       parent.insertBefore(child, anchor)
     } else {
       parent.appendChild(child)
     }
+  }
+}
+
+export function normalizeNode(node: DNode): DComponent {
+  const rawValue = unref(node)
+
+  if (isPrimitive(rawValue)) {
+    return createTextElement(node as MaybeRef<PrimitiveType>)
+  }
+
+  if (isFragment(rawValue)) {
+    return rawValue
+  } else {
+    return rawValue
   }
 }
 

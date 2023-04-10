@@ -1,5 +1,5 @@
 import { Optional } from '@0x-jerry/utils'
-import { createUpdaterScope } from '../node'
+import { createFragment, createUpdaterScope } from '../node'
 import { DComponent } from '../node'
 import { createTextElement } from '../node'
 import { getContext, isFragment } from '../node'
@@ -14,9 +14,12 @@ export function vMap<T>(
    */
   render: (item: T, idx: number) => Optional<DComponent>,
 ) {
-  const anchor = createTextElement('')
+  const anchorStart = createTextElement('')
+  const anchorEnd = createTextElement('')
 
-  const ctx = getContext(anchor)
+  const el = createFragment([anchorStart, anchorEnd])
+
+  const ctx = getContext(el)
 
   const u = createUpdaterScope()
 
@@ -53,26 +56,29 @@ export function vMap<T>(
         key2el.delete(keyValue)
       })
 
-      const parent = anchor.parentElement!
+      const parent = anchorEnd.parentElement!
 
       newList.forEach((item) => {
         if (isFragment(item)) {
-          item.moveTo(parent, anchor)
+          item.moveTo(parent, anchorEnd)
         } else {
-          parent.insertBefore(item, anchor)
+          parent.insertBefore(item, anchorEnd)
         }
       })
+
       renderedChildren = newList
+
+      el.children = [anchorStart, ...newList, anchorEnd]
     })
   } else {
     const newList: ChildElement[] = generateNewList()
-    const parent = anchor.parentElement!
+    const parent = anchorEnd.parentElement!
 
     newList.forEach((item) => {
       if (isFragment(item)) {
-        item.moveTo(parent, anchor)
+        item.moveTo(parent, anchorEnd)
       } else {
-        parent.insertBefore(item, anchor)
+        parent.insertBefore(item, anchorEnd)
       }
     })
     renderedChildren = newList
@@ -80,7 +86,7 @@ export function vMap<T>(
 
   ctx.on('mounted', u.run)
 
-  getContext(anchor).on('unmounted', () => {
+  getContext(anchorEnd).on('unmounted', () => {
     u.stop()
 
     renderedChildren.forEach((item) => {
@@ -88,7 +94,7 @@ export function vMap<T>(
     })
   })
 
-  return anchor
+  return el
 
   function generateNewList() {
     const newList: ChildElement[] = []
