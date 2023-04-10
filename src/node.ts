@@ -49,23 +49,24 @@ export function createNativeElement(
 
   const u = createUpdaterScope()
 
-  Object.entries(props || {}).forEach(([key, value]) => {
-    if (!isRef(value)) {
-      updateEl(el, key, value)
-      return
-    }
+  const keys = Object.keys(props || {})
 
+  if (keys.length) {
     ctx.state ||= new Map()
 
-    u.add(() => {
-      const old = ctx.state!.get(key)
+    for (const key of keys) {
+      u.add(() => {
+        const value = props![key]
 
-      // todo: check old !== value
-      updateEl(el, key, value, old)
+        const old = ctx.state!.get(key)
 
-      ctx.state!.set(key, value)
-    })
-  })
+        // todo: check old !== value
+        updateEl(el, key, value, old)
+
+        ctx.state!.set(key, value)
+      })
+    }
+  }
 
   ctx.on('mounted', u.run)
   ctx.on('unmounted', (fromParent: boolean) => {
