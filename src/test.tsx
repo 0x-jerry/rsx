@@ -74,7 +74,7 @@ const TestBinding = () => {
   return (
     <>
       <h1>Value binding</h1>
-      <input $value:trim={inputValue}></input>
+      <input $={inputValue}></input>
       <span>input value is: {inputValue}</span>
     </>
   )
