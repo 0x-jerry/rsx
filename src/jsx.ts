@@ -1,177 +1,109 @@
-import { JsonPrimitive, Optional, isString, makePair } from '@0x-jerry/utils'
+import { isString } from '@0x-jerry/utils'
 import {
-  VNode,
-  createEl,
+  DComponent,
+  DNode,
   createFragment,
-  createTextEl,
-  createUpdater,
-  isInternalElements,
-  unmount
-} from './dom'
-import { isRef, unref } from '@vue/reactivity'
-import { VInternalElements } from './dom'
-import { MaybeRef } from './types'
+  createNativeElement,
+  isDComponent,
+} from './node'
 
-type FunctionalComponent = (props?: any) => VNode
+type FunctionalComponent = (props?: any, children?: DNode[]) => DComponent
 
 export function h(
-  type: string | FunctionalComponent | VInternalElements,
+  type: string | FunctionalComponent | DComponent,
   props?: Record<string, any>,
-  ...children: VNode[]
-): VNode {
-  if (isInternalElements(type)) {
+  ...children: DComponent[]
+): DComponent {
+  if (isDComponent(type)) {
     return type
   }
 
   if (!isString(type)) {
-    const _p = {
-      ...props,
-      children
-    }
-
-    return type(_p)
+    return type(props, children)
   }
 
-  return createEl(type, props, children)
+  return createNativeElement(type, props, children)
 }
 
-export function Fragment(props: { children?: any[] }): VNode {
-  const el = createFragment(props.children)
-
-  return el
+export const Fragment: FunctionalComponent = (_, children) => {
+  return createFragment(children || [])
 }
 
-export function vCase(
-  condition: MaybeRef<JsonPrimitive>,
-  /**
-   * should return jsx
-   */
-  cases: Record<string, Optional<() => any>>
-) {
-  const el = createTextEl('')
+// export function vFor<T>(
+//   list: MaybeRef<T[]>,
+//   key: keyof T,
+//   /**
+//    * should return jsx
+//    */
+//   render: (item: T, idx: number) => any,
+// ) {
+//   const el = createTextEl('')
 
-  const pair = makePair(cases)
+//   const u = createUpdater()
 
-  const u = createUpdater()
+//   type ChildElement = VInternalElements & {
+//     /**
+//      * if should reuse
+//      */
+//     _r?: boolean
+//   }
 
-  let renderedEl: VInternalElements | null = null
+//   const key2el = new Map<string, ChildElement>()
+//   const el2key = new Map<ChildElement, string>()
 
-  if (isRef(condition)) {
-    u.updaters.push(() => {
-      const oldChild = renderedEl
+//   let renderedChildren: ChildElement[] = []
 
-      if (isInternalElements(oldChild)) {
-        unmount(oldChild)
-      }
+//   if (isRef(list)) {
+//     u.updaters.push(() => {
+//       const newList = unref(list).map((n, idx) => {
+//         const keyValue = String(n[key])
 
-      const newChild = pair(String(unref(condition)))
+//         if (key2el.has(keyValue)) {
+//           const reuseEl = key2el.get(keyValue)!
+//           reuseEl._r = true
 
-      if (oldChild) {
-        if (newChild) {
-          el.parentElement?.replaceChild(newChild, oldChild)
-        } else {
-          el.removeChild(oldChild)
-        }
-      } else if (newChild) {
-        el.parentElement?.insertBefore(newChild, el)
-      }
+//           return reuseEl
+//         }
 
-      renderedEl = newChild
-    })
-  } else {
-    const newChild = pair(String(unref(condition)))
-    el.parentElement?.insertBefore(newChild, el)
-  }
+//         const el = render(n, idx) as VInternalElements & { _r?: boolean }
 
-  // should waiting `el` to append to it's parent
-  Promise.resolve().then(() => u.run())
+//         key2el.set(keyValue, el)
+//         el2key.set(el, keyValue)
 
-  el.addEventListener('unmount', u.stop)
+//         return el
+//       })
 
-  return el
-}
+//       for (const child of renderedChildren) {
+//         child.remove()
 
-export const vIf = (
-  condition: MaybeRef<JsonPrimitive>,
-  truthy?: () => any,
-  falsy?: () => any
-) => vCase(condition, { true: truthy, false: falsy })
+//         if (child._r) {
+//           // reset reuse flag
+//           child._r = false
+//           continue
+//         }
 
-export function vFor<T>(
-  list: MaybeRef<T[]>,
-  key: keyof T,
-  /**
-   * should return jsx
-   */
-  render: (item: T, idx: number) => any
-) {
-  const el = createTextEl('')
+//         // should delete
+//         unmount(child)
 
-  const u = createUpdater()
+//         const keyValue = el2key.get(child)!
 
-  type ChildElement = VInternalElements & {
-    /**
-     * if should reuse
-     */
-    _r?: boolean
-  }
+//         el2key.delete(child)
+//         key2el.delete(keyValue)
+//       }
 
-  const key2el = new Map<string, ChildElement>()
-  const el2key = new Map<ChildElement, string>()
+//       renderedChildren = newList
 
-  let renderedChildren: ChildElement[] = []
+//       // re-render all items
+//       newList.forEach((item) => {
+//         el.parentElement?.insertBefore(item, el)
+//       })
+//     })
+//   }
 
-  if (isRef(list)) {
-    u.updaters.push(() => {
-      const newList = unref(list).map((n, idx) => {
-        const keyValue = String(n[key])
+//   // should waiting `el` to append to it's parent
+//   Promise.resolve().then(() => u.run())
 
-        if (key2el.has(keyValue)) {
-          const reuseEl = key2el.get(keyValue)!
-          reuseEl._r = true
+//   el.addEventListener('unmount', u.stop)
 
-          return reuseEl
-        }
-
-        const el = render(n, idx) as VInternalElements & { _r?: boolean }
-
-        key2el.set(keyValue, el)
-        el2key.set(el, keyValue)
-
-        return el
-      })
-
-      for (const child of renderedChildren) {
-        child.remove()
-
-        if (child._r) {
-          // reset reuse flag
-          child._r = false
-          continue
-        }
-
-        // should delete
-        unmount(child)
-
-        const keyValue = el2key.get(child)!
-
-        el2key.delete(child)
-        key2el.delete(keyValue)
-      }
-
-      renderedChildren = newList
-
-      // re-render all items
-      newList.forEach((item) => {
-        el.parentElement?.insertBefore(item, el)
-      })
-    })
-  }
-
-  // should waiting `el` to append to it's parent
-  Promise.resolve().then(() => u.run())
-
-  el.addEventListener('unmount', u.stop)
-
-  return el
-}
+//   return el
+// }

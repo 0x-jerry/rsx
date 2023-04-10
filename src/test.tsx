@@ -1,5 +1,7 @@
 import { computed, ref } from '@vue/reactivity'
-import { h, Fragment, vCase, vFor } from './jsx'
+import { h, Fragment } from './jsx'
+import { DComponent, getContext, isFragment } from './node'
+import { vCase } from './internalComponents'
 
 const Counter = () => {
   const count = ref(0)
@@ -13,7 +15,7 @@ const Counter = () => {
 
   const testVCase = vCase(show, {
     true: () => <div>this is true</div>,
-    false: () => <div>this is false</div>
+    false: () => <div>this is false</div>,
   })
 
   const toggleShow = () => {
@@ -21,20 +23,20 @@ const Counter = () => {
   }
 
   const list = ref(
-    new Array(10).fill(0).map((_, idx) => ({ key: idx.toString() }))
+    new Array(10).fill(0).map((_, idx) => ({ key: idx.toString() })),
   )
 
   let seq = true
   const makeRandomData = () => {
     seq = !seq
     list.value = list.value.sort((a, b) =>
-      seq ? a.key.localeCompare(b.key) : b.key.localeCompare(a.key)
+      seq ? a.key.localeCompare(b.key) : b.key.localeCompare(a.key),
     )
   }
 
-  const testVFor = vFor(list, 'key', (item) => {
-    return <span>{item.key}</span>
-  })
+  // const testVFor = vFor(list, 'key', (item) => {
+  //   return <span>{item.key}</span>
+  // })
 
   const inputValue = ref('123')
 
@@ -55,7 +57,7 @@ const Counter = () => {
 
       <h1>Test loop</h1>
       <button onClick={makeRandomData}>random</button>
-      {testVFor}
+      {/* {testVFor} */}
       <h1>Value binding</h1>
       <input $value:trim={inputValue}></input>
       <span>input value is: {inputValue}</span>
@@ -67,6 +69,12 @@ const root = <Counter></Counter>
 
 mount(root as any)
 
-function mount(dom: HTMLElement) {
-  document.getElementById('app')?.append(dom)
+function mount(dom: DComponent) {
+  const container = document.getElementById('app')!
+
+  getContext(dom).mount(container)
+
+  if (!isFragment(dom)) {
+    container.append(dom)
+  }
 }
