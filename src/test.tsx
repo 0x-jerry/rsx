@@ -1,7 +1,7 @@
 import { computed, ref } from '@vue/reactivity'
 import { h, Fragment } from './jsx'
 import { DComponent, getContext, isFragment } from './node'
-import { vCase } from './internalComponents'
+import { vCase, vMap } from './internalComponents'
 
 const Counter = () => {
   const count = ref(0)
@@ -34,9 +34,9 @@ const Counter = () => {
     )
   }
 
-  // const testVFor = vFor(list, 'key', (item) => {
-  //   return <span>{item.key}</span>
-  // })
+  const testVMap = vMap(list, 'key', (item) => {
+    return <span>{item.key}</span>
+  })
 
   const inputValue = ref('123')
 
@@ -57,7 +57,7 @@ const Counter = () => {
 
       <h1>Test loop</h1>
       <button onClick={makeRandomData}>random</button>
-      {/* {testVFor} */}
+      {testVMap}
       <h1>Value binding</h1>
       <input $value:trim={inputValue}></input>
       <span>input value is: {inputValue}</span>
@@ -72,9 +72,11 @@ mount(root as any)
 function mount(dom: DComponent) {
   const container = document.getElementById('app')!
 
-  getContext(dom).mount(container)
-
-  if (!isFragment(dom)) {
+  if (isFragment(dom)) {
+    dom.moveTo(container)
+  } else {
     container.append(dom)
   }
+
+  getContext(dom).emit('mounted')
 }

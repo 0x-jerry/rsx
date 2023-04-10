@@ -9,7 +9,6 @@ import { effect, effectScope, isRef, unref } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
 
 export interface DNodeContext extends EventEmitter<DNodeEventMap> {
-  mount(parent: ParentNode, anchor?: Node): void
   state?: Map<string, any>
 }
 
@@ -30,6 +29,8 @@ export type DText = Text & MixDComponent
 export type DFragment = MixDComponent & {
   _fg: true
   children: (DComponent | Node)[]
+  getLastElement(): Node | null
+  moveTo(parent: ParentNode, anchor?: Node): void
 }
 
 export type DComponent = DText | DFragment | DElement
@@ -79,7 +80,7 @@ export function createNativeElement(
     }
   })
 
-  mountChildren(el, children)
+  moveChildren(el, children)
 
   return el
 }
@@ -113,12 +114,23 @@ export function createFragment(children: DNode[]) {
     _: ctx,
     _fg: true,
     children: [],
+    getLastElement() {
+      const last = el.children.at(-1)
+
+      if (isFragment(last)) {
+        return this.getLastElement()
+      }
+
+      return last || null
+    },
+    moveTo(parent, anchor) {
+      moveChildren(parent, children, anchor)
+    },
   }
 
-  ctx.mount = (parent, anchor) => {
-    mountChildren(parent, children, anchor)
-    ctx.emit('mounted')
-  }
+  ctx.on('unmounted', () => {
+    el.children.forEach((item) => getContext(item)?.emit('unmounted'))
+  })
 
   el._ = ctx
 
@@ -129,10 +141,6 @@ export function createFragment(children: DNode[]) {
 
 function createNodeContext() {
   const ctx = new EventEmitter() as DNodeContext
-
-  ctx.mount = (p, a) => {
-    ctx.emit('mounted')
-  }
 
   return ctx
 }
@@ -198,14 +206,14 @@ function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
   }
 }
 
-function mountChildren(parent: ParentNode, children?: DNode[], anchor?: Node) {
+function moveChildren(parent: ParentNode, children?: DNode[], anchor?: Node) {
   for (const child of children || []) {
     if (isRef(child)) {
       const childEl = createTextElement(child)
 
-      getContext(childEl)!.mount(parent)
-
       mount(childEl)
+
+      getContext(childEl).emit('mounted')
       continue
     }
 
@@ -213,13 +221,15 @@ function mountChildren(parent: ParentNode, children?: DNode[], anchor?: Node) {
       const childEl = createTextElement(child)
 
       mount(childEl)
-      getContext(childEl).mount(parent)
+      getContext(childEl).emit('mounted')
     } else if (isDComponent(child)) {
-      if (!isFragment(child)) {
+      if (isFragment(child)) {
+        child.moveTo(parent, anchor)
+      } else {
         mount(child)
       }
 
-      getContext(child).mount(parent)
+      getContext(child).emit('mounted')
     } else {
       mount(child)
       console.warn(

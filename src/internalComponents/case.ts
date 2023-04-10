@@ -56,11 +56,13 @@ export function vCase(
     if (newChild) {
       const parentEl = anchor.parentElement!
 
-      getContext(newChild).mount(parentEl, anchor)
-
-      if (!isFragment(newChild)) {
+      if (isFragment(newChild)) {
+        newChild.moveTo(parentEl, anchor)
+      } else {
         parentEl.insertBefore(newChild, anchor)
       }
+
+      getContext(newChild).emit('mounted')
     }
 
     return newChild
