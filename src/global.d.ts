@@ -1,20 +1,24 @@
-namespace JSX {
-  interface Element {}
+import { DElement } from './node'
 
-  interface ElementAttributesProperty {
-    [key: string]: any
-    props: {}
-  }
+declare global {
+  namespace JSX {
+    interface Element extends DElement {}
 
-  interface ElementChildrenAttribute {
-    [key: string]: any
-    children: {}
-  }
+    interface ElementAttributesProperty {
+      [key: string]: any
+      props: {}
+    }
 
-  interface IntrinsicAttributes {}
-  interface IntrinsicClassAttributes<TT> {}
+    interface ElementChildrenAttribute {
+      [key: string]: any
+      children: {}
+    }
 
-  interface IntrinsicElements {
-    [name: string]: any
+    interface IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<TT> {}
+
+    interface IntrinsicElements {
+      [name: string]: any
+    }
   }
 }
