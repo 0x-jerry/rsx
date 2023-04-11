@@ -1,4 +1,5 @@
-import { DElement } from './node'
+import { DElement } from '../src/node'
+import { NativeElements } from './jsx'
 
 declare global {
   namespace JSX {
@@ -17,7 +18,7 @@ declare global {
     interface IntrinsicAttributes {}
     interface IntrinsicClassAttributes<TT> {}
 
-    interface IntrinsicElements {
+    interface IntrinsicElements extends NativeElements {
       [name: string]: any
     }
   }
