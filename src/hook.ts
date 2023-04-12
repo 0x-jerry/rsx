@@ -8,6 +8,7 @@ type DNodeEventMap = {
 }
 
 export interface DNodeContext extends EventEmitter<DNodeEventMap> {
+  name?: string
   updater: Updater
   children?: DNodeContext[]
 }
@@ -58,8 +59,9 @@ export function createUpdaterScope() {
   }
 }
 
-export function createNodeContext() {
+export function createNodeContext(name?: string) {
   const ctx = new EventEmitter() as DNodeContext
+  ctx.name = name
 
   let updater: Updater | null = null
 
@@ -134,8 +136,10 @@ export function mount(node: DComponent) {
 export function useContext() {
   const ctx = getCurrentContext()
 
-  if (!ctx)
+  if (!ctx) {
+    debugger
     throw new Error('This should only used inside functional component.')
+  }
 
   return ctx
 }

@@ -8,11 +8,7 @@ import {
   unref,
 } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
-import {
-  DNodeContext,
-  onUnmounted,
-  useContext,
-} from './hook'
+import { DNodeContext, onUnmounted, runWithContext, useContext } from './hook'
 
 type MixDComponent = {
   _?: DNodeContext
@@ -90,6 +86,8 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
 export function createFragment(children: DNode[]) {
   let mounted = false
 
+  const ctx = useContext()
+
   const el: DFragment = {
     _fg: true,
     children: [],
@@ -103,19 +101,22 @@ export function createFragment(children: DNode[]) {
       return last || null
     },
     moveTo(parent, anchor) {
-      const _children = moveChildren(
-        parent,
-        mounted ? el.children : children,
-        anchor,
-      )
+      runWithContext(ctx, () => {
+        const _children = moveChildren(
+          parent,
+          mounted ? el.children : children,
+          anchor,
+        )
 
-      el.children = _children
+        el.children = _children
 
-      if (!mounted) {
-        mounted = true
-        // todo: mount event?
-        // _children.forEach((child) => mount(child))
-      }
+        if (!mounted) {
+          mounted = true
+
+          // todo: mount event?
+          // _children.forEach((child) => mount(child))
+        }
+      })
     },
   }
 

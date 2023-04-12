@@ -21,7 +21,7 @@ export function vCase(
    */
   cases: Record<string, Optional<() => DComponent>>,
 ) {
-  const ctx = createNodeContext()
+  const ctx = createNodeContext('v-case')
   appendToCurrentContext(ctx)
   setCurrentContext(ctx)
 

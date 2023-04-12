@@ -8,7 +8,12 @@ import {
 } from './node'
 import { isRef, unref } from '@vue/reactivity'
 import { camelCase, PascalCase } from './stringUtils'
-import { appendToCurrentContext, createNodeContext, getCurrentContext, popCurrentContext, setCurrentContext } from './hook'
+import {
+  appendToCurrentContext,
+  createNodeContext,
+  popCurrentContext,
+  setCurrentContext,
+} from './hook'
 
 type FunctionalComponent = (props?: any, children?: DNode[]) => DComponent
 
@@ -24,7 +29,7 @@ export function h(
   const _props = transformProps(type, props)
 
   if (!isString(type)) {
-    const ctx = createNodeContext()
+    const ctx = createNodeContext(type.name)
     appendToCurrentContext(ctx)
 
     setCurrentContext(ctx)

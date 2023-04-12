@@ -8,6 +8,7 @@ import { unref } from '@vue/reactivity'
 import {
   appendToCurrentContext,
   createNodeContext,
+  popCurrentContext,
   runWithContext,
   setCurrentContext,
   unmount,
@@ -22,7 +23,7 @@ export function vMap<T>(
    */
   render: (item: T, idx: number) => Optional<DComponent>,
 ) {
-  const ctx = createNodeContext()
+  const ctx = createNodeContext('v-map')
   appendToCurrentContext(ctx)
   setCurrentContext(ctx)
 
@@ -48,6 +49,10 @@ export function vMap<T>(
     () => unref(list).map((n) => n[key]),
     () => runWithContext(ctx, update),
   )
+
+  popCurrentContext()
+
+  return el
 
   function update() {
     const newList: ChildElement[] = generateNewList()
@@ -83,8 +88,6 @@ export function vMap<T>(
 
     el.children = [anchorStart, ...newList, anchorEnd]
   }
-
-  return el
 
   function generateNewList() {
     const newList: ChildElement[] = []

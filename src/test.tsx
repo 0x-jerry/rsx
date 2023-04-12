@@ -2,6 +2,7 @@ import { computed, ref, toRaw, toRef } from '@vue/reactivity'
 import { h, Fragment } from './jsx'
 import { vCase, vMap } from './internalComponents'
 import { mount } from './op'
+import { useContext } from './hook'
 
 const TestFor = () => {
   let id = 0
@@ -48,6 +49,7 @@ const TestFor = () => {
       item.id += 100
     }
   }
+
   return (
     <>
       <h1>Test loop</h1>
@@ -95,6 +97,9 @@ const TestBinding = () => {
 }
 
 const App = () => {
+  const ctx = useContext()
+  console.log('App', ctx)
+
   const count = ref(0)
 
   const click = () => {
