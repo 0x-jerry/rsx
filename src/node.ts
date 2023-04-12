@@ -54,7 +54,7 @@ export function createNativeElement(
 
     for (const key of keys) {
       const runner = ctx.updater.add(() => {
-        const value = props![key]
+        const value = unref(props![key])
 
         const old = state.get(key)
 
