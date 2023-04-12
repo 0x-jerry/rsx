@@ -1,11 +1,19 @@
 import { Optional } from '@0x-jerry/utils'
-import { createFragment, createUpdaterScope } from '../node'
+import { createFragment } from '../node'
 import { DComponent } from '../node'
 import { createTextElement } from '../node'
-import { getContext, isFragment } from '../node'
+import { isFragment } from '../node'
 import { MaybeRef } from '../types'
-import { computed, effect, isRef, unref } from '@vue/reactivity'
+import { computed, effect, unref } from '@vue/reactivity'
 import { stop } from '@vue/reactivity'
+import {
+  createNodeContext,
+  getContext,
+  onMounted,
+  onUnmounted,
+  popCurrentContext,
+  setCurrentContext,
+} from '../hook'
 
 export function vMap<T>(
   list: MaybeRef<T[]>,
@@ -15,12 +23,13 @@ export function vMap<T>(
    */
   render: (item: T, idx: number) => Optional<DComponent>,
 ) {
+  const ctx = createNodeContext()
+  setCurrentContext(ctx)
+
   const anchorStart = createTextElement('')
   const anchorEnd = createTextElement('')
 
   const el = createFragment([anchorStart, anchorEnd])
-
-  const ctx = getContext(el)
 
   type ChildElement = DComponent & {
     /**
@@ -36,28 +45,23 @@ export function vMap<T>(
 
   const keys = computed(() => unref(list).map((n) => n[key]))
 
-  // fix me, infinite loop, should only diff keys.
-
   let oldKeys: string[] | null = null
 
-  const runner = effect(
-    () => {
-      if (!oldKeys) oldKeys = keys.value as string[]
-      else {
-        console.log(oldKeys, keys.value)
+  ctx.updater.add(() => {
+    if (!oldKeys) oldKeys = keys.value as string[]
+    else {
+      console.log(oldKeys, keys.value)
 
-        oldKeys = keys.value as string[]
-      }
+      oldKeys = keys.value as string[]
+    }
 
-      Promise.resolve().then(update)
-    },
-    {
-      lazy: true,
-    },
-  )
+    Promise.resolve().then(update)
+  })
 
   function update() {
+    setCurrentContext(ctx)
     const newList: ChildElement[] = generateNewList()
+    popCurrentContext()
 
     // todo Minimum movement algorithm
 
@@ -88,13 +92,13 @@ export function vMap<T>(
 
     renderedChildren = newList
 
-    el.children = [anchorStart,...newList, anchorEnd]
+    el.children = [anchorStart, ...newList, anchorEnd]
   }
 
-  ctx.on('mounted', runner)
+  onMounted(ctx.updater.flush)
 
-  getContext(anchorEnd).on('unmounted', () => {
-    stop(runner)
+  onUnmounted(() => {
+    ctx.updater.scope.stop
 
     renderedChildren.forEach((item) => {
       getContext(item).emit('unmounted')

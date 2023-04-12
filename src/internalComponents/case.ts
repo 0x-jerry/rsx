@@ -3,12 +3,18 @@ import { isRef, unref } from '@vue/reactivity'
 import {
   DComponent,
   createTextElement,
-  getContext,
-  createUpdaterScope,
   isDComponent,
   isFragment,
 } from '../node'
 import { MaybeRef } from '../types'
+import {
+  createNodeContext,
+  getContext,
+  onMounted,
+  onUnmounted,
+  popCurrentContext,
+  setCurrentContext,
+} from '../hook'
 
 export function vCase(
   condition: MaybeRef<JsonPrimitive>,
@@ -17,16 +23,17 @@ export function vCase(
    */
   cases: Record<string, Optional<() => DComponent>>,
 ) {
+  const ctx = createNodeContext()
+  setCurrentContext(ctx)
+
   const anchor = createTextElement('')
-  const ctx = getContext(anchor)
-  const u = createUpdaterScope()
 
   const pair = makePair(cases)
 
   let renderedEl: Optional<DComponent> = null
 
   if (isRef(condition)) {
-    u.add(() => {
+    ctx.updater.add(() => {
       const oldChild = renderedEl
 
       if (isDComponent(oldChild)) {
@@ -41,17 +48,20 @@ export function vCase(
     mountCondition()
   }
 
-  ctx.on('mounted', u.run)
-  ctx.on('unmounted', () => {
-    u.stop()
+  onMounted(ctx.updater.flush)
+  onUnmounted(() => {
+    ctx.updater.scope.stop()
 
     getContext(renderedEl)?.emit('unmounted')
   })
 
+  popCurrentContext()
   return anchor
 
   function mountCondition() {
+    setCurrentContext(ctx)
     const newChild = pair(String(unref(condition)))
+    popCurrentContext()
 
     if (newChild) {
       const parentEl = anchor.parentElement!

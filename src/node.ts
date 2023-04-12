@@ -1,23 +1,8 @@
-import {
-  EventEmitter,
-  PrimitiveType,
-  isPrimitive,
-  walkTree,
-} from '@0x-jerry/utils'
+import { PrimitiveType, isPrimitive, walkTree } from '@0x-jerry/utils'
 import { MaybeRef } from './types'
 import { effect, effectScope, unref } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
-import { createNodeContext } from './hook'
-
-export interface DNodeContext extends EventEmitter<DNodeEventMap> {
-  state?: Map<string, any>
-}
-
-type DNodeEventMap = {
-  created(): void
-  mounted(): void
-  unmounted(fromParent?: boolean): void
-}
+import { DNodeContext, getContext, onUnmounted, useContext } from './hook'
 
 type MixDComponent = {
   _: DNodeContext
@@ -40,23 +25,22 @@ export type DNode = DComponent | MaybeRef<PrimitiveType>
 
 export function createNativeElement(
   type: string,
-  props?: Record<string, any>,
+  props: Record<string, any>,
   children?: DNode[],
 ) {
   const el = document.createElement(type) as DElement
 
-  const ctx = createNodeContext()
+  const ctx = useContext()
+
   el._ = ctx
 
-  const u = createUpdaterScope()
-
-  const keys = Object.keys(props || {})
+  const keys = Object.keys(props)
 
   if (keys.length) {
     ctx.state ||= new Map()
 
     for (const key of keys) {
-      u.add(() => {
+      ctx.updater.add(() => {
         const value = props![key]
 
         const old = ctx.state!.get(key)
@@ -69,9 +53,9 @@ export function createNativeElement(
     }
   }
 
-  ctx.on('mounted', u.run)
-  ctx.on('unmounted', (fromParent: boolean) => {
-    u.stop()
+  ctx.on('mounted', ctx.updater.flush)
+  ctx.on('unmounted', () => {
+    ctx.updater.scope.stop()
 
     walkTree(el, (item) => {
       getContext(item).emit('unmounted', true)
@@ -90,18 +74,17 @@ export function createNativeElement(
 export function createTextElement(content: MaybeRef<PrimitiveType>) {
   const el = document.createTextNode('') as DText
 
-  const ctx = createNodeContext()
+  const ctx = useContext()
   el._ = ctx
 
-  const u = createUpdaterScope()
-
-  u.add(() => {
+  ctx.updater.add(() => {
     el.textContent = String(unref(content) ?? '')
   })
 
-  ctx.on('mounted', u.run)
+  ctx.on('mounted', ctx.updater.flush)
   ctx.on('unmounted', () => {
-    u.stop()
+    ctx.updater.scope.stop()
+
     el.remove()
   })
 
@@ -109,7 +92,7 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
 }
 
 export function createFragment(children: DNode[]) {
-  const ctx = createNodeContext()
+  const ctx = useContext()
 
   let mounted = false
 
@@ -142,11 +125,9 @@ export function createFragment(children: DNode[]) {
     },
   }
 
-  ctx.on('unmounted', () => {
+  onUnmounted(() => {
     el.children.forEach((item) => getContext(item)?.emit('unmounted'))
   })
-
-  el._ = ctx
 
   return el
 }
@@ -252,12 +233,6 @@ export function normalizeNode(node: DNode): DComponent {
   } else {
     return rawValue
   }
-}
-
-export function getContext(el?: DComponent): DNodeContext
-export function getContext(el?: unknown): DNodeContext | null
-export function getContext(el?: unknown): DNodeContext | null {
-  return isDComponent(el) ? el._ : null
 }
 
 export function isDComponent(o: unknown): o is DComponent {

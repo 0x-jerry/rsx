@@ -8,6 +8,7 @@ import {
 } from './node'
 import { isRef, unref } from '@vue/reactivity'
 import { camelCase, PascalCase } from './stringUtils'
+import { createNodeContext, popCurrentContext, setCurrentContext } from './hook'
 
 type FunctionalComponent = (props?: any, children?: DNode[]) => DComponent
 
@@ -23,7 +24,13 @@ export function h(
   const _props = transformProps(type, props)
 
   if (!isString(type)) {
-    return type(_props, children)
+    setCurrentContext(createNodeContext())
+
+    const el = type(_props, children)
+
+    popCurrentContext()
+
+    return el
   }
 
   return createNativeElement(type, _props, children)
