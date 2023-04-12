@@ -1,6 +1,6 @@
-import { EventEmitter, Fn } from '@0x-jerry/utils'
+import { EventEmitter, Fn, isObject } from '@0x-jerry/utils'
 import { effectScope, effect } from '@vue/reactivity'
-import { DComponent, isDComponent } from './node'
+import { DComponent } from './node'
 
 type DNodeEventMap = {
   mounted(): void
@@ -8,8 +8,8 @@ type DNodeEventMap = {
 }
 
 export interface DNodeContext extends EventEmitter<DNodeEventMap> {
-  state?: Map<string, any>
   updater: Updater
+  children?: DNodeContext[]
 }
 
 const currentCtxStack: DNodeContext[] = []
@@ -69,7 +69,32 @@ export function createNodeContext() {
     },
   })
 
+  ctx.on('mounted', ctx.updater.flush)
+
+  ctx.on('unmounted', () => {
+    ctx.updater.scope.stop()
+  })
+
   return ctx
+}
+
+export function appendToCurrentContext(ctx: DNodeContext) {
+  const previousCtx = getCurrentContext()
+
+  if (!previousCtx) {
+    return
+  }
+
+  ctx.on('unmounted', () => {
+    // remove it self
+    const idx = previousCtx.children?.indexOf(ctx)
+    if (idx != null && idx >= 0) {
+      previousCtx.children?.splice(idx, 1)
+    }
+  })
+
+  previousCtx.children ||= []
+  previousCtx.children.push(ctx)
 }
 
 export function setCurrentContext(ctx: DNodeContext) {
@@ -81,17 +106,33 @@ export function popCurrentContext() {
 }
 
 export function getCurrentContext() {
-  return currentCtxStack
+  return currentCtxStack.at(-1)
 }
 
-export function getContext(el?: DComponent): DNodeContext
-export function getContext(el?: unknown): DNodeContext | null
 export function getContext(el?: unknown): DNodeContext | null {
-  return isDComponent(el) ? el._ : null
+  return isObject(el) && '_' in el && (el._ as any)
 }
 
+export function unmount(node: DComponent) {
+  const ctx = getContext(node)
+
+  if (!ctx) return
+
+  ctx.children?.forEach((child) => child.emit('unmounted'))
+
+  ctx.emit('unmounted')
+}
+
+export function mount(node: DComponent) {
+  const ctx = getContext(node)
+
+  if (!ctx) return
+  ctx.emit('mounted')
+}
+
+//  --------
 export function useContext() {
-  const ctx = currentCtxStack.at(-1)
+  const ctx = getCurrentContext()
 
   if (!ctx)
     throw new Error('This should only used inside functional component.')
@@ -122,5 +163,22 @@ export function watchEffect(fn: Fn) {
 
   return effect(fn, {
     scope: ctx.updater.scope,
+  })
+}
+
+export function watch<T>(
+  getter: () => T,
+  fn: (val: T, oldVal: T | null) => any,
+) {
+  const ctx = useContext()
+
+  let oldValue: T | null = null
+  ctx.updater.add(() => {
+    const newValue = getter()
+
+    Promise.resolve().then(() => {
+      fn(newValue, oldValue)
+      oldValue = newValue
+    })
   })
 }

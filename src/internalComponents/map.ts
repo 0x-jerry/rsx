@@ -4,15 +4,14 @@ import { DComponent } from '../node'
 import { createTextElement } from '../node'
 import { isFragment } from '../node'
 import { MaybeRef } from '../types'
-import { computed, effect, unref } from '@vue/reactivity'
-import { stop } from '@vue/reactivity'
+import { unref } from '@vue/reactivity'
 import {
+  appendToCurrentContext,
   createNodeContext,
-  getContext,
-  onMounted,
-  onUnmounted,
-  popCurrentContext,
+  runWithContext,
   setCurrentContext,
+  unmount,
+  watch,
 } from '../hook'
 
 export function vMap<T>(
@@ -24,12 +23,14 @@ export function vMap<T>(
   render: (item: T, idx: number) => Optional<DComponent>,
 ) {
   const ctx = createNodeContext()
+  appendToCurrentContext(ctx)
   setCurrentContext(ctx)
 
   const anchorStart = createTextElement('')
   const anchorEnd = createTextElement('')
 
   const el = createFragment([anchorStart, anchorEnd])
+  el._ = ctx
 
   type ChildElement = DComponent & {
     /**
@@ -43,25 +44,13 @@ export function vMap<T>(
 
   let renderedChildren: ChildElement[] = []
 
-  const keys = computed(() => unref(list).map((n) => n[key]))
-
-  let oldKeys: string[] | null = null
-
-  ctx.updater.add(() => {
-    if (!oldKeys) oldKeys = keys.value as string[]
-    else {
-      console.log(oldKeys, keys.value)
-
-      oldKeys = keys.value as string[]
-    }
-
-    Promise.resolve().then(update)
-  })
+  watch(
+    () => unref(list).map((n) => n[key]),
+    () => runWithContext(ctx, update),
+  )
 
   function update() {
-    setCurrentContext(ctx)
     const newList: ChildElement[] = generateNewList()
-    popCurrentContext()
 
     // todo Minimum movement algorithm
 
@@ -74,7 +63,7 @@ export function vMap<T>(
       }
 
       // unmount
-      getContext(child).emit('unmounted')
+      unmount(child)
 
       el2key.delete(child)
       key2el.delete(keyValue)
@@ -94,16 +83,6 @@ export function vMap<T>(
 
     el.children = [anchorStart, ...newList, anchorEnd]
   }
-
-  onMounted(ctx.updater.flush)
-
-  onUnmounted(() => {
-    ctx.updater.scope.stop
-
-    renderedChildren.forEach((item) => {
-      getContext(item).emit('unmounted')
-    })
-  })
 
   return el
 

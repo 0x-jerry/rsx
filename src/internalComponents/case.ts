@@ -1,19 +1,17 @@
 import { JsonPrimitive, Optional, makePair } from '@0x-jerry/utils'
 import { isRef, unref } from '@vue/reactivity'
-import {
-  DComponent,
-  createTextElement,
-  isDComponent,
-  isFragment,
-} from '../node'
+import { DComponent, createTextElement, isFragment } from '../node'
 import { MaybeRef } from '../types'
 import {
+  appendToCurrentContext,
   createNodeContext,
   getContext,
+  mount,
   onMounted,
   onUnmounted,
   popCurrentContext,
   setCurrentContext,
+  unmount,
 } from '../hook'
 
 export function vCase(
@@ -24,9 +22,11 @@ export function vCase(
   cases: Record<string, Optional<() => DComponent>>,
 ) {
   const ctx = createNodeContext()
+  appendToCurrentContext(ctx)
   setCurrentContext(ctx)
 
   const anchor = createTextElement('')
+  anchor._ = ctx
 
   const pair = makePair(cases)
 
@@ -36,9 +36,7 @@ export function vCase(
     ctx.updater.add(() => {
       const oldChild = renderedEl
 
-      if (isDComponent(oldChild)) {
-        getContext(oldChild).emit('unmounted')
-      }
+      if (oldChild) unmount(oldChild)
 
       const newChild = mountCondition()
 
@@ -72,7 +70,7 @@ export function vCase(
         parentEl.insertBefore(newChild, anchor)
       }
 
-      getContext(newChild).emit('mounted')
+      mount(newChild)
     }
 
     return newChild
