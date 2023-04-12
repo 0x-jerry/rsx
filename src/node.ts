@@ -5,8 +5,9 @@ import {
   walkTree,
 } from '@0x-jerry/utils'
 import { MaybeRef } from './types'
-import { effect, effectScope, isRef, unref } from '@vue/reactivity'
+import { effect, effectScope, unref } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
+import { createNodeContext } from './hook'
 
 export interface DNodeContext extends EventEmitter<DNodeEventMap> {
   state?: Map<string, any>
@@ -81,7 +82,7 @@ export function createNativeElement(
 
   const _children = moveChildren(el, children)
 
-  _children.forEach(item => getContext(item).emit('mounted'))
+  _children.forEach((item) => getContext(item).emit('mounted'))
 
   return el
 }
@@ -151,12 +152,6 @@ export function createFragment(children: DNode[]) {
 }
 
 // ---- utils ----
-
-function createNodeContext() {
-  const ctx = new EventEmitter() as DNodeContext
-
-  return ctx
-}
 
 export function createUpdaterScope() {
   let flushQueue = new Set<() => void>()
