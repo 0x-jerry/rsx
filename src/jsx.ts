@@ -82,16 +82,17 @@ function transformProps(type: any, props?: Record<string, any>): any {
   })
 
   //
-  const _props: Record<string, any> = new Proxy(_raw, {
-    get(_, key) {
-      return unref(_raw[key as string])
-    },
-    set() {
-      return false
-    },
-  })
+  // const _props: Record<string, any> = new Proxy(_raw, {
+  //   get(_, key) {
+  //     return unref(_raw[key as string])
+  //   },
+  //   set() {
+  //     return false
+  //   },
+  // })
 
-  return _props
+  // todo: make it read only
+  return _raw
 }
 
 // todo, default binding syntax sugar

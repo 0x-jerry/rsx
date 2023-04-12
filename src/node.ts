@@ -8,7 +8,14 @@ import {
   unref,
 } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
-import { DNodeContext, onUnmounted, runWithContext, useContext } from './hook'
+import {
+  DNodeContext,
+  mount,
+  onUnmounted,
+  runWithContext,
+  unmount,
+  useContext,
+} from './hook'
 
 type MixDComponent = {
   _?: DNodeContext
@@ -63,8 +70,8 @@ export function createNativeElement(
 
   onUnmounted(() => effects.forEach((item) => stop(item)))
 
-  // todo: mount event?
   const _children = moveChildren(el, children)
+  _children.forEach((child) => mount(child))
 
   return el
 }
@@ -113,12 +120,21 @@ export function createFragment(children: DNode[]) {
         if (!mounted) {
           mounted = true
 
-          // todo: mount event?
-          // _children.forEach((child) => mount(child))
+          _children.forEach((child) => mount(child))
         }
       })
     },
   }
+
+  onUnmounted(() => {
+    el.children.forEach((child) => {
+      unmount(child)
+
+      if (!isFragment(child)) {
+        child.remove()
+      }
+    })
+  })
 
   return el
 }
