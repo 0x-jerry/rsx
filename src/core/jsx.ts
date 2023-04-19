@@ -1,4 +1,4 @@
-import { isString } from '@0x-jerry/utils'
+import { isString, camelCase, PascalCase } from '@0x-jerry/utils'
 import {
   DComponent,
   DNode,
@@ -7,7 +7,6 @@ import {
   isDComponent,
 } from './node'
 import { isRef, unref } from '@vue/reactivity'
-import { camelCase, PascalCase } from './stringUtils'
 import {
   appendToCurrentContext,
   createNodeContext,
