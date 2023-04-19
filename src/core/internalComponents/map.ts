@@ -2,7 +2,6 @@ import { Optional } from '@0x-jerry/utils'
 import { createFragment } from '../node'
 import { DComponent } from '../node'
 import { createTextElement } from '../node'
-import { isFragment } from '../node'
 import { MaybeRef } from '../types'
 import { unref } from '@vue/reactivity'
 import {
@@ -27,10 +26,8 @@ export function vMap<T>(
   appendToCurrentContext(ctx)
   setCurrentContext(ctx)
 
-  const anchorStart = createTextElement('')
-  const anchorEnd = createTextElement('')
+  const el = createFragment([])
 
-  const el = createFragment([anchorStart, anchorEnd])
   el._ = ctx
 
   type ChildElement = DComponent & {
@@ -49,6 +46,8 @@ export function vMap<T>(
     () => unref(list).map((n) => n[key]),
     () => runWithContext(ctx, update),
   )
+
+  update()
 
   popCurrentContext()
 
@@ -74,19 +73,11 @@ export function vMap<T>(
       key2el.delete(keyValue)
     })
 
-    const parent = anchorEnd.parentElement!
-
     newList.forEach((item) => {
-      if (isFragment(item)) {
-        item.moveTo(parent, anchorEnd)
-      } else {
-        parent.insertBefore(item, anchorEnd)
-      }
+      el.appendChild(item)
     })
 
     renderedChildren = newList
-
-    el.children = [anchorStart, ...newList, anchorEnd]
   }
 
   function generateNewList() {

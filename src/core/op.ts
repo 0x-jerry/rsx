@@ -1,5 +1,5 @@
 import { isString } from '@0x-jerry/utils'
-import { DComponent, isFragment } from './node'
+import { DComponent } from './node'
 import { mount as mountNode } from './hook'
 
 export function mountApp(dom: DComponent, selector: string | HTMLElement) {
@@ -12,11 +12,7 @@ export function mountApp(dom: DComponent, selector: string | HTMLElement) {
     return
   }
 
-  if (isFragment(dom)) {
-    dom.moveTo(container)
-  } else {
-    container.append(dom)
-  }
+  container.append(dom)
 
   mountNode(dom)
 }

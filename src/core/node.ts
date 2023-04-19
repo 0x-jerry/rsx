@@ -1,21 +1,8 @@
 import { PrimitiveType, isPrimitive } from '@0x-jerry/utils'
 import { MaybeRef } from './types'
-import {
-  ReactiveEffectRunner,
-  effect,
-  effectScope,
-  stop,
-  unref,
-} from '@vue/reactivity'
+import { ReactiveEffectRunner, stop, unref } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
-import {
-  DNodeContext,
-  mount,
-  onUnmounted,
-  runWithContext,
-  unmount,
-  useContext,
-} from './hook'
+import { DNodeContext, mount, onUnmounted, useContext } from './hook'
 
 type MixDComponent = {
   _?: DNodeContext
@@ -25,12 +12,7 @@ export type DElement = HTMLElement & MixDComponent
 
 export type DText = Text & MixDComponent
 
-export type DFragment = MixDComponent & {
-  _fg: true
-  children: DComponent[]
-  getLastElement(): Node | null
-  moveTo(parent: ParentNode, anchor?: Node): void
-}
+export type DFragment = DElement
 
 export type DComponent = DText | DFragment | DElement
 
@@ -91,50 +73,12 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
 }
 
 export function createFragment(children: DNode[]) {
-  let mounted = false
+  const el = document.createElement('div') as DElement
+  el.style.display = 'contents'
 
-  const ctx = useContext()
+  const _children = moveChildren(el, children)
 
-  const el: DFragment = {
-    _fg: true,
-    children: [],
-    getLastElement() {
-      const last = el.children.at(-1)
-
-      if (isFragment(last)) {
-        return this.getLastElement()
-      }
-
-      return last || null
-    },
-    moveTo(parent, anchor) {
-      runWithContext(ctx, () => {
-        const _children = moveChildren(
-          parent,
-          mounted ? el.children : children,
-          anchor,
-        )
-
-        el.children = _children
-
-        if (!mounted) {
-          mounted = true
-
-          _children.forEach((child) => mount(child))
-        }
-      })
-    },
-  }
-
-  onUnmounted(() => {
-    el.children.forEach((child) => {
-      unmount(child)
-
-      if (!isFragment(child)) {
-        child.remove()
-      }
-    })
-  })
+  _children.forEach((child) => mount(child))
 
   return el
 }
@@ -166,11 +110,7 @@ function moveChildren(parent: ParentNode, children?: DNode[], anchor?: Node) {
   for (const child of children || []) {
     const childEl = normalizeNode(child)
 
-    if (isFragment(childEl)) {
-      childEl.moveTo(parent, anchor)
-    } else {
-      move(childEl)
-    }
+    move(childEl)
 
     _children.push(childEl)
   }
@@ -198,8 +138,4 @@ export function normalizeNode(node: DNode): DComponent {
 
 export function isDComponent(o: unknown): o is DComponent {
   return isObject(o) && '_' in o
-}
-
-export function isFragment(o: unknown): o is DFragment {
-  return isDComponent(o) && '_fg' in o
 }

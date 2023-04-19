@@ -1,1 +1,1 @@
-export { MaybeRef } from './reactivity'
+export type { MaybeRef } from './reactivity'

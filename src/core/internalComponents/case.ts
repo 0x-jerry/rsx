@@ -1,6 +1,6 @@
 import { JsonPrimitive, Optional, makePair } from '@0x-jerry/utils'
 import { isRef, unref } from '@vue/reactivity'
-import { DComponent, createTextElement, isFragment } from '../node'
+import { DComponent, createTextElement } from '../node'
 import { MaybeRef } from '../types'
 import {
   appendToCurrentContext,
@@ -64,11 +64,7 @@ export function vCase(
     if (newChild) {
       const parentEl = anchor.parentElement!
 
-      if (isFragment(newChild)) {
-        newChild.moveTo(parentEl, anchor)
-      } else {
-        parentEl.insertBefore(newChild, anchor)
-      }
+      parentEl.insertBefore(newChild, anchor)
 
       mount(newChild)
     }

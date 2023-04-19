@@ -1,6 +1,6 @@
 import { EventEmitter, Fn, isObject } from '@0x-jerry/utils'
 import { effectScope, effect } from '@vue/reactivity'
-import { DComponent, isFragment } from './node'
+import { DComponent } from './node'
 
 type DNodeEventMap = {
   mounted(): void
@@ -118,13 +118,11 @@ export function getContext(el?: unknown): DNodeContext | null {
 export function unmount(node: DComponent) {
   const ctx = getContext(node)
 
+  node.remove()
+
   if (!ctx) return
 
   ctx.children?.forEach((child) => child.emit('unmounted'))
-
-  if (!isFragment(node)) {
-    node.remove()
-  }
 
   ctx.emit('unmounted')
 }
