@@ -27,6 +27,10 @@ export function h(
 
   const _props = transformProps(type, props)
 
+  if (type === Fragment) {
+    return type(_props, children)
+  }
+
   if (!isString(type)) {
     const ctx = createNodeContext(type.name)
     appendToCurrentContext(ctx)
