@@ -1,4 +1,4 @@
-import { DElement } from '../src/node'
+import { DElement } from '../src/core'
 import { NativeElements } from './jsx'
 
 declare global {

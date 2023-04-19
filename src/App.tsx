@@ -1,8 +1,5 @@
 import { computed, ref, toRaw, toRef } from '@vue/reactivity'
-import { h, Fragment } from './jsx'
-import { vCase, vMap } from './internalComponents'
-import { mount } from './op'
-import { useContext } from './hook'
+import { h, Fragment, useContext, vCase, vMap, mountApp } from './core'
 
 const TestFor = () => {
   let id = 0
@@ -124,6 +121,6 @@ const App = () => {
   )
 }
 
-const root = <App></App>
+const root = h(App)
 
-mount(root as any, '#app')
+mountApp(root, '#app')

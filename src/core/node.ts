@@ -141,48 +141,6 @@ export function createFragment(children: DNode[]) {
 
 // ---- utils ----
 
-export function createUpdaterScope() {
-  let flushQueue = new Set<() => void>()
-  const scope = effectScope()
-
-  let pending: Promise<void> | null = null
-
-  return {
-    add(fn: () => void) {
-      const runner = effect(fn, {
-        lazy: true,
-        scope,
-        scheduler() {
-          flushQueue.add(runner)
-
-          if (pending) {
-            return
-          }
-
-          pending = Promise.resolve().then(() => {
-            flush()
-            pending = null
-          })
-        },
-      })
-
-      flushQueue.add(runner)
-
-      return runner
-    },
-    run: flush,
-    stop: scope.stop,
-  }
-
-  function flush() {
-    for (const run of flushQueue) {
-      run()
-    }
-
-    flushQueue = new Set()
-  }
-}
-
 function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
   if (/^on/.test(key)) {
     const eventName = key.slice(2).toLowerCase()
