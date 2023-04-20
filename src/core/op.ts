@@ -1,6 +1,6 @@
 import { isString } from '@0x-jerry/utils'
 import { DComponent } from './node'
-import { mount as mountNode } from './hook'
+import { mount } from './hook'
 
 export function mountApp(dom: DComponent, selector: string | HTMLElement) {
   const container = isString(selector)
@@ -14,5 +14,5 @@ export function mountApp(dom: DComponent, selector: string | HTMLElement) {
 
   container.append(dom)
 
-  mountNode(dom)
+  mount(dom)
 }

@@ -1,10 +1,10 @@
 import { PrimitiveType, isPrimitive } from '@0x-jerry/utils'
 import { MaybeRef } from './types'
-import { ReactiveEffectRunner, effect, stop, unref } from '@vue/reactivity'
+import { ReactiveEffectRunner, isRef, stop, unref } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
-import { mount, onUnmounted, useContext } from './hook'
+import { mount, onUnmounted } from './hook'
 import { DNodeContext } from './context'
-import { queueJob } from './reactivity/scheduler'
+import { queueJob } from './scheduler'
 
 type MixDComponent = {
   _?: DNodeContext
@@ -29,9 +29,8 @@ export function createNativeElement(
 
   const keys = Object.keys(props)
 
-  const effects: ReactiveEffectRunner[] = []
-
   if (keys.length) {
+    const effects: ReactiveEffectRunner[] = []
     const state = new Map()
 
     for (const key of keys) {
@@ -48,9 +47,9 @@ export function createNativeElement(
 
       effects.push(runner)
     }
-  }
 
-  onUnmounted(() => effects.forEach((item) => stop(item)))
+    onUnmounted(() => effects.forEach((item) => stop(item)))
+  }
 
   const _children = moveChildren(el, children)
   _children.forEach((child) => mount(child))
@@ -61,11 +60,15 @@ export function createNativeElement(
 export function createTextElement(content: MaybeRef<PrimitiveType>) {
   const el = document.createTextNode('') as DText
 
-  const runner = queueJob(() => {
-    el.textContent = String(unref(content) ?? '')
-  })
+  if (isRef(content)) {
+    const runner = queueJob(() => {
+      el.textContent = String(unref(content) ?? '')
+    })
 
-  onUnmounted(() => stop(runner))
+    onUnmounted(() => stop(runner))
+  } else {
+    el.textContent = String(content ?? '')
+  }
 
   return el
 }
