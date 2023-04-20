@@ -38,10 +38,11 @@ function defineContext<T>() {
     current() {
       return stack.at(-1)
     },
-    runWith(fn: () => void, ctx: T) {
+    runWith<U>(fn: () => U, ctx: T): U {
       actions.push(ctx)
-      fn()
+      let r = fn()
       actions.pop()
+      return r
     },
   }
 

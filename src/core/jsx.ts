@@ -35,22 +35,31 @@ export function h(
     return createNativeElement(type, _props, children)
   }
 
-  const ctx = createNodeContext(type.name)
-  appendToCurrentContext(ctx)
-
-  setCurrentContext(ctx)
-
-  const el = type(_props, children)
-  // set context
-  el._ = ctx
-
-  popCurrentContext()
+  const el = createComponentInstance(type, _props, children)
 
   return el
 }
 
 export const Fragment: FunctionalComponent = (_, children) => {
   return createFragment(children || [])
+}
+
+export function createComponentInstance(
+  type: FunctionalComponent,
+  props?: any,
+  children?: DComponent[],
+) {
+  const ctx = createNodeContext(type.name)
+  appendToCurrentContext(ctx)
+
+  setCurrentContext(ctx)
+
+  const el = type(props, children)
+
+  el._ = ctx
+
+  popCurrentContext()
+  return el
 }
 
 function transformProps(type: any, props?: Record<string, any>): any {
@@ -84,16 +93,17 @@ function transformProps(type: any, props?: Record<string, any>): any {
     }
   })
 
-  const _props: Record<string, any> = new Proxy(_raw, {
-    get(_, key) {
-      return unref(_raw[key as string])
-    },
-    set() {
-      return false
-    },
-  })
+  return _raw
+  // const _props: Record<string, any> = new Proxy(_raw, {
+  //   get(_, key) {
+  //     return unref(_raw[key as string])
+  //   },
+  //   set() {
+  //     return false
+  //   },
+  // })
 
-  return _props
+  // return _props
 }
 
 // todo, default binding syntax sugar

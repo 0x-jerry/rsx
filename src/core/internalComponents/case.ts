@@ -1,65 +1,38 @@
 import { JsonPrimitive, Optional, makePair } from '@0x-jerry/utils'
-import { isRef, unref } from '@vue/reactivity'
 import { DComponent, createTextElement } from '../node'
 import { MaybeRef } from '../types'
-import {
-  appendToCurrentContext,
-  createNodeContext,
-  getContext,
-  mount,
-  onMounted,
-  onUnmounted,
-  popCurrentContext,
-  setCurrentContext,
-  unmount,
-} from '../hook'
+import { mount, unmount, useContext } from '../hook'
+import { queueJob } from '../scheduler'
+import { runWithContext } from '../context'
+import { createComponentInstance } from '..'
 
-export function vCase(
-  condition: MaybeRef<JsonPrimitive>,
-  /**
-   * should return jsx
-   */
-  cases: Record<string, Optional<() => DComponent>>,
-) {
-  const ctx = createNodeContext('v-case')
-  appendToCurrentContext(ctx)
-  setCurrentContext(ctx)
+export function VCase(props: {
+  condition: JsonPrimitive
+  cases?: Record<string, Optional<() => DComponent>>
+}) {
+  const ctx = useContext()
 
   const anchor = createTextElement('')
   anchor._ = ctx
 
-  const pair = makePair(cases)
+  const pair = makePair(props.cases || {})
 
   let renderedEl: Optional<DComponent> = null
 
-  if (isRef(condition)) {
-    ctx.updater.add(() => {
-      const oldChild = renderedEl
+  queueJob(() => {
+    const oldChild = renderedEl
 
-      if (oldChild) unmount(oldChild)
+    if (oldChild) unmount(oldChild)
 
-      const newChild = mountCondition()
+    const newChild = mountCondition()
 
-      renderedEl = newChild
-    })
-  } else {
-    mountCondition()
-  }
-
-  onMounted(ctx.updater.flush)
-  onUnmounted(() => {
-    ctx.updater.scope.stop()
-
-    getContext(renderedEl)?.emit('unmounted')
+    renderedEl = newChild
   })
 
-  popCurrentContext()
   return anchor
 
   function mountCondition() {
-    setCurrentContext(ctx)
-    const newChild = pair(String(unref(condition)))
-    popCurrentContext()
+    const newChild = runWithContext(() => pair(String(props.condition)), ctx)
 
     if (newChild) {
       const parentEl = anchor.parentElement!
@@ -71,6 +44,16 @@ export function vCase(
 
     return newChild
   }
+}
+
+export function vCase(
+  condition: MaybeRef<JsonPrimitive>,
+  /**
+   * should return jsx
+   */
+  cases: Record<string, Optional<() => DComponent>>,
+) {
+  createComponentInstance(VCase, { condition, cases })
 }
 
 export const vIf = (
