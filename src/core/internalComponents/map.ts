@@ -1,30 +1,21 @@
 import { Optional } from '@0x-jerry/utils'
 import { createFragment } from '../node'
 import { DComponent } from '../node'
-import { createTextElement } from '../node'
 import { MaybeRef } from '../types'
 import { unref } from '@vue/reactivity'
-import {
-  appendToCurrentContext,
-  createNodeContext,
-  popCurrentContext,
-  runWithContext,
-  setCurrentContext,
-  unmount,
-  watch,
-} from '../hook'
+import { onUnmounted, unmount, useContext } from '..'
+import { watch } from '../reactivity'
+import { runWithContext } from '../context'
 
-export function vMap<T>(
-  list: MaybeRef<T[]>,
-  key: keyof T,
+export function VMap<T>(props: {
+  list: MaybeRef<T[]>
+  key: keyof T
   /**
    * should return jsx
    */
-  render: (item: T, idx: number) => Optional<DComponent>,
-) {
-  const ctx = createNodeContext('v-map')
-  appendToCurrentContext(ctx)
-  setCurrentContext(ctx)
+  render: (item: T, idx: number) => Optional<DComponent>
+}) {
+  const ctx = useContext()
 
   const el = createFragment([])
 
@@ -42,14 +33,12 @@ export function vMap<T>(
 
   let renderedChildren: ChildElement[] = []
 
-  watch(
-    () => unref(list).map((n) => n[key]),
-    () => runWithContext(ctx, update),
+  const stop = watch(
+    () => unref(props.list).map((n) => n[props.key]),
+    () => runWithContext(update, ctx),
   )
 
-  update()
-
-  popCurrentContext()
+  onUnmounted(stop)
 
   return el
 
@@ -83,8 +72,8 @@ export function vMap<T>(
   function generateNewList() {
     const newList: ChildElement[] = []
 
-    unref(list).forEach((n, idx) => {
-      const keyValue = String(n[key])
+    unref(props.list).forEach((n, idx) => {
+      const keyValue = String(n[props.key])
 
       if (key2el.has(keyValue)) {
         const reuseEl = key2el.get(keyValue)!
@@ -95,7 +84,7 @@ export function vMap<T>(
         return reuseEl
       }
 
-      const el = render(n, idx)
+      const el = props.render(n, idx)
 
       if (el) {
         key2el.set(keyValue, el)
@@ -107,3 +96,12 @@ export function vMap<T>(
     return newList
   }
 }
+
+export function vMap<T>(
+  list: MaybeRef<T[]>,
+  key: keyof T,
+  /**
+   * should return jsx
+   */
+  render: (item: T, idx: number) => Optional<DComponent>,
+) {}

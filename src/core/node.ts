@@ -35,13 +35,13 @@ export function createNativeElement(
 
     for (const key of keys) {
       const runner = queueJob(() => {
-        const value = props![key]
+        const value = unref(props![key])
 
         const old = state.get(key)
 
         if (value !== old) {
           updateEl(el, key, value, old)
-          state!.set(key, value)
+          state.set(key, value)
         }
       })
 
