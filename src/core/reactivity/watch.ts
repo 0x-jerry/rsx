@@ -1,4 +1,11 @@
-import { type Ref, effect, isRef, stop, unref } from '@vue/reactivity'
+import {
+  effect,
+  isRef,
+  stop,
+  unref,
+  type Ref,
+  type ReactiveEffectOptions,
+} from '@vue/reactivity'
 import type { MaybeRef } from './types'
 import { type Promisable, isArray, isFn } from '@0x-jerry/utils'
 
@@ -6,9 +13,7 @@ export type StopWatcher = () => void
 
 export type TriggerFn<T> = (newVal: T, oldValue?: T) => Promisable<void>
 
-export interface WatchOption {
-  lazy?: boolean
-}
+export interface WatchOption extends ReactiveEffectOptions {}
 
 export function watch<T>(
   getter: Ref<T> | (() => MaybeRef<T>),

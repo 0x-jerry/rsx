@@ -12,7 +12,7 @@ import {
   createNodeContext,
   popCurrentContext,
   setCurrentContext,
-} from './hook'
+} from './context'
 
 type FunctionalComponent = (props?: any, children?: DNode[]) => DComponent
 
@@ -31,22 +31,22 @@ export function h(
     return type(_props, children)
   }
 
-  if (!isString(type)) {
-    const ctx = createNodeContext(type.name)
-    appendToCurrentContext(ctx)
-
-    setCurrentContext(ctx)
-
-    const el = type(_props, children)
-    // set context
-    el._ = ctx
-
-    popCurrentContext()
-
-    return el
+  if (isString(type)) {
+    return createNativeElement(type, _props, children)
   }
 
-  return createNativeElement(type, _props, children)
+  const ctx = createNodeContext(type.name)
+  appendToCurrentContext(ctx)
+
+  setCurrentContext(ctx)
+
+  const el = type(_props, children)
+  // set context
+  el._ = ctx
+
+  popCurrentContext()
+
+  return el
 }
 
 export const Fragment: FunctionalComponent = (_, children) => {
@@ -84,18 +84,16 @@ function transformProps(type: any, props?: Record<string, any>): any {
     }
   })
 
-  //
-  // const _props: Record<string, any> = new Proxy(_raw, {
-  //   get(_, key) {
-  //     return unref(_raw[key as string])
-  //   },
-  //   set() {
-  //     return false
-  //   },
-  // })
+  const _props: Record<string, any> = new Proxy(_raw, {
+    get(_, key) {
+      return unref(_raw[key as string])
+    },
+    set() {
+      return false
+    },
+  })
 
-  // todo: make it read only
-  return _raw
+  return _props
 }
 
 // todo, default binding syntax sugar
