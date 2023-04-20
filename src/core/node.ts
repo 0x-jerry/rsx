@@ -73,7 +73,7 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
   return el
 }
 
-export function createFragment(children: DNode[]) {
+export function createFragment(children: DNode[] = []) {
   const el = document.createElement('div') as DElement
   el.style.display = 'contents'
 

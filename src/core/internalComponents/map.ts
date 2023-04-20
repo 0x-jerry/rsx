@@ -3,7 +3,7 @@ import { createFragment } from '../node'
 import { DComponent } from '../node'
 import { MaybeRef } from '../types'
 import { unref } from '@vue/reactivity'
-import { onUnmounted, unmount, useContext } from '..'
+import { h, onUnmounted, unmount, useContext } from '..'
 import { watch } from '../reactivity'
 import { runWithContext } from '../context'
 
@@ -104,4 +104,6 @@ export function vMap<T>(
    * should return jsx
    */
   render: (item: T, idx: number) => Optional<DComponent>,
-) {}
+) {
+  return h(VMap, { list, key, render })
+}

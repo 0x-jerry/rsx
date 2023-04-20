@@ -1,10 +1,11 @@
 import { JsonPrimitive, Optional, makePair } from '@0x-jerry/utils'
-import { DComponent, createTextElement } from '../node'
+import { DComponent, createFragment, createTextElement } from '../node'
 import { MaybeRef } from '../types'
 import { mount, unmount, useContext } from '../hook'
 import { queueJob } from '../scheduler'
 import { runWithContext } from '../context'
-import { createComponentInstance } from '..'
+import { h } from '../jsx'
+import { unref } from '@vue/reactivity'
 
 export function VCase(props: {
   condition: JsonPrimitive
@@ -12,8 +13,8 @@ export function VCase(props: {
 }) {
   const ctx = useContext()
 
-  const anchor = createTextElement('')
-  anchor._ = ctx
+  const el = createFragment()
+  el._ = ctx
 
   const pair = makePair(props.cases || {})
 
@@ -29,15 +30,13 @@ export function VCase(props: {
     renderedEl = newChild
   })
 
-  return anchor
+  return el
 
   function mountCondition() {
-    const newChild = runWithContext(() => pair(String(props.condition)), ctx)
+    const newChild = runWithContext(() => pair(String(unref(props.condition))), ctx)
 
     if (newChild) {
-      const parentEl = anchor.parentElement!
-
-      parentEl.insertBefore(newChild, anchor)
+      el.appendChild(newChild)
 
       mount(newChild)
     }
@@ -53,7 +52,7 @@ export function vCase(
    */
   cases: Record<string, Optional<() => DComponent>>,
 ) {
-  createComponentInstance(VCase, { condition, cases })
+  return h(VCase, { condition, cases })
 }
 
 export const vIf = (

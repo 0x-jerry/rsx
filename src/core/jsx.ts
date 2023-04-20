@@ -35,16 +35,14 @@ export function h(
     return createNativeElement(type, _props, children)
   }
 
-  const el = createComponentInstance(type, _props, children)
-
-  return el
+  return createComponentInstance(type, _props, children)
 }
 
 export const Fragment: FunctionalComponent = (_, children) => {
   return createFragment(children || [])
 }
 
-export function createComponentInstance(
+function createComponentInstance(
   type: FunctionalComponent,
   props?: any,
   children?: DComponent[],
