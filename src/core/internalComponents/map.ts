@@ -1,11 +1,10 @@
 import { Optional } from '@0x-jerry/utils'
-import { createFragment } from '../node'
-import { DComponent } from '../node'
+import { createFragment, DComponent } from '../node'
 import { MaybeRef } from '../types'
 import { unref } from '@vue/reactivity'
-import { h, onUnmounted, unmount, useContext } from '..'
-import { watch } from '../reactivity'
+import { unmount, useContext, useWatch } from '../hook'
 import { runWithContext } from '../context'
+import { h } from '../jsx'
 
 export function VMap<T>(props: {
   list: MaybeRef<T[]>
@@ -17,7 +16,7 @@ export function VMap<T>(props: {
 }) {
   const ctx = useContext()
 
-  const el = createFragment([])
+  const el = createFragment()
 
   el._ = ctx
 
@@ -33,12 +32,10 @@ export function VMap<T>(props: {
 
   let renderedChildren: ChildElement[] = []
 
-  const stop = watch(
+  useWatch(
     () => unref(props.list).map((n) => n[props.key]),
     () => runWithContext(update, ctx),
   )
-
-  onUnmounted(stop)
 
   return el
 

@@ -1,6 +1,7 @@
 import { Fn } from '@0x-jerry/utils'
 import { DComponent, getContext } from './node'
 import { getCurrentContext } from './context'
+import { watch } from './reactivity'
 
 export function unmount(node: DComponent) {
   const ctx = getContext(node)
@@ -41,4 +42,13 @@ export function onUnmounted(fn: Fn) {
   const ctx = useContext()
 
   ctx.on('unmounted', fn)
+}
+
+export const useWatch: typeof watch = (getter, fn, opt) => {
+  const ctx = useContext()
+  const stop = watch(getter, fn, opt)
+
+  ctx.on('unmounted', stop)
+
+  return stop
 }
