@@ -6,7 +6,6 @@ import {
   type Ref,
   type ReactiveEffectOptions,
 } from '@vue/reactivity'
-import type { MaybeRef } from './types'
 import { type Promisable, isArray, isFn } from '@0x-jerry/utils'
 
 export type StopWatcher = () => void
@@ -16,7 +15,7 @@ export type TriggerFn<T> = (newVal: T, oldValue?: T) => Promisable<void>
 export interface WatchOption extends ReactiveEffectOptions {}
 
 export function watch<T>(
-  getter: Ref<T> | (() => MaybeRef<T>),
+  getter: Ref<T> | (() => T),
   fn: TriggerFn<T>,
   option?: WatchOption,
 ): StopWatcher {
@@ -58,7 +57,7 @@ function isEq(a: unknown, b: unknown) {
 }
 
 export function watchLazy<T>(
-  getter: Ref<T> | (() => MaybeRef<T>),
+  getter: Ref<T> | (() => T),
   fn: TriggerFn<T>,
   option?: Omit<WatchOption, 'lazy'>,
 ): StopWatcher {
