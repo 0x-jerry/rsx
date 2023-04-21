@@ -57,6 +57,6 @@ export function vCase(
 
 export const vIf = (
   condition: MaybeRef<JsonPrimitive>,
-  truthy?: () => any,
-  falsy?: () => any,
+  truthy?: () => DComponent,
+  falsy?: () => DComponent,
 ) => vCase(condition, { true: truthy, false: falsy })

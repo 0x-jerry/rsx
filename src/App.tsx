@@ -1,5 +1,5 @@
 import { computed, ref, toRaw, toRef } from '@vue/reactivity'
-import { h, Fragment, vCase, vMap } from './core'
+import { h, Fragment, vCase, vMap, Teleport } from './core'
 
 const TestFor = () => {
   let id = 0
@@ -89,6 +89,15 @@ const TestBinding = () => {
   )
 }
 
+const TestPort = () => {
+  return (
+    <Teleport to="#port">
+      <div>try teleport, this should inside the #port element</div>
+      <TestIf></TestIf>
+    </Teleport>
+  )
+}
+
 export const App = () => {
   const count = ref(0)
 
@@ -108,6 +117,9 @@ export const App = () => {
       <TestFor></TestFor>
 
       <TestBinding></TestBinding>
+
+      <div id="port" class="border border-blue border-solid"></div>
+      <TestPort></TestPort>
     </>
   )
 }

@@ -105,7 +105,7 @@ function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
   }
 }
 
-function moveChildren(parent: ParentNode, children?: DNode[], anchor?: Node) {
+export function moveChildren(parent: ParentNode, children?: DNode[], anchor?: Node) {
   const _children: DComponent[] = []
 
   for (const child of children || []) {

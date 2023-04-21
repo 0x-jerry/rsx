@@ -12,7 +12,6 @@ declare global {
 
     interface ElementChildrenAttribute {
       [key: string]: any
-      children: {}
     }
 
     interface IntrinsicAttributes {}
