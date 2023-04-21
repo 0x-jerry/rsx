@@ -1,7 +1,6 @@
 import { unref } from '@vue/reactivity'
-import { sleep } from '@0x-jerry/utils'
 import { createTextElement, moveChildren } from '../node'
-import { useWatch } from '../hook'
+import { onMounted, useWatch } from '../hook'
 
 export function Teleport(
   props: {
@@ -13,10 +12,11 @@ export function Teleport(
 
   useWatch(() => unref(props.to), update)
 
+  onMounted(update)
+
   return el as unknown as JSX.Element
 
-  async function update() {
-    await sleep()
+  function update() {
     const selector = unref(props.to)
     const root = document.querySelector(selector)
 

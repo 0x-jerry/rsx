@@ -2,7 +2,7 @@ import { PrimitiveType, isPrimitive } from '@0x-jerry/utils'
 import { MaybeRef } from './types'
 import { ReactiveEffectRunner, isRef, stop, unref } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
-import { mount, onUnmounted } from './hook'
+import { onUnmounted } from './hook'
 import { DNodeContext } from './context'
 import { queueJob } from './scheduler'
 
@@ -34,16 +34,19 @@ export function createNativeElement(
     const state = new Map()
 
     for (const key of keys) {
-      const runner = queueJob(() => {
-        const value = unref(props![key])
+      const runner = queueJob(
+        () => {
+          const value = unref(props![key])
 
-        const old = state.get(key)
+          const old = state.get(key)
 
-        if (value !== old) {
-          updateEl(el, key, value, old)
-          state.set(key, value)
-        }
-      })
+          if (value !== old) {
+            updateEl(el, key, value, old)
+            state.set(key, value)
+          }
+        },
+        { immediate: true },
+      )
 
       effects.push(runner)
     }
@@ -51,8 +54,7 @@ export function createNativeElement(
     onUnmounted(() => effects.forEach((item) => stop(item)))
   }
 
-  const _children = moveChildren(el, children)
-  _children.forEach((child) => mount(child))
+  moveChildren(el, children)
 
   return el
 }
@@ -77,9 +79,7 @@ export function createFragment(children: DNode[] = []) {
   const el = document.createElement('div') as DElement
   el.style.display = 'contents'
 
-  const _children = moveChildren(el, children)
-
-  _children.forEach((child) => mount(child))
+  moveChildren(el, children)
 
   return el
 }
@@ -105,7 +105,11 @@ function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
   }
 }
 
-export function moveChildren(parent: ParentNode, children?: DNode[], anchor?: Node) {
+export function moveChildren(
+  parent: ParentNode,
+  children?: DNode[],
+  anchor?: Node,
+) {
   const _children: DComponent[] = []
 
   for (const child of children || []) {

@@ -1,7 +1,14 @@
 import { Fn } from '@0x-jerry/utils'
 import { DComponent, getContext } from './node'
-import { getCurrentContext } from './context'
-import { watch } from './reactivity'
+import { DNodeContext, getCurrentContext } from './context'
+import {
+  StopWatcher,
+  TriggerFn,
+  WatchOption,
+  watch,
+  watchLazy,
+} from './reactivity'
+import { Ref } from '@vue/reactivity'
 
 export function unmount(node: DComponent) {
   const ctx = getContext(node)
@@ -10,7 +17,11 @@ export function unmount(node: DComponent) {
 
   if (!ctx) return
 
-  ctx.children?.forEach((child) => child.emit('unmounted'))
+  _unmount(ctx)
+}
+
+function _unmount(ctx: DNodeContext) {
+  ctx.children?.forEach((child) => _unmount(child))
 
   ctx.emit('unmounted')
 }
@@ -19,6 +30,13 @@ export function mount(node: DComponent) {
   const ctx = getContext(node)
 
   if (!ctx) return
+
+  _mount(ctx)
+}
+
+function _mount(ctx: DNodeContext) {
+  ctx.children?.forEach((item) => _mount(item))
+
   ctx.emit('mounted')
 }
 
@@ -44,9 +62,16 @@ export function onUnmounted(fn: Fn) {
   ctx.on('unmounted', fn)
 }
 
-export const useWatch: typeof watch = (getter, fn, opt) => {
+export function useWatch<T>(
+  getter: Ref<T> | (() => T),
+  fn: TriggerFn<T>,
+  opt?: WatchOption,
+): StopWatcher {
   const ctx = useContext()
-  const stop = watch(getter, fn, opt)
+  const stop = watch(getter, fn, {
+    lazy: true,
+    ...opt,
+  })
 
   ctx.on('unmounted', stop)
 

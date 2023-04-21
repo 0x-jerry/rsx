@@ -52,6 +52,8 @@ function createComponentInstance(
 
   setCurrentContext(ctx)
 
+  // ctx.on('mounted', () => console.log('mounted', ctx.name))
+
   const el = type(props, children)
 
   el._ = ctx

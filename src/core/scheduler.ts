@@ -38,7 +38,7 @@ export function flushJobs() {
   currentPromise = null
 }
 
-function scheduler(job: Job, flush: keyof typeof queue) {
+function scheduler(job: Job, flush: keyof typeof queue = 'sync') {
   queue[flush].add(job)
 
   if (currentPromise) return
@@ -46,15 +46,24 @@ function scheduler(job: Job, flush: keyof typeof queue) {
   currentPromise = resolvedPromise.then(flushJobs)
 }
 
-export function queueJob(job: () => void, flush: keyof typeof queue = 'sync') {
+export interface QueueJobOption {
+  immediate?: boolean
+  flush?: keyof typeof queue
+}
+
+export function queueJob(job: () => void, opt: QueueJobOption = {}) {
   const runner = effect(job, {
     lazy: true,
     scheduler: () => {
-      scheduler(runner, flush)
+      scheduler(runner, opt.flush)
     },
   })
 
-  scheduler(runner, flush)
+  if (opt.immediate) {
+    runner()
+  } else {
+    scheduler(runner, opt.flush)
+  }
 
   return runner
 }
