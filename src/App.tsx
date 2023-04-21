@@ -1,25 +1,32 @@
 import { computed, ref, toRaw, toRef } from '@vue/reactivity'
-import { h, Fragment, useContext, vCase, vMap, mountApp } from './core'
+import { h, Fragment, vCase, vMap } from './core'
 
 const TestFor = () => {
   let id = 0
 
   const list = ref(new Array(10).fill(0).map(() => ({ id, key: String(id++) })))
 
-  let seq = true
-
-  const makeRandomData = () => {
-    seq = !seq
-    list.value = list.value.sort((a, b) => (seq ? a.id - b.id : b.id - a.id))
-  }
+  let asc = true
 
   const testVMap = vMap(list, 'key', (item) => {
-    return (
-      <>
-        <span>{toRef(item, 'id')}</span>,
-      </>
-    )
+    return <span>{toRef(item, 'id')},</span>
   })
+
+  return (
+    <>
+      <h1>Test loop</h1>
+      <button onClick={makeRandomData}>random</button>
+      <button onClick={add}>add</button>
+      <button onClick={remove}>remove</button>
+      <button onClick={changeItem}>change</button>
+      {testVMap}
+    </>
+  )
+
+  function makeRandomData() {
+    asc = !asc
+    list.value = list.value.sort((a, b) => (asc ? a.id - b.id : b.id - a.id))
+  }
 
   function add() {
     list.value.push({
@@ -46,17 +53,6 @@ const TestFor = () => {
       item.id += 100
     }
   }
-
-  return (
-    <>
-      <h1>Test loop</h1>
-      <button onClick={makeRandomData}>random</button>
-      <button onClick={add}>add</button>
-      <button onClick={remove}>remove</button>
-      <button onClick={changeItem}>change</button>
-      {testVMap}
-    </>
-  )
 }
 
 const TestIf = () => {
@@ -93,24 +89,19 @@ const TestBinding = () => {
   )
 }
 
-const App = () => {
-  const ctx = useContext()
-  console.log('App', ctx)
-
+export const App = () => {
   const count = ref(0)
 
   const click = () => {
     count.value++
-    console.log('click', count.value)
   }
+
+  const double = computed(() => count.value * 2)
 
   return (
     <>
       <button onClick={click}>{count}</button>
-      <div>
-        double:
-        {computed(() => count.value * 2)}
-      </div>
+      <div>double:{double}</div>
 
       <hr />
       <TestIf></TestIf>
@@ -120,7 +111,3 @@ const App = () => {
     </>
   )
 }
-
-const root = h(App)
-
-mountApp(root, '#app')
