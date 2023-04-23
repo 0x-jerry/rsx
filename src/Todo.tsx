@@ -1,19 +1,19 @@
-import { reactive, toRef, toRefs } from '@vue/reactivity'
+import { computed, reactive, toRef, toRefs } from '@vue/reactivity'
 import { dc } from './core/defineComponent'
 import { VMap, h } from './core'
 
 interface TodoOption {
   id: string
-  complete?: boolean
+  completed?: boolean
   content: string
 }
 
 export const TodoItem = dc<TodoOption>((props) => {
-  const { complete, content } = toRefs(props)
+  const { completed, content } = toRefs(props)
 
   return (
     <label class="flex">
-      <input type="checkbox" value={complete} />
+      <input type="checkbox" value={completed} />
       {content}
     </label>
   )
@@ -44,12 +44,20 @@ export const TodoApp = dc(() => {
       </div>
       <hr />
       <VMap
-        list={toRef(state, 'items')}
+        list={computed(() =>
+          state.type.value !== 'all'
+            ? state.items.value.filter((item) =>
+                state.type.value === 'completed'
+                  ? item.completed
+                  : !item.completed,
+              )
+            : state.items.value,
+        )}
         key={(n) => n.id}
         render={({ item }) => (
           <div class="item">
             {/* @ts-ignore todo, fix typedef */}
-            <input type="checkbox" $={toRef(item, 'complete')} />
+            <input type="checkbox" $={toRef(item, 'completed')} />
             {toRef(item, 'content')}
           </div>
         )}
