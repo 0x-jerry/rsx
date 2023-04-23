@@ -6,7 +6,7 @@ import {
   createNativeElement,
   isDComponent,
 } from './node'
-import { isRef, shallowReactive } from '@vue/reactivity'
+import { isRef, shallowReactive, unref } from '@vue/reactivity'
 import {
   appendToCurrentContext,
   createNodeContext,
@@ -74,10 +74,10 @@ function transformProps(type: any, props?: Record<string, any>): any {
     }
 
     if (key === '$') {
-      const props = transformDefaultBinding(type, value)
+      const newProps = transformDefaultBinding(type, value, props)
 
       // todo, check duplicate key
-      Object.assign(_raw, props)
+      Object.assign(_raw, newProps)
       return
     }
 
@@ -107,15 +107,21 @@ function transformProps(type: any, props?: Record<string, any>): any {
 }
 
 // todo, default binding syntax sugar
-function transformDefaultBinding(type: any, value: any) {
+function transformDefaultBinding(
+  type: any,
+  value: any,
+  allProps: Record<string, any>,
+) {
   const props: Record<string, any> = {}
 
   if (type === 'input') {
-    if (props.type === 'checkbox') {
+    if (unref(allProps.type) === 'checkbox') {
       props.checked = value
       if (isRef(value)) {
-        props.onChange = (e: InputEvent) =>
-          (value.value = (e.target as HTMLInputElement).checked)
+        props.onChange = (e: InputEvent) => {
+          value.value = (e.target as HTMLInputElement).checked
+          console.log('checked', value.value)
+        }
       }
     } else {
       props.value = value

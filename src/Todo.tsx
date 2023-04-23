@@ -1,6 +1,6 @@
 import { ToRefs, computed, reactive, toRef, toRefs } from '@vue/reactivity'
 import { dc } from './core/defineComponent'
-import { VMap, h, Fragment } from './core'
+import { VMap, h, Fragment, useWatch } from './core'
 
 interface TodoOption {
   id: string
@@ -13,7 +13,7 @@ const TodoItem = dc<ToRefs<TodoOption>>((props) => {
 
   return (
     <label class="flex">
-      <input type="checkbox" value={completed} />
+      <input type="checkbox" $={completed} />
       {content}
     </label>
   )
@@ -29,9 +29,12 @@ export const TodoApp = dc(() => {
   const filteredItems = computed(() => {
     const isCompleted = state.type === 'completed'
 
-    return state.type === 'all'
-      ? state.items
-      : state.items.filter((item) => isCompleted === item.completed)
+    const items =
+      state.type === 'all'
+        ? state.items
+        : state.items.filter((item) => isCompleted === !!item.completed)
+
+    return items
   })
 
   return (
@@ -55,20 +58,16 @@ export const TodoApp = dc(() => {
       <VMap
         list={filteredItems}
         key={(n) => n.id}
-        render={({ item }) => (
-          <>
-            <TodoItem {...toRefs(item)}></TodoItem>,
-          </>
-        )}
+        render={({ item }) => <TodoItem {...toRefs(item)}></TodoItem>}
       />
     </div>
   )
 
   function addTodo() {
-    const item = {
+    const item: TodoOption = {
       id: Math.random().toString(),
       content: state.content,
-      complete: false,
+      completed: false,
     }
 
     state.items.push(item)
@@ -78,6 +77,9 @@ export const TodoApp = dc(() => {
 
   function sort() {
     state.items.sort((a, b) => a.content.localeCompare(b.content))
-    console.log('sort', state.items.map(n => n.content))
+    console.log(
+      'sort',
+      state.items.map((n) => n.content),
+    )
   }
 })
