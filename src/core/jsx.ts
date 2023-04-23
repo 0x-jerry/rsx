@@ -1,4 +1,4 @@
-import { isString, camelCase, PascalCase } from '@0x-jerry/utils'
+import { isString, camelCase, PascalCase, makePair } from '@0x-jerry/utils'
 import {
   DComponent,
   DNode,
@@ -111,11 +111,26 @@ function transformDefaultBinding(type: any, value: any) {
   const props: Record<string, any> = {}
 
   if (type === 'input') {
+    if (props.type === 'checkbox') {
+      props.checked = value
+      if (isRef(value)) {
+        props.onChange = (e: InputEvent) =>
+          (value.value = (e.target as HTMLInputElement).checked)
+      }
+    } else {
+      props.value = value
+
+      if (isRef(value)) {
+        props.onInput = (e: InputEvent) =>
+          (value.value = (e.target as HTMLInputElement).value)
+      }
+    }
+  } else if (type === 'select') {
     props.value = value
 
     if (isRef(value)) {
-      props.onInput = (e: InputEvent) =>
-        (value.value = (e.target as HTMLInputElement).value)
+      props.onChange = (e: InputEvent) =>
+        (value.value = (e.target as HTMLSelectElement).value)
     }
   }
 

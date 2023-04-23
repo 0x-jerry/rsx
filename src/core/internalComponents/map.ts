@@ -1,4 +1,4 @@
-import { Optional } from '@0x-jerry/utils'
+import { isFn, Optional } from '@0x-jerry/utils'
 import { createFragment, DComponent } from '../node'
 import { MaybeRef } from '../types'
 import { unref } from '@vue/reactivity'
@@ -6,13 +6,15 @@ import { unmount, useContext, useWatch } from '../hook'
 import { runWithContext } from '../context'
 import { h } from '../jsx'
 
+type KeyValue = string | number | boolean | null | undefined
+
 export function VMap<T>(props: {
   list: MaybeRef<T[]>
-  key: keyof T
+  key: (item: T, idx: number) => KeyValue
   /**
    * should return jsx
    */
-  render: (item: T, idx: number) => Optional<DComponent>
+  render: (props: { item: T; idx: number }) => JSX.Element
 }) {
   const ctx = useContext()
 
@@ -33,11 +35,19 @@ export function VMap<T>(props: {
   let renderedChildren: ChildElement[] = []
 
   useWatch(
-    () => unref(props.list).map((n) => n[props.key]),
+    () => unref(props.list).map(getKey),
     () => runWithContext(update, ctx),
   )
 
+  runWithContext(update, ctx)
+
   return el
+
+  function getKey(item: T, index: number) {
+    const k = props.key(item, index)
+
+    return String(k)
+  }
 
   function update() {
     const newList: ChildElement[] = generateNewList()
@@ -70,7 +80,7 @@ export function VMap<T>(props: {
     const newList: ChildElement[] = []
 
     unref(props.list).forEach((n, idx) => {
-      const keyValue = String(n[props.key])
+      const keyValue = getKey(n, idx)
 
       if (key2el.has(keyValue)) {
         const reuseEl = key2el.get(keyValue)!
@@ -81,7 +91,7 @@ export function VMap<T>(props: {
         return reuseEl
       }
 
-      const el = props.render(n, idx)
+      const el = h(props.render, { item: n, index: idx })
 
       if (el) {
         key2el.set(keyValue, el)
