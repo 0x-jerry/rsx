@@ -2,7 +2,7 @@ import { JsonPrimitive, Optional, makePair } from '@0x-jerry/utils'
 import { DComponent, createFragment, createTextElement } from '../node'
 import { MaybeRef } from '../types'
 import { mount, unmount, useContext } from '../hook'
-import { queueJob } from '../scheduler'
+import { queueEffectJob } from '../scheduler'
 import { runWithContext } from '../context'
 import { h } from '../jsx'
 import { unref } from '@vue/reactivity'
@@ -20,7 +20,7 @@ export function VCase(props: {
 
   let renderedEl: Optional<DComponent> = null
 
-  queueJob(() => {
+  queueEffectJob(() => {
     const oldChild = renderedEl
 
     if (oldChild) unmount(oldChild)

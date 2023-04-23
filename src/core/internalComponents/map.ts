@@ -1,10 +1,11 @@
-import { isFn, Optional } from '@0x-jerry/utils'
+import { Optional } from '@0x-jerry/utils'
 import { createFragment, DComponent } from '../node'
 import { MaybeRef } from '../types'
 import { unref } from '@vue/reactivity'
 import { mount, onMounted, unmount, useContext, useWatch } from '../hook'
 import { runWithContext } from '../context'
 import { h } from '../jsx'
+import { insertBefore } from '../nodeOp'
 
 type KeyValue = string | number | boolean | null | undefined
 
@@ -50,24 +51,30 @@ export function VMap<T>(props: {
   function update() {
     const newList: ChildElement[] = generateNewList()
 
-    // todo Minimum movement algorithm
     el.__children.forEach((child: ChildElement) => {
       const keyValue = el2key.get(child)!
+      // skip reuse node
       if (child._r) {
-        // reset reuse flag
-        child._r = false
         return
       }
 
-      // unmount
-      unmount(child)
-
       el2key.delete(child)
       key2el.delete(keyValue)
+
+      // unmount
+      unmount(child)
     })
 
     newList.forEach((item) => {
-      el.before(item)
+      insertBefore(el, item)
+
+      // reset reuse flag
+      if (item._r) {
+        console.log('reuse!')
+        item._r = false
+        return
+      }
+
       mount(item)
     })
 

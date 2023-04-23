@@ -7,6 +7,7 @@ import {
   type ReactiveEffectOptions,
 } from '@vue/reactivity'
 import { type Promisable, isArray, isFn } from '@0x-jerry/utils'
+import { queueJob } from '../scheduler'
 
 export type StopWatcher = () => void
 
@@ -29,6 +30,9 @@ export function watch<T>(
   const runner = effect(effectFn, {
     ...option,
     lazy: false,
+    scheduler: () => {
+      queueJob(runner)
+    },
   })
 
   return () => stop(runner)

@@ -35,7 +35,10 @@ export const TodoApp = dc(() => {
   })
 
   return (
-    <div class="flex flex-col">
+    <div class="flex flex-col w-200px">
+      <div>
+        <button onClick={sort}> sort </button>
+      </div>
       <select $={toRef(state, 'type')}>
         <VMap
           list={['all', 'completed', 'uncompleted']}
@@ -54,7 +57,7 @@ export const TodoApp = dc(() => {
         key={(n) => n.id}
         render={({ item }) => (
           <>
-            <TodoItem {...toRefs(item)}></TodoItem>
+            <TodoItem {...toRefs(item)}></TodoItem>,
           </>
         )}
       />
@@ -71,5 +74,10 @@ export const TodoApp = dc(() => {
     state.items.push(item)
     console.log('add item', item)
     state.content = ''
+  }
+
+  function sort() {
+    state.items.sort((a, b) => a.content.localeCompare(b.content))
+    console.log('sort', state.items.map(n => n.content))
   }
 })

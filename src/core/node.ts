@@ -2,9 +2,10 @@ import { PrimitiveType, isPrimitive } from '@0x-jerry/utils'
 import { MaybeRef } from './types'
 import { ReactiveEffectRunner, isRef, stop, unref } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
-import { onMounted, onUnmounted, useContext } from './hook'
+import { onMounted, onUnmounted } from './hook'
 import { DNodeContext } from './context'
-import { queueJob } from './scheduler'
+import { queueEffectJob } from './scheduler'
+import { moveChildren } from './nodeOp'
 
 type MixDComponent = {
   _?: DNodeContext
@@ -38,7 +39,7 @@ export function createNativeElement(
     const state = new Map()
 
     for (const key of keys) {
-      const runner = queueJob(
+      const runner = queueEffectJob(
         () => {
           const value = unref(props![key])
 
@@ -67,7 +68,7 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
   const el = document.createTextNode('') as DText
 
   if (isRef(content)) {
-    const runner = queueJob(() => {
+    const runner = queueEffectJob(() => {
       el.textContent = String(unref(content) ?? '')
     })
 
@@ -84,8 +85,14 @@ export function createFragment(children: DNode[] = []) {
 
   el.__fg = true
   el.__children = []
+  let mounted = false
 
   onMounted(() => {
+    if (mounted) {
+      console.log("already mounted!!!")
+      return
+    }
+    mounted = true
     el.__children = moveChildren(el.parentElement!, children, el)
   })
 
@@ -110,53 +117,19 @@ function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
     return
   }
 
-  if (value == null) {
-    el.removeAttribute(key)
+  const isValueKey =
+    el.tagName === 'INPUT' && ['value', 'checked'].includes(key)
+
+  if (isValueKey) {
+    // @ts-ignore
+    el[key] = value
   } else {
-    el.setAttribute(key, value)
-  }
-}
-
-export function moveChildren(
-  parent: ParentNode,
-  children?: DNode[],
-  anchor?: Node,
-) {
-  const _children: DComponent[] = []
-
-  for (const child of children || []) {
-    const childEl = normalizeNode(child)
-
-    move(childEl)
-
-    _children.push(childEl)
-  }
-
-  return _children
-
-  function move(child: Node) {
-    if (anchor) {
-      parent.insertBefore(child, anchor)
+    if (value == null) {
+      el.removeAttribute(key)
     } else {
-      parent.appendChild(child)
+      el.setAttribute(key, value)
     }
   }
-}
-
-export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
-  if (!isFragment(node)) {
-    if (anchor) {
-      parent.insertBefore(node, anchor)
-    } else {
-      parent.appendChild(node)
-    }
-
-    return
-  }
-
-  node.__children.forEach((item) => moveTo(parent, item, anchor))
-
-  moveTo(parent, node, anchor)
 }
 
 export function normalizeNode(node: DNode): DComponent {
