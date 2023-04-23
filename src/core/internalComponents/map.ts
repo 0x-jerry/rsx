@@ -14,7 +14,7 @@ export function VMap<T>(props: {
   /**
    * should return jsx
    */
-  render: (props: { item: T; idx: number }) => JSX.Element
+  render: (props: { item: T; index: number }) => JSX.Element
 }) {
   const ctx = useContext()
 
@@ -88,7 +88,7 @@ export function VMap<T>(props: {
         return reuseEl
       }
 
-      const el = h(props.render, { item: n, index: idx })
+      const el = props.render({ item: n, index: idx })
 
       if (el) {
         key2el.set(keyValue, el)

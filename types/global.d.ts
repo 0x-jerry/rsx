@@ -1,9 +1,9 @@
-import { DElement } from '../src/core'
+import { DComponent } from '../src/core'
 import { NativeElements } from './jsx'
 
 declare global {
   namespace JSX {
-    interface Element extends DElement {}
+    interface Element extends DComponent {}
 
     interface ElementAttributesProperty {
       [key: string]: any

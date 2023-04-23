@@ -20,7 +20,7 @@ export type DFragment = Comment &
     __children: DComponent[]
   }
 
-export type DComponent = DText | DFragment | DElement
+export type DComponent = ChildNode & MixDComponent
 
 export type DNode = DComponent | MaybeRef<PrimitiveType>
 

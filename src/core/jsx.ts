@@ -1,4 +1,4 @@
-import { isString, camelCase, PascalCase, makePair } from '@0x-jerry/utils'
+import { isString, camelCase, PascalCase } from '@0x-jerry/utils'
 import {
   DComponent,
   DNode,
@@ -6,7 +6,7 @@ import {
   createNativeElement,
   isDComponent,
 } from './node'
-import { isRef, unref } from '@vue/reactivity'
+import { isRef, shallowReactive } from '@vue/reactivity'
 import {
   appendToCurrentContext,
   createNodeContext,
@@ -63,9 +63,9 @@ function createComponentInstance(
 }
 
 function transformProps(type: any, props?: Record<string, any>): any {
-  if (!props) return {}
+  const _raw: Record<string, any> = shallowReactive({})
 
-  const _raw: Record<string, any> = {}
+  if (!props) return _raw
 
   Object.entries(props).forEach(([key, value]) => {
     if (!key.startsWith('$')) {
