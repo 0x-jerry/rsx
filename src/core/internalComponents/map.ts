@@ -2,7 +2,7 @@ import { isFn, Optional } from '@0x-jerry/utils'
 import { createFragment, DComponent } from '../node'
 import { MaybeRef } from '../types'
 import { unref } from '@vue/reactivity'
-import { onMounted, unmount, useContext, useWatch } from '../hook'
+import { mount, onMounted, unmount, useContext, useWatch } from '../hook'
 import { runWithContext } from '../context'
 import { h } from '../jsx'
 
@@ -68,6 +68,7 @@ export function VMap<T>(props: {
 
     newList.forEach((item) => {
       el.before(item)
+      mount(item)
     })
 
     el.__children = newList
@@ -88,7 +89,7 @@ export function VMap<T>(props: {
         return reuseEl
       }
 
-      const el = props.render({ item: n, index: idx })
+      const el = h(props.render, { item: n, index: idx })
 
       if (el) {
         key2el.set(keyValue, el)
