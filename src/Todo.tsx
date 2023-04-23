@@ -44,7 +44,7 @@ export const TodoApp = dc(() => {
       </div>
       <hr />
       <VMap
-        list={state.items}
+        list={toRef(state, 'items')}
         key={(n) => n.id}
         render={({ item }) => (
           <div class="item">
@@ -58,10 +58,12 @@ export const TodoApp = dc(() => {
   )
 
   function addTodo() {
-    state.items.value.push({
+    const item = {
       id: Math.random().toString(),
       content: state.content.value,
       complete: false,
-    })
+    }
+    console.log('add item', item)
+    state.items.value.push(item)
   }
 })

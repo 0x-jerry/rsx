@@ -1,13 +1,7 @@
 import { Fn } from '@0x-jerry/utils'
 import { DComponent, getContext } from './node'
 import { DNodeContext, getCurrentContext } from './context'
-import {
-  StopWatcher,
-  TriggerFn,
-  WatchOption,
-  watch,
-  watchLazy,
-} from './reactivity'
+import { StopWatcher, TriggerFn, WatchOption, watch } from './reactivity'
 import { Ref } from '@vue/reactivity'
 
 export function unmount(node: DComponent) {
@@ -68,10 +62,8 @@ export function useWatch<T>(
   opt?: WatchOption,
 ): StopWatcher {
   const ctx = useContext()
-  const stop = watch(getter, fn, {
-    lazy: true,
-    ...opt,
-  })
+
+  const stop = watch(getter, fn, opt)
 
   ctx.on('unmounted', stop)
 

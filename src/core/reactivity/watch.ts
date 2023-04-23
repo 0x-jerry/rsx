@@ -12,7 +12,9 @@ export type StopWatcher = () => void
 
 export type TriggerFn<T> = (newVal: T, oldValue?: T) => Promisable<void>
 
-export interface WatchOption extends ReactiveEffectOptions {}
+export interface WatchOption extends Omit<ReactiveEffectOptions, 'lazy'> {
+  immediate?: boolean
+}
 
 export function watch<T>(
   getter: Ref<T> | (() => T),
@@ -20,10 +22,14 @@ export function watch<T>(
   option?: WatchOption,
 ): StopWatcher {
   let oldVal: any
+  let triggered = false
 
   const getterIsRef = isRef(getter)
 
-  const runner = effect(effectFn, option)
+  const runner = effect(effectFn, {
+    ...option,
+    lazy: false,
+  })
 
   return () => stop(runner)
 
@@ -42,7 +48,11 @@ export function watch<T>(
       return
     }
 
-    fn(newVal, oldVal)
+    if (option?.immediate || (!option?.immediate && triggered)) {
+      fn(newVal, oldVal)
+    }
+
+    triggered = true
 
     oldVal = newVal
   }
@@ -54,12 +64,4 @@ function isEq(a: unknown, b: unknown) {
   }
 
   return a === b
-}
-
-export function watchLazy<T>(
-  getter: Ref<T> | (() => T),
-  fn: TriggerFn<T>,
-  option?: Omit<WatchOption, 'lazy'>,
-): StopWatcher {
-  return watch(getter, fn, { ...option, lazy: true })
 }
