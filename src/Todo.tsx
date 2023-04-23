@@ -1,6 +1,6 @@
-import { ToRefs, computed, reactive, toRef, toRefs } from '@vue/reactivity'
+import { computed, reactive, toRef, toRefs } from '@vue/reactivity'
 import { dc } from './core/defineComponent'
-import { VMap, h, Fragment, useWatch } from './core'
+import { VMap, h } from './core'
 
 interface TodoOption {
   id: string
@@ -8,7 +8,7 @@ interface TodoOption {
   content: string
 }
 
-const TodoItem = dc<ToRefs<TodoOption>>((props) => {
+const TodoItem = dc<TodoOption>((props) => {
   const { completed, content } = props
 
   return (

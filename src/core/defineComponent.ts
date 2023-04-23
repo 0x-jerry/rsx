@@ -1,5 +1,5 @@
 import { isFn } from '@0x-jerry/utils'
-import { toRefs } from '@vue/reactivity'
+import { ToRefs, proxyRefs } from '@vue/reactivity'
 
 export interface PropOption<T = any> {
   type?: T
@@ -14,7 +14,7 @@ export interface ComponentOption<Props extends PropsType = {}> {
 }
 
 export type FunctionalComponent<P extends PropsType> = (
-  props: P,
+  props: ToRefs<P>,
   children?: any[],
 ) => JSX.Element
 
@@ -48,7 +48,7 @@ export function defineComponent<P extends PropsType>(
 
   function wrap(impl: FunctionalComponent<P>): FunctionalComponent<P> {
     return (props, children) => {
-      const _props = toRefs(props)
+      const _props = proxyRefs(props)
       return impl(_props as any, children)
     }
   }
