@@ -2,7 +2,7 @@ import { isFn, Optional } from '@0x-jerry/utils'
 import { createFragment, DComponent } from '../node'
 import { MaybeRef } from '../types'
 import { unref } from '@vue/reactivity'
-import { unmount, useContext, useWatch } from '../hook'
+import { onMounted, unmount, useContext, useWatch } from '../hook'
 import { runWithContext } from '../context'
 import { h } from '../jsx'
 
@@ -20,8 +20,6 @@ export function VMap<T>(props: {
 
   const el = createFragment()
 
-  el._ = ctx
-
   type ChildElement = DComponent & {
     /**
      * if should reuse
@@ -32,14 +30,14 @@ export function VMap<T>(props: {
   const key2el = new Map<string, ChildElement>()
   const el2key = new Map<ChildElement, string>()
 
-  let renderedChildren: ChildElement[] = []
-
   useWatch(
     () => unref(props.list).map(getKey),
     () => runWithContext(update, ctx),
   )
 
-  runWithContext(update, ctx)
+  onMounted(() => {
+    runWithContext(update, ctx)
+  })
 
   return el
 
@@ -53,8 +51,7 @@ export function VMap<T>(props: {
     const newList: ChildElement[] = generateNewList()
 
     // todo Minimum movement algorithm
-
-    renderedChildren.forEach((child) => {
+    el.__children.forEach((child: ChildElement) => {
       const keyValue = el2key.get(child)!
       if (child._r) {
         // reset reuse flag
@@ -70,10 +67,10 @@ export function VMap<T>(props: {
     })
 
     newList.forEach((item) => {
-      el.appendChild(item)
+      el.before(item)
     })
 
-    renderedChildren = newList
+    el.__children = newList
   }
 
   function generateNewList() {

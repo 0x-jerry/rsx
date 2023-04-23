@@ -2,7 +2,7 @@ import { PrimitiveType, isPrimitive } from '@0x-jerry/utils'
 import { MaybeRef } from './types'
 import { ReactiveEffectRunner, isRef, stop, unref } from '@vue/reactivity'
 import { isObject } from '@0x-jerry/utils'
-import { onUnmounted } from './hook'
+import { onMounted, onUnmounted, useContext } from './hook'
 import { DNodeContext } from './context'
 import { queueJob } from './scheduler'
 
@@ -14,7 +14,11 @@ export type DElement = HTMLElement & MixDComponent
 
 export type DText = Text & MixDComponent
 
-export type DFragment = DElement
+export type DFragment = Comment &
+  MixDComponent & {
+    __fg: true
+    __children: DComponent[]
+  }
 
 export type DComponent = DText | DFragment | DElement
 
@@ -76,10 +80,18 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
 }
 
 export function createFragment(children: DNode[] = []) {
-  const el = document.createElement('div') as DElement
-  el.style.display = 'contents'
+  const el = document.createComment('fragment') as DFragment
 
-  moveChildren(el, children)
+  el.__fg = true
+  el.__children = []
+
+  onMounted(() => {
+    el.__children = moveChildren(el.parentElement!, children, el)
+  })
+
+  onUnmounted(() => {
+    el.__children.forEach((item) => item.remove())
+  })
 
   return el
 }
@@ -131,6 +143,22 @@ export function moveChildren(
   }
 }
 
+export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
+  if (!isFragment(node)) {
+    if (anchor) {
+      parent.insertBefore(node, anchor)
+    } else {
+      parent.appendChild(node)
+    }
+
+    return
+  }
+
+  node.__children.forEach((item) => moveTo(parent, item, anchor))
+
+  moveTo(parent, node, anchor)
+}
+
 export function normalizeNode(node: DNode): DComponent {
   const rawValue = unref(node)
 
@@ -143,6 +171,10 @@ export function normalizeNode(node: DNode): DComponent {
 
 export function isDComponent(o: unknown): o is DComponent {
   return isObject(o) && '_' in o
+}
+
+export function isFragment(o: unknown): o is DFragment {
+  return isObject(o) && '__fg' in o
 }
 
 export function getContext(el?: unknown): DNodeContext | null {
