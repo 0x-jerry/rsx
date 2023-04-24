@@ -13,9 +13,10 @@
   },
   "description": "",
   "devDependencies": {
-    "unocss": "^0.51.5",
+    "happy-dom": "^9.9.2",
+    "unocss": "^0.51.8",
     "vite": "^4.3.1",
-    "vite-plugin-inspect": "^0.7.23",
+    "vite-plugin-inspect": "^0.7.24",
     "vitest": "^0.30.1"
   }
 }
