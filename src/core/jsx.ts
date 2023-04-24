@@ -6,7 +6,7 @@ import {
   createNativeElement,
   isDComponent,
 } from './node'
-import { isRef, shallowReactive, unref } from '@vue/reactivity'
+import { isRef, unref } from '@vue/reactivity'
 import {
   appendToCurrentContext,
   createNodeContext,
@@ -48,11 +48,10 @@ function createComponentInstance(
   children?: DComponent[],
 ) {
   const ctx = createNodeContext(type.name)
+
   appendToCurrentContext(ctx)
 
   setCurrentContext(ctx)
-
-  // ctx.on('mounted', () => console.log('mounted', ctx.name))
 
   const el = type(props, children)
 
