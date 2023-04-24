@@ -10,7 +10,11 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src", "types"]
 }
