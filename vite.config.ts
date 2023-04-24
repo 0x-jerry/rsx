@@ -1,3 +1,5 @@
+/// <reference types="vitest" />
+
 import { defineConfig } from 'vite'
 import inspect from 'vite-plugin-inspect'
 import uno from 'unocss/vite'
@@ -15,5 +17,8 @@ export default defineConfig({
     alias: {
       '@/': path.resolve('src') + '/',
     },
+  },
+  test: {
+    globals: true,
   },
 })
