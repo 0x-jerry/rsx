@@ -40,9 +40,14 @@ function defineContext<T>() {
     },
     runWith<U>(fn: () => U, ctx: T): U {
       actions.push(ctx)
-      let r = fn()
-      actions.pop()
-      return r
+
+      try {
+        return fn()
+      } catch (error) {
+        throw error
+      } finally {
+        actions.pop()
+      }
     },
   }
 
