@@ -53,10 +53,17 @@ export function createNativeElement(
         { immediate: true },
       )
 
-      effects.push(runner)
+      // stop it when don't have active deps
+      if (runner.effect.deps.length) {
+        effects.push(runner)
+      } else {
+        stop(runner)
+      }
     }
 
-    onUnmounted(() => effects.forEach((item) => stop(item)))
+    if (effects.length) {
+      onUnmounted(() => effects.forEach((item) => stop(item)))
+    }
   }
 
   moveChildren(el, children)
@@ -89,7 +96,7 @@ export function createFragment(children: DNode[] = []) {
 
   onMounted(() => {
     if (mounted) {
-      console.log("already mounted!!!")
+      console.log('already mounted!!!')
       return
     }
     mounted = true

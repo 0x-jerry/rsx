@@ -63,7 +63,7 @@ function createComponentInstance(
 }
 
 function transformProps(type: any, props?: Record<string, any>): any {
-  const _raw: Record<string, any> = shallowReactive({})
+  const _raw: Record<string, any> = {}
 
   if (!props) return _raw
 
@@ -94,16 +94,6 @@ function transformProps(type: any, props?: Record<string, any>): any {
   })
 
   return _raw
-  // const _props: Record<string, any> = new Proxy(_raw, {
-  //   get(_, key) {
-  //     return unref(_raw[key as string])
-  //   },
-  //   set() {
-  //     return false
-  //   },
-  // })
-
-  // return _props
 }
 
 // todo, default binding syntax sugar
