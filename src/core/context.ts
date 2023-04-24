@@ -2,7 +2,7 @@ import { EventEmitter } from '@0x-jerry/utils'
 
 type DNodeEventMap = {
   mounted(): void
-  unmounted(fromParent?: boolean): void
+  unmounted(): void
 }
 
 export interface DNodeContext extends EventEmitter<DNodeEventMap> {
