@@ -1,6 +1,6 @@
 import { computed, reactive, toRef, toRefs } from '@vue/reactivity'
 import { dc } from './core/defineComponent'
-import { VMap, h } from './core'
+import { VMap } from './core'
 
 interface TodoOption {
   id: string
