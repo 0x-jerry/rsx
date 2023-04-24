@@ -17,12 +17,17 @@ export interface WatchOption extends Omit<ReactiveEffectOptions, 'lazy'> {
   immediate?: boolean
 }
 
+/**
+ * used to check oldValue
+ */
+const initOldValue = Symbol()
+
 export function watch<T>(
   getter: Ref<T> | (() => T),
   fn: TriggerFn<T>,
   option?: WatchOption,
 ): StopWatcher {
-  let oldVal: any
+  let oldVal: any = initOldValue
   let triggered = false
 
   const getterIsRef = isRef(getter)
@@ -53,12 +58,11 @@ export function watch<T>(
     }
 
     if (option?.immediate || (!option?.immediate && triggered)) {
-      fn(newVal, oldVal)
+      fn(newVal, oldVal === initOldValue ? undefined : oldVal)
+      oldVal = newVal
     }
 
     triggered = true
-
-    oldVal = newVal
   }
 }
 
