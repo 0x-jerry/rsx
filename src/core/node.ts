@@ -58,6 +58,7 @@ export function createNativeElement(
         effects.push(runner)
       } else {
         stop(runner)
+        state.delete(key)
       }
     }
 
