@@ -1,4 +1,4 @@
-import { ref } from '@vue/reactivity'
+import { Ref, ref } from '@vue/reactivity'
 import { h } from './jsx'
 import { nextTick } from './scheduler'
 
@@ -128,5 +128,45 @@ describe('jsx', () => {
     expect(text.textContent).toBe('hello')
     await nextTick()
     expect(text.textContent).toBe('world')
+  })
+
+  it('should not allow change props directly', async () => {
+    type Props = {
+      v: Ref<string>
+      onUpdateV: (v: string) => void
+    }
+
+    const Comp = ({ v, onUpdateV }: Props) => {
+      // should not working
+      v.value = '123'
+
+      return h(
+        'div',
+        {
+          onClick() {
+            onUpdateV('123')
+          },
+        },
+        v,
+      )
+    }
+
+    const props: Props = {
+      v: ref('1'),
+      onUpdateV(v: string) {
+        props.v.value = v
+      },
+    }
+
+    const el = h(Comp, props)
+
+    expect(el.textContent).toBe('1')
+    expect(props.v.value).toBe('1')
+
+    el.dispatchEvent(new Event('click'))
+
+    expect(props.v.value).toBe('123')
+    await nextTick()
+    expect(el.textContent).toBe('123')
   })
 })

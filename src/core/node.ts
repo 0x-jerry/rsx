@@ -98,10 +98,8 @@ export function createFragment(children: DNode[] = []) {
 
   el.__fg = true
   el.__children = []
-  let mounted = false
 
   onMounted(() => {
-    mounted = true
     el.__children = moveChildren(el.parentElement!, children, el)
   })
 
