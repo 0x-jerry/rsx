@@ -90,7 +90,7 @@ function transformProps(type: any, props?: Record<string, any>): any {
 
     if (isRef(value)) {
       // fix me: compose events
-      _raw[`on${PascalCase(name)}`] = (v: unknown) => (value.value = v)
+      _raw[`onUpdate${PascalCase(name)}`] = (v: unknown) => (value.value = v)
     }
   })
 
