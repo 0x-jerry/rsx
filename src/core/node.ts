@@ -76,9 +76,14 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
   const el = document.createTextNode('') as DText
 
   if (isRef(content)) {
-    const runner = queueEffectJob(() => {
-      el.textContent = String(unref(content) ?? '')
-    })
+    const runner = queueEffectJob(
+      () => {
+        el.textContent = String(unref(content) ?? '')
+      },
+      {
+        immediate: true,
+      },
+    )
 
     onUnmounted(() => stop(runner))
   } else {
@@ -96,10 +101,6 @@ export function createFragment(children: DNode[] = []) {
   let mounted = false
 
   onMounted(() => {
-    if (mounted) {
-      console.log('already mounted!!!')
-      return
-    }
     mounted = true
     el.__children = moveChildren(el.parentElement!, children, el)
   })

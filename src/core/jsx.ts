@@ -19,7 +19,7 @@ type FunctionalComponent = (props?: any, children?: DNode[]) => DComponent
 export function h(
   type: string | FunctionalComponent | DComponent,
   props?: Record<string, any>,
-  ...children: DComponent[]
+  ...children: DNode[]
 ): DComponent {
   if (isDComponent(type)) {
     return type
@@ -45,7 +45,7 @@ export const Fragment: FunctionalComponent = (_, children) => {
 function createComponentInstance(
   type: FunctionalComponent,
   props?: any,
-  children?: DComponent[],
+  children?: DNode[],
 ) {
   const ctx = createNodeContext(type.name)
 

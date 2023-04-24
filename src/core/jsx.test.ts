@@ -112,4 +112,21 @@ describe('jsx', () => {
 
     expect(hasError).toBeCalledTimes(1)
   })
+
+  it('should render as text node', async () => {
+    const v = ref('hello')
+
+    const Comp = () => h('div', {}, v)
+
+    const el = h(Comp) as HTMLDivElement
+
+    const text = el.childNodes.item(0)
+    expect(text).instanceOf(Text)
+    expect(text.textContent).toBe('hello')
+
+    v.value = 'world'
+    expect(text.textContent).toBe('hello')
+    await nextTick()
+    expect(text.textContent).toBe('world')
+  })
 })
