@@ -1,6 +1,7 @@
 import { isString } from '@0x-jerry/utils'
 import { DComponent } from './node'
 import { mount } from './hook'
+import { disableSSR, enableSSR } from './config'
 
 export function mountApp(dom: DComponent, selector: string | HTMLElement) {
   const container = isString(selector)
@@ -18,8 +19,13 @@ export function mountApp(dom: DComponent, selector: string | HTMLElement) {
 }
 
 export function renderToString(Comp: DComponent) {
+  // todo
+  enableSSR()
+
   const app = document.createElement('div')
   mountApp(Comp, app)
+
+  disableSSR()
 
   return app.innerHTML
 }
