@@ -1,7 +1,7 @@
-import { computed } from '@vue/reactivity'
+import { computed, isReactive, toRef } from '@vue/reactivity'
 
-export function toComputed<T extends {}, K extends keyof T>(o: T, key: K) {
-  return computed(() => o[key])
+function toReactiveRef<T extends {}, K extends keyof T>(o: T, key: K) {
+  return isReactive(o) ? toRef(o, key) : computed(() => o[key])
 }
 
-export const $ = toComputed
+export const $ = toReactiveRef

@@ -1,4 +1,4 @@
-import { computed, reactive, toRef } from '@vue/reactivity'
+import { computed, reactive } from '@vue/reactivity'
 import { dc } from './core/defineComponent'
 import { $, VMap } from './core'
 
@@ -48,7 +48,7 @@ export const TodoApp = dc(() => {
       <div>
         <button onClick={sort}> sort </button>
       </div>
-      <select $={toRef(state, 'type')}>
+      <select $={$(state, 'type')}>
         <VMap
           list={['all', 'completed', 'uncompleted']}
           key={(n) => n}
@@ -57,7 +57,7 @@ export const TodoApp = dc(() => {
       </select>
 
       <div class="flex">
-        <input type="text" $={toRef(state, 'content')} />
+        <input type="text" $={$(state, 'content')} />
         <button onClick={addTodo}>add</button>
       </div>
       <hr />
@@ -67,7 +67,7 @@ export const TodoApp = dc(() => {
         render={({ item }) => (
           <TodoItem
             item={item}
-            $completed={toRef(item, 'completed')}
+            $completed={$(item, 'completed')}
           ></TodoItem>
         )}
       />

@@ -1,6 +1,7 @@
 import { isFn } from '@0x-jerry/utils'
 import { DefineProps } from './props'
 import { ToMaybeRef } from '.'
+import { Merge } from 'type-fest'
 
 export interface PropOption<T = any> {
   type?: T
@@ -14,8 +15,13 @@ export interface ComponentOption<Props extends PropsType = {}> {
   toRefs?: boolean
 }
 
+interface CommonProps {
+  class?: any
+  [key: string]: any
+}
+
 export type FunctionalComponent<P extends PropsType = {}> = (
-  props: P,
+  props: Merge<P, CommonProps>,
   children?: any[],
 ) => JSX.Element
 
