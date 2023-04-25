@@ -1,8 +1,6 @@
-import { ComputedRef, Ref } from '@vue/reactivity'
+import { Ref } from '@vue/reactivity'
 
-type RefType<T> = Ref<T> | ComputedRef<T>
-
-export type MaybeRef<T> = T | RefType<T>
+export type MaybeRef<T> = T | Ref<T>
 
 export type ToMaybeRef<T> = T extends {}
   ? {

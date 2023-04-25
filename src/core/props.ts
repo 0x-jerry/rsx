@@ -1,4 +1,3 @@
-import { UnwrapRef } from '@vue/reactivity'
 import { Merge, UnionToIntersection } from 'type-fest'
 
 type Compose<
