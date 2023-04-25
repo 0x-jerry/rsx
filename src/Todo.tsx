@@ -51,7 +51,6 @@ export const TodoApp = dc(() => {
       <select $={$(state, 'type')}>
         <VMap
           list={['all', 'completed', 'uncompleted']}
-          key={(n) => n}
           render={({ item }) => <option value={item}>{item}</option>}
         />
       </select>
@@ -63,7 +62,6 @@ export const TodoApp = dc(() => {
       <hr />
       <VMap
         list={filteredItems}
-        key={(n) => n.id}
         render={({ item }) => (
           <TodoItem
             item={item}

@@ -7,11 +7,9 @@ import { runWithContext } from '../context'
 import { h } from '../jsx'
 import { insertBefore } from '../nodeOp'
 
-type KeyValue = string | number | boolean | null | undefined
-
 export function VMap<T>(props: {
   list: MaybeRef<T[]>
-  key: (item: T, idx: number) => KeyValue
+  key?: (item: T, idx: number) => any
   /**
    * should return jsx
    */
@@ -43,9 +41,9 @@ export function VMap<T>(props: {
   return el
 
   function getKey(item: T, index: number) {
-    const k = props.key(item, index)
+    const k = props.key ? props.key(item, index) : item
 
-    return String(k)
+    return k
   }
 
   function update() {
