@@ -16,3 +16,10 @@ export function mountApp(dom: DComponent, selector: string | HTMLElement) {
 
   mount(dom)
 }
+
+export function renderToString(Comp: DComponent) {
+  const app = document.createElement('div')
+  mountApp(Comp, app)
+
+  return app.innerHTML
+}
