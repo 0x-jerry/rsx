@@ -92,4 +92,24 @@ describe('watch', () => {
     await nextTick()
     expect(fn).toBeCalledTimes(1)
   })
+
+  it('should not triggered when have the same date', async () => {
+    const fn = vi.fn()
+
+    const d1 = new Date()
+    const d2 = new Date()
+    const d3 = new Date()
+
+    const count = ref(d1)
+
+    watch(count, fn)
+
+    count.value = d2
+    await nextTick()
+    expect(fn).toBeCalledTimes(1)
+
+    count.value = d3
+    await nextTick()
+    expect(fn).toBeCalledTimes(1)
+  })
 })

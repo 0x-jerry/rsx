@@ -53,7 +53,7 @@ export function watch<T>(
 
     newVal = unref(newVal)
 
-    if (isEq(oldVal, newVal)) {
+    if (isLooseEq(oldVal, newVal)) {
       return
     }
 
@@ -66,7 +66,11 @@ export function watch<T>(
   }
 }
 
-function isEq(a: unknown, b: unknown) {
+function isLooseEq(a: unknown, b: unknown) {
+  if (a instanceof Date && b instanceof Date) {
+    return a.getTime() === b.getTime()
+  }
+
   if (isArray(a) && isArray(b) && a.length === b.length) {
     return a.every((v, idx) => v === b[idx])
   }
