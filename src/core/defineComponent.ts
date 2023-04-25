@@ -1,4 +1,6 @@
 import { isFn } from '@0x-jerry/utils'
+import { DefineProps } from './props'
+import { ToMaybeRef } from '.'
 
 export interface PropOption<T = any> {
   type?: T
@@ -12,7 +14,7 @@ export interface ComponentOption<Props extends PropsType = {}> {
   toRefs?: boolean
 }
 
-export type FunctionalComponent<P extends PropsType> = (
+export type FunctionalComponent<P extends PropsType = {}> = (
   props: P,
   children?: any[],
 ) => JSX.Element
@@ -22,8 +24,8 @@ export type FunctionalComponent<P extends PropsType> = (
  * @param impl
  */
 export function defineComponent<P extends PropsType>(
-  impl: FunctionalComponent<P>,
-): FunctionalComponent<P>
+  impl: FunctionalComponent<DefineProps<P>>,
+): FunctionalComponent<ToMaybeRef<P>>
 /**
  * with option
  * @param opt
@@ -31,15 +33,15 @@ export function defineComponent<P extends PropsType>(
  */
 export function defineComponent<P extends PropsType>(
   opt: ComponentOption<P>,
-  impl: FunctionalComponent<P>,
-): FunctionalComponent<P>
+  impl: FunctionalComponent<DefineProps<P>>,
+): FunctionalComponent<ToMaybeRef<P>>
 /**
  * implement
  */
 export function defineComponent<P extends PropsType>(
-  opt: ComponentOption<P> | FunctionalComponent<P>,
-  impl?: FunctionalComponent<P>,
-): FunctionalComponent<P> {
+  opt: ComponentOption<P> | FunctionalComponent,
+  impl?: FunctionalComponent,
+): FunctionalComponent {
   if (isFn(opt)) return opt
 
   // todo check props type

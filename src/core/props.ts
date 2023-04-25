@@ -19,15 +19,8 @@ type Prop<
   Required extends boolean = false,
 > = Key extends `$${infer U}`
   ? Merge<
-      Compose<Key, Value, false>,
-      Merge<
-        Compose<U, Value, false>,
-        Compose<
-          `onUpdate${Capitalize<U>}`,
-          (v: UnwrapRef<Value>) => void,
-          false
-        >
-      >
+      Compose<U, Value, false>,
+      Compose<`onUpdate${Capitalize<U>}`, (v: Value) => void, false>
     >
   : Compose<Key, Value, Required>
 

@@ -6,7 +6,7 @@ import {
   createNativeElement,
   isDComponent,
 } from './node'
-import { computed, isRef, unref } from '@vue/reactivity'
+import { isRef, unref } from '@vue/reactivity'
 import {
   appendToCurrentContext,
   createNodeContext,
@@ -69,8 +69,7 @@ function transformProps(type: any, props?: Record<string, any>): any {
   Object.entries(props).forEach(([key, value]) => {
     if (!key.startsWith('$')) {
       // Prevent change props directly.
-      // Maybe should only working in dev mode ?
-      _raw[key] = isRef(value) ? computed(() => value.value) : value
+      _raw[key] = value
       return
     }
 
@@ -94,7 +93,16 @@ function transformProps(type: any, props?: Record<string, any>): any {
     }
   })
 
-  return _raw
+  // return _raw
+  return new Proxy(_raw, {
+    get(t, p, r) {
+      return unref(Reflect.get(t, p, r))
+    },
+    set() {
+      // Prevent change props directly.
+      return true
+    },
+  })
 }
 
 // todo, default binding syntax sugar

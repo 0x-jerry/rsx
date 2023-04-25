@@ -1320,20 +1320,18 @@ type EventHandlers<E> = {
     : (payload: E[K]) => void
 }
 
-import { DNode } from '../src/node'
-import { MaybeRef } from '../src/types'
+import { ToMaybeRef, MaybeRef, DNode } from '@/core'
 
 export type ReservedProps = {
-  key?: string | number | symbol
-  ref_for?: boolean
-  ref_key?: string
-  $?: MaybeRef<any>
+  $?: any
   children?: DNode | DNode[]
 
   [key: string]: any
 }
 
 export type NativeElements = {
-  [K in keyof IntrinsicElementAttributes]: IntrinsicElementAttributes[K] &
+  [K in keyof IntrinsicElementAttributes]: ToMaybeRef<
+    IntrinsicElementAttributes[K]
+  > &
     ReservedProps
 }

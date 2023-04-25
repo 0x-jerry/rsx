@@ -1,6 +1,8 @@
-import { Ref, ref } from '@vue/reactivity'
+import { ref } from '@vue/reactivity'
 import { h } from './jsx'
 import { nextTick } from './scheduler'
+import { $ } from './reactivity'
+import { dc } from './defineComponent'
 
 describe('jsx', () => {
   it('should return dom element', () => {
@@ -132,26 +134,25 @@ describe('jsx', () => {
 
   it('should not allow change props directly', async () => {
     type Props = {
-      v: Ref<string>
-      onUpdateV: (v: string) => void
+      $v: string
     }
 
-    const Comp = ({ v, onUpdateV }: Props) => {
+    const Comp = dc<Props>((props) => {
       // should not working
-      v.value = '123'
+      props.v = '123'
 
       return h(
         'div',
         {
           onClick() {
-            onUpdateV('123')
+            props.onUpdateV?.('123')
           },
         },
-        v,
+        $(props, 'v'),
       )
-    }
+    })
 
-    const props: Props = {
+    const props = {
       v: ref('1'),
       onUpdateV(v: string) {
         props.v.value = v
