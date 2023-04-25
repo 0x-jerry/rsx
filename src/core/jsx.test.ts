@@ -3,6 +3,7 @@ import { h } from './jsx'
 import { nextTick } from './scheduler'
 import { $ } from './reactivity'
 import { dc } from './defineComponent'
+import { useWatch } from './hook'
 
 describe('jsx', () => {
   it('should return dom element', () => {
@@ -169,5 +170,32 @@ describe('jsx', () => {
     expect(props.v.value).toBe('123')
     await nextTick()
     expect(el.textContent).toBe('123')
+  })
+
+  it('should be reactive when pass ref value', async () => {
+    type Props = {
+      v: number
+    }
+
+    const fn = vi.fn()
+
+    const Comp = dc<Props>((props) => {
+      useWatch(() => props.v, fn)
+
+      return h('div')
+    })
+
+    const props = {
+      v: ref(1),
+      x: 1,
+    }
+
+    h(Comp, props)
+    await nextTick()
+    expect(fn).toBeCalledTimes(0)
+
+    props.v.value++
+    await nextTick()
+    expect(fn).toBeCalledTimes(1)
   })
 })
