@@ -1,11 +1,11 @@
 import { JsonPrimitive, Optional, makePair } from '@0x-jerry/utils'
-import { DComponent, createFragment, createTextElement } from '../node'
+import { computed, unref } from '@vue/reactivity'
+import { DComponent, createFragment } from '../node'
 import { MaybeRef } from '../types'
-import { mount, unmount, useContext } from '../hook'
-import { queueEffectJob } from '../scheduler'
+import { mount, onMounted, unmount, useContext, useWatch } from '../hook'
 import { runWithContext } from '../context'
 import { h } from '../jsx'
-import { unref } from '@vue/reactivity'
+import { insertBefore } from '../nodeOp'
 
 export function VCase(props: {
   condition: JsonPrimitive
@@ -18,9 +18,17 @@ export function VCase(props: {
 
   const pair = makePair(props.cases || {})
 
+  const caseKey = computed(() => String(unref(props.condition)))
+
   let renderedEl: Optional<DComponent> = null
 
-  queueEffectJob(() => {
+  useWatch(caseKey, updateCase)
+
+  onMounted(updateCase)
+
+  return el
+
+  function updateCase() {
     const oldChild = renderedEl
 
     if (oldChild) unmount(oldChild)
@@ -28,15 +36,13 @@ export function VCase(props: {
     const newChild = mountCondition()
 
     renderedEl = newChild
-  })
-
-  return el
+  }
 
   function mountCondition() {
-    const newChild = runWithContext(() => pair(String(unref(props.condition))), ctx)
+    const newChild = runWithContext(() => pair(caseKey.value), ctx)
 
     if (newChild) {
-      el.appendChild(newChild)
+      insertBefore(el, newChild)
 
       mount(newChild)
     }
