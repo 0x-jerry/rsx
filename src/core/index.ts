@@ -1,3 +1,4 @@
+export { ref, reactive } from '@vue/reactivity'
 export * from './internalComponents'
 export * from './node'
 export * from './types'

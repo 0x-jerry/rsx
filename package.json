@@ -4,17 +4,29 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "vitest"
+    "test": "vitest",
+    "build": "tsup"
   },
-  "author": "",
   "dependencies": {
     "@0x-jerry/utils": "^1.16.3",
     "@vue/reactivity": "^3.2.47"
   },
+  "tsup": {
+    "entry": [
+      "src/core/index.ts"
+    ],
+    "format": [
+      "esm"
+    ],
+    "minify": true,
+    "clean": true
+  },
   "description": "",
   "devDependencies": {
     "happy-dom": "^9.9.2",
+    "tsup": "^7.1.0",
     "type-fest": "^3.8.0",
+    "typescript": "^5.1.6",
     "unocss": "^0.51.8",
     "vite": "^4.3.1",
     "vite-plugin-inspect": "^0.7.24",
