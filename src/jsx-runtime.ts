@@ -1,10 +1,16 @@
+import { isFn, toArray } from '@0x-jerry/utils'
 import { h } from './core'
+import { computed, unref } from '@vue/reactivity'
 export { Fragment } from './core'
 
-// @ts-ignore
-export const jsx = (tag, props) => {
+export const jsx = (tag: any, props: { children: any }) => {
   const { children, ...other } = props
-  return h(tag, other, children)
+
+  const convertedChildren = toArray(children).map((n) =>
+    isFn(n) ? computed(() => unref(n())) : n,
+  )
+
+  return h(tag, other, ...convertedChildren)
 }
 
 export const jsxs = jsx

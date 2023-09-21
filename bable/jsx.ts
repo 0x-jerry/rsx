@@ -30,6 +30,23 @@ export function jsxPlugin({ types: t }: typeof BabelCore): BabelCore.PluginObj {
           }
         },
       },
+      JSXElement: {
+        enter(path) {
+          for (const child of path.node.children) {
+
+            if (t.isJSXExpressionContainer(child)) {
+              const expression = child.expression
+              if (t.isJSXEmptyExpression(expression)) {
+                return
+              }
+
+              const arrowFnExpress = t.arrowFunctionExpression([], expression)
+
+              child.expression = arrowFnExpress
+            }
+          }
+        },
+      },
     },
   }
 }

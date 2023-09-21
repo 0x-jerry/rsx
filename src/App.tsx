@@ -1,5 +1,11 @@
-import { TodoApp } from './Todo'
+import { ref } from '@vue/reactivity'
 
 export const App = () => {
-  return <div>hello</div>
+  const count = ref(1)
+
+  return (
+    <>
+      <button onClick={() => count.value++}>{count}</button>
+    </>
+  )
 }
