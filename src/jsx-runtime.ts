@@ -23,8 +23,12 @@ export const jsx = (tag: any, props: { children: any; [key: string]: any }) => {
       continue
     }
 
-    if (isRef(prop())) {
-      _props[key] = prop()
+    const realProp = prop()
+
+    if (isRef(realProp)) {
+      _props[key] = realProp
+    } else if (isFn(realProp)) {
+      _props[key] = realProp
     } else {
       _props[key] = computed(() => prop())
     }
