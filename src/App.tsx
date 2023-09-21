@@ -7,7 +7,7 @@ export const App = () => {
 
   return (
     <>
-      <button onClick={plusOne} data-count={count.value}>{count}</button>
+      <button onClick={plusOne} data-count={count.value} data-x="123">{count}</button>
     </>
   )
 }

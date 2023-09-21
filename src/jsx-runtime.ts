@@ -1,7 +1,9 @@
 import { isFn, toArray } from '@0x-jerry/utils'
 import { h } from './core'
-import { computed, unref } from '@vue/reactivity'
+import { computed, isRef, unref } from '@vue/reactivity'
 export { Fragment } from './core'
+
+const excludePrefixReg = /^(on|_)/
 
 export const jsx = (tag: any, props: { children: any; [key: string]: any }) => {
   const { children, ...other } = props
@@ -11,8 +13,21 @@ export const jsx = (tag: any, props: { children: any; [key: string]: any }) => {
   for (const key in other) {
     const prop = other[key]
 
-    _props[key] =
-      isFn(prop) && !key.startsWith('on') ? computed(() => unref(prop())) : prop
+    if (excludePrefixReg.test(key)) {
+      _props[key] = prop
+      continue
+    }
+
+    if (!isFn(prop)) {
+      _props[key] = prop
+      continue
+    }
+
+    if (isRef(prop())) {
+      _props[key] = prop()
+    } else {
+      _props[key] = computed(() => prop())
+    }
   }
 
   const convertedChildren = toArray(children).map((n) =>

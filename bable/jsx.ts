@@ -1,6 +1,10 @@
 import BabelCore from '@babel/core'
 import syntaxJsx from '@babel/plugin-syntax-jsx'
 
+const config = {
+  excludePrefixReg: /^(on|_)/,
+}
+
 export function jsxPlugin({ types: t }: typeof BabelCore): BabelCore.PluginObj {
   return {
     name: 'babel-plugin-jsx',
@@ -12,7 +16,9 @@ export function jsxPlugin({ types: t }: typeof BabelCore): BabelCore.PluginObj {
           const nameNode = path.node.name
 
           if (t.isJSXIdentifier(nameNode)) {
-            if (nameNode.name.startsWith('on')) {
+            const nodeName = nameNode.name
+
+            if (config.excludePrefixReg.test(nodeName)) {
               return
             }
           }
@@ -33,7 +39,6 @@ export function jsxPlugin({ types: t }: typeof BabelCore): BabelCore.PluginObj {
       JSXElement: {
         enter(path) {
           for (const child of path.node.children) {
-
             if (t.isJSXExpressionContainer(child)) {
               const expression = child.expression
               if (t.isJSXEmptyExpression(expression)) {
