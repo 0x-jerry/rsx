@@ -3,9 +3,11 @@ import { ref } from '@vue/reactivity'
 export const App = () => {
   const count = ref(1)
 
+  const plusOne = () => count.value++
+
   return (
     <>
-      <button onClick={() => count.value++}>{count}</button>
+      <button onClick={plusOne} data-count={count.value}>{count}</button>
     </>
   )
 }
