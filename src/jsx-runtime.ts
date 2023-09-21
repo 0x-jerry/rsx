@@ -30,9 +30,17 @@ export const jsx = (tag: any, props: { children: any; [key: string]: any }) => {
     }
   }
 
-  const convertedChildren = toArray(children).map((n) =>
-    isFn(n) ? computed(() => unref(n())) : n,
-  )
+  const convertedChildren = toArray(children).map((child) => {
+    if (!isFn(child)) {
+      return child
+    }
+
+    const v = child()
+
+    if (isRef(v)) return v
+
+    return computed(() => child())
+  })
 
   return h(tag, _props, ...convertedChildren)
 }
