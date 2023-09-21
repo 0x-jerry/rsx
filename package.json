@@ -8,8 +8,8 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@0x-jerry/utils": "^1.16.3",
-    "@vue/reactivity": "^3.2.47"
+    "@0x-jerry/utils": "^2.0.0",
+    "@vue/reactivity": "^3.3.4"
   },
   "tsup": {
     "entry": [
@@ -32,13 +32,13 @@
     "@babel/types": "^7.22.19",
     "@rollup/plugin-babel": "^6.0.3",
     "@types/babel__core": "^7.20.2",
-    "happy-dom": "^9.9.2",
-    "tsup": "^7.1.0",
-    "type-fest": "^3.8.0",
-    "typescript": "^5.1.6",
-    "unocss": "^0.51.8",
-    "vite": "^4.3.1",
-    "vite-plugin-inspect": "^0.7.24",
-    "vitest": "^0.30.1"
+    "happy-dom": "^12.1.5",
+    "tsup": "^7.2.0",
+    "type-fest": "^4.3.1",
+    "typescript": "^5.2.2",
+    "unocss": "^0.56.0",
+    "vite": "~4.3.1",
+    "vite-plugin-inspect": "^0.7.38",
+    "vitest": "^0.34.4"
   }
 }

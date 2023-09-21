@@ -18,6 +18,7 @@ export default defineConfig({
     inspect(),
     uno(),
     babel({
+      babelHelpers: 'bundled',
       extensions: ['tsx', 'jsx'],
       plugins: [
         [jsxPlugin, {}],
@@ -25,7 +26,7 @@ export default defineConfig({
           '@babel/plugin-transform-react-jsx',
           {
             runtime: 'automatic',
-            importSource: `@`
+            importSource: `@`,
           },
         ],
       ],
