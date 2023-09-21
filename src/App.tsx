@@ -7,12 +7,8 @@ export const App = () => {
 
   return (
     <>
-      <button
-        _a={count.value}
-        onClick={plusOne}
-        data-count={count.value}
-        data-x="123"
-      >
+      <p>count: {count.value}</p>
+      <button _a={count.value} onClick={plusOne} data-x="123">
         count: {count}
       </button>
     </>
