@@ -23,7 +23,7 @@
   },
   "description": "",
   "devDependencies": {
-    "happy-dom": "^9.9.2",
+    "happy-dom": "^13.0.0",
     "tsup": "^7.1.0",
     "type-fest": "^3.8.0",
     "typescript": "^5.1.6",
