@@ -28,7 +28,7 @@
     "type-fest": "^3.8.0",
     "typescript": "^5.1.6",
     "unocss": "^0.51.8",
-    "vite": "^4.3.1",
+    "vite": "^5.0.0",
     "vite-plugin-inspect": "^0.7.24",
     "vitest": "^0.30.1"
   }
