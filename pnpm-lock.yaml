@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@0x-jerry/utils':
-    specifier: ^1.16.3
-    version: 1.16.3
+    specifier: ^2.0.0
+    version: 2.1.1
   '@vue/reactivity':
     specifier: ^3.2.47
     version: 3.2.47
@@ -40,11 +40,11 @@ devDependencies:
 
 packages:
 
-  /@0x-jerry/utils@1.16.3:
-    resolution: {integrity: sha512-h0gw6HAIla+e1KTe2JZkxw6kywLbpsYVJPv/K9BByo4xREcT9UtICB2Iq4reN9fpNxbmx3q/sRwbTpt/JxAqSw==}
+  /@0x-jerry/utils@2.1.1:
+    resolution: {integrity: sha512-VNF9b4CFEW+I+hqmA/RKf7KrV9QXe4GCQS958iew0lvTqslaArYKk1gZvwj1zGCUwo6LBXCYEKjzPf5e/PEPBQ==}
     dependencies:
-      fflate: 0.7.4
-      nanoid: 4.0.2
+      fflate: 0.8.2
+      nanoid: 5.0.6
     dev: false
 
   /@ampproject/remapping@2.2.1:
@@ -1130,8 +1130,8 @@ packages:
       reusify: 1.0.4
     dev: true
 
-  /fflate@0.7.4:
-    resolution: {integrity: sha512-5u2V/CDW15QM1XbbgS+0DfPxVB+jUKhWEKuuFuHncbk3tEEqzmoXL+2KyOFuKGqOnmdIy0/davWF1CkuwtibCw==}
+  /fflate@0.8.2:
+    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
     dev: false
 
   /fill-range@7.0.1:
@@ -1453,9 +1453,9 @@ packages:
     hasBin: true
     dev: true
 
-  /nanoid@4.0.2:
-    resolution: {integrity: sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==}
-    engines: {node: ^14 || ^16 || >=18}
+  /nanoid@5.0.6:
+    resolution: {integrity: sha512-rRq0eMHoGZxlvaFOUdK1Ev83Bd1IgzzR+WJ3IbDJ7QOSdAxYjlurSPqFs9s4lJg29RT6nPwizFtJhQS6V5xgiA==}
+    engines: {node: ^18 || >=20}
     hasBin: true
     dev: false
 

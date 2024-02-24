@@ -8,7 +8,7 @@
     "build": "tsup"
   },
   "dependencies": {
-    "@0x-jerry/utils": "^1.16.3",
+    "@0x-jerry/utils": "^2.0.0",
     "@vue/reactivity": "^3.2.47"
   },
   "tsup": {
