@@ -106,6 +106,8 @@ function transformProps(type: any, props?: Record<string, any>): any {
 }
 
 // todo, default binding syntax sugar
+// current: $xx={refValue}
+// suppport new sugar: $xx={[data, 'key']}
 function transformDefaultBinding(
   type: any,
   value: any,
