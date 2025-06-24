@@ -1,4 +1,4 @@
-import { effect } from '@vue/reactivity'
+import { lazyEffect } from './reactivity'
 
 const resolvedPromise = Promise.resolve()
 
@@ -54,8 +54,7 @@ export interface QueueJobOption {
 }
 
 export function queueEffectJob(job: Job, opt: QueueJobOption = {}) {
-  const runner = effect(job, {
-    lazy: true,
+  const runner = lazyEffect(job, {
     scheduler: () => {
       queueJob(runner, opt.flush)
     },

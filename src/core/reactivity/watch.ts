@@ -1,4 +1,4 @@
-import { isArray, isFn, type Promisable } from '@0x-jerry/utils'
+import { type Awaitable, isArray, isFn } from '@0x-jerry/utils'
 import {
   effect,
   isRef,
@@ -11,7 +11,7 @@ import { queueJob } from '../scheduler'
 
 export type StopWatcher = () => void
 
-export type TriggerFn<T> = (newVal: T, oldValue?: T) => Promisable<void>
+export type TriggerFn<T> = (newVal: T, oldValue?: T) => Awaitable<void>
 
 export interface WatchOption extends Omit<ReactiveEffectOptions, 'lazy'> {
   immediate?: boolean
@@ -34,7 +34,6 @@ export function watch<T>(
 
   const runner = effect(effectFn, {
     ...option,
-    lazy: false,
     scheduler: () => {
       queueJob(runner)
     },

@@ -89,7 +89,9 @@ function transformProps(type: any, props?: Record<string, any>): any {
 
     if (isRef(value)) {
       // fix me: compose events
-      _raw[`onUpdate${PascalCase(name)}`] = (v: unknown) => (value.value = v)
+      _raw[`onUpdate${PascalCase(name)}`] = (v: unknown) => {
+        value.value = v
+      }
     }
   })
 
@@ -128,16 +130,18 @@ function transformDefaultBinding(
       props.value = value
 
       if (isRef(value)) {
-        props.onInput = (e: InputEvent) =>
-          (value.value = (e.target as HTMLInputElement).value)
+        props.onInput = (e: InputEvent) => {
+          value.value = (e.target as HTMLInputElement).value
+        }
       }
     }
   } else if (type === 'select') {
     props.value = value
 
     if (isRef(value)) {
-      props.onChange = (e: InputEvent) =>
-        (value.value = (e.target as HTMLSelectElement).value)
+      props.onChange = (e: InputEvent) => {
+        value.value = (e.target as HTMLSelectElement).value
+      }
     }
   }
 

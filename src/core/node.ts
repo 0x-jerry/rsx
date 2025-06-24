@@ -40,7 +40,7 @@ export function createNativeElement(
     for (const key of keys) {
       const runner = queueEffectJob(
         () => {
-          const value = unref(props![key])
+          const value = props[key]
 
           const old = state.get(key)
 
@@ -53,7 +53,13 @@ export function createNativeElement(
       )
 
       // stop it when don't have active deps
-      effects.push(runner)
+      const hasDeps = 'deps' in runner.effect && runner.effect.deps
+      if (hasDeps) {
+        effects.push(runner)
+      } else {
+        stop(runner)
+        state.delete(key)
+      }
     }
 
     if (effects.length) {

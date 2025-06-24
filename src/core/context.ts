@@ -1,8 +1,8 @@
 import { EventEmitter } from '@0x-jerry/utils'
 
 type DNodeEventMap = {
-  mounted(): void
-  unmounted(): void
+  mounted: []
+  unmounted: []
 }
 
 export interface DNodeContext extends EventEmitter<DNodeEventMap> {

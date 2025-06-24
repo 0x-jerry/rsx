@@ -44,14 +44,11 @@ export function defineComponent<P extends PropsType>(
 /**
  * implement
  */
-export function defineComponent<P extends PropsType>(
-  opt: ComponentOption<P> | FunctionalComponent,
-  impl?: FunctionalComponent,
-): FunctionalComponent {
+export function defineComponent(opt: unknown, impl?: any): any {
   if (isFn(opt)) return opt
 
   // todo check props type
-  return impl!
+  return impl
 }
 
 export const dc = defineComponent

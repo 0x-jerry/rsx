@@ -1,4 +1,8 @@
 {
-    "testing.automaticallyOpenPeekView": "never",
-    "editor.defaultFormatter": "biomejs.biome"
+  "testing.automaticallyOpenPeekView": "never",
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": true
+  }
 }
