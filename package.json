@@ -23,6 +23,7 @@
   },
   "description": "",
   "devDependencies": {
+    "@biomejs/biome": "^2.0.5",
     "happy-dom": "^18.0.1",
     "tsup": "^8.5.0",
     "type-fest": "^4.41.0",
