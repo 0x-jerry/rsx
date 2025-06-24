@@ -1,9 +1,10 @@
 import { isObject, isPrimitive, type PrimitiveType } from '@0x-jerry/utils'
-import { isRef, type ReactiveEffectRunner, stop, unref } from '@vue/reactivity'
+import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
+import { clsx } from 'clsx'
 import type { DNodeContext } from './context'
 import { onMounted, onUnmounted } from './hook'
 import { moveChildren } from './nodeOp'
-import { effect } from './reactivity'
+import { effect, isRef, unref } from './reactivity'
 import type { MaybeRef } from './types'
 
 type MixDComponent = {
@@ -39,7 +40,7 @@ export function createNativeElement(
 
     for (const key of keys) {
       const runner = effect(() => {
-        const value = props[key]
+        const value = transformProps(key, props[key])
 
         const old = state.get(key)
 
@@ -67,6 +68,14 @@ export function createNativeElement(
   moveChildren(el, children)
 
   return el
+}
+
+function transformProps(key: string, value: unknown) {
+  if (key === 'class') {
+    return clsx(value as any)
+  }
+
+  return value
 }
 
 export function createTextElement(content: MaybeRef<PrimitiveType>) {

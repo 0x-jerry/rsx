@@ -1,5 +1,4 @@
 import { camelCase, isString, PascalCase } from '@0x-jerry/utils'
-import { isRef, unref } from '@vue/reactivity'
 import {
   appendToCurrentContext,
   createNodeContext,
@@ -13,6 +12,7 @@ import {
   type DNode,
   isDComponent,
 } from './node'
+import { isRef, unref } from './reactivity'
 
 type FunctionalComponent = (props?: any, children?: DNode[]) => DComponent
 
@@ -123,7 +123,6 @@ function transformDefaultBinding(
       if (isRef(value)) {
         props.onChange = (e: InputEvent) => {
           value.value = (e.target as HTMLInputElement).checked
-          console.log('checked', value.value)
         }
       }
     } else {

@@ -6,6 +6,11 @@
     "useIgnoreFile": false
   },
   "files": {
+    "includes": [
+      "src/**/*.ts",
+      "src/**/*.tsx",
+      "types"
+    ],
     "ignoreUnknown": false
   },
   "formatter": {

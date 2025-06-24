@@ -1,13 +1,8 @@
 import type { Fn } from '@0x-jerry/utils'
-import type { Ref } from '@vue/reactivity'
+import type { WatchCallback, WatchEffect, WatchSource } from '@vue/reactivity'
 import { type DNodeContext, getCurrentContext } from './context'
 import { type DComponent, getContext } from './node'
-import {
-  type StopWatcher,
-  type TriggerFn,
-  type WatchOption,
-  watch,
-} from './reactivity'
+import { type WatchHandle, type WatchOptions, watch } from './reactivity'
 
 export function unmount(node: DComponent) {
   const ctx = getContext(node)
@@ -61,11 +56,11 @@ export function onUnmounted(fn: Fn) {
   ctx.on('unmounted', fn)
 }
 
-export function useWatch<T>(
-  getter: Ref<T> | (() => T),
-  fn: TriggerFn<T>,
-  opt?: WatchOption,
-): StopWatcher {
+export function useWatch(
+  getter: WatchSource | WatchSource[] | WatchEffect,
+  fn: WatchCallback,
+  opt?: WatchOptions,
+): WatchHandle {
   const ctx = useContext()
 
   const stop = watch(getter, fn, opt)

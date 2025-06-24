@@ -1,3 +1,4 @@
+export { computed, reactive, ref } from '@vue/reactivity'
 export * from './effect'
 export { nextTick } from './scheduler'
 export * from './types'

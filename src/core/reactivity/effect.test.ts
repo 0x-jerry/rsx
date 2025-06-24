@@ -1,4 +1,4 @@
-import { ref } from '@vue/reactivity'
+import { ref } from '.'
 import { effect } from './effect'
 import { nextTick } from './scheduler'
 

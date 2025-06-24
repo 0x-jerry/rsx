@@ -9,6 +9,8 @@ import type {
 import { watch as _watch } from '@vue/reactivity'
 import { queueJob } from './scheduler'
 
+export type { WatchOptions, WatchHandle }
+
 export function watch(
   source: WatchSource | WatchSource[] | WatchEffect | object,
   cb?: WatchCallback | null,

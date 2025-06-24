@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@0x-jerry/utils": "^5.0.0",
-    "@vue/reactivity": "^3.5.17"
+    "@vue/reactivity": "^3.5.17",
+    "clsx": "^2.1.1"
   },
   "tsup": {
     "entry": [

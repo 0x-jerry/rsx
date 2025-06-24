@@ -1,5 +1,4 @@
-import { computed, reactive } from '@vue/reactivity'
-import { $, VMap } from './core'
+import { $, computed, reactive, VMap } from './core'
 import { dc } from './core/defineComponent'
 
 interface TodoOption {
@@ -8,22 +7,24 @@ interface TodoOption {
   content: string
 }
 
-const TodoItem = dc<{ item: TodoOption; $completed: boolean }>((props) => {
-  const { item } = props
+const TodoItem = dc<{ item: TodoOption; class: string; $completed: boolean }>(
+  (props) => {
+    const { item } = props
 
-  return (
-    <label class="flex">
-      <input
-        type="checkbox"
-        checked={$(item, 'completed')}
-        onChange={(e) =>
-          props.onUpdateCompleted?.((e.target as HTMLInputElement).checked)
-        }
-      />
-      {$(item, 'content')}
-    </label>
-  )
-})
+    return (
+      <label class={$(() => ['flex', props.class])}>
+        <input
+          type="checkbox"
+          checked={$(item, 'completed')}
+          onChange={(e) =>
+            props.onUpdateCompleted?.((e.target as HTMLInputElement).checked)
+          }
+        />
+        {$(item, 'content')}
+      </label>
+    )
+  },
+)
 
 export const TodoApp = dc(() => {
   const state = reactive({
@@ -48,12 +49,21 @@ export const TodoApp = dc(() => {
       <div>
         <button onClick={sort}> sort </button>
       </div>
-      <select $={$(state, 'type')}>
+      <div className="flex">
         <VMap
           list={['all', 'completed', 'uncompleted']}
-          render={({ item }) => <option value={item}>{item}</option>}
+          render={({ item }) => (
+            <button
+              onClick={() => {
+                state.type = item
+              }}
+              class={$(() => (state.type === item ? 'bg-green' : ''))}
+            >
+              {item}
+            </button>
+          )}
         />
-      </select>
+      </div>
 
       <div class="flex">
         <input type="text" $={$(state, 'content')} />
@@ -63,13 +73,19 @@ export const TodoApp = dc(() => {
       <VMap
         list={filteredItems}
         render={({ item }) => (
-          <TodoItem item={item} $completed={$(item, 'completed')}></TodoItem>
+          <TodoItem
+            item={item}
+            $completed={$(item, 'completed')}
+            class={$(() => (item.completed ? 'bg-red' : ''))}
+          ></TodoItem>
         )}
       />
     </div>
   )
 
   function addTodo() {
+    if (!state.content) return
+
     const item: TodoOption = {
       id: Math.random().toString(),
       content: state.content,
