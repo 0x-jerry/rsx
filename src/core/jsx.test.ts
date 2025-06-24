@@ -2,8 +2,7 @@ import { ref } from '@vue/reactivity'
 import { dc } from './defineComponent'
 import { useWatch } from './hook'
 import { h } from './jsx'
-import { $ } from './reactivity'
-import { nextTick } from './scheduler'
+import { $, nextTick } from './reactivity'
 
 describe('jsx', () => {
   it('should return dom element', () => {

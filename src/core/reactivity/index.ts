@@ -1,4 +1,5 @@
-export { watch } from '@vue/reactivity'
-export * from './lazyEffect'
+export * from './effect'
+export { nextTick } from './scheduler'
 export * from './types'
 export * from './utils'
+export * from './watch'

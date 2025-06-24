@@ -1,5 +1,5 @@
-import { DComponent } from '../src/core'
-import { NativeElements } from './jsx'
+import type { DComponent } from '../src/core'
+import type { NativeElements } from './jsx'
 
 declare global {
   namespace JSX {

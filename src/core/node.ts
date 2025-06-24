@@ -3,7 +3,7 @@ import { isRef, type ReactiveEffectRunner, stop, unref } from '@vue/reactivity'
 import type { DNodeContext } from './context'
 import { onMounted, onUnmounted } from './hook'
 import { moveChildren } from './nodeOp'
-import { queueEffectJob } from './scheduler'
+import { effect } from './reactivity'
 import type { MaybeRef } from './types'
 
 type MixDComponent = {
@@ -38,19 +38,16 @@ export function createNativeElement(
     const state = new Map()
 
     for (const key of keys) {
-      const runner = queueEffectJob(
-        () => {
-          const value = props[key]
+      const runner = effect(() => {
+        const value = props[key]
 
-          const old = state.get(key)
+        const old = state.get(key)
 
-          if (value !== old) {
-            updateEl(el, key, value, old)
-            state.set(key, value)
-          }
-        },
-        { immediate: true },
-      )
+        if (value !== old) {
+          updateEl(el, key, value, old)
+          state.set(key, value)
+        }
+      })
 
       // stop it when don't have active deps
       const hasDeps = 'deps' in runner.effect && runner.effect.deps
@@ -76,14 +73,9 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
   const el = document.createTextNode('') as DText
 
   if (isRef(content)) {
-    const runner = queueEffectJob(
-      () => {
-        el.textContent = String(unref(content) ?? '')
-      },
-      {
-        immediate: true,
-      },
-    )
+    const runner = effect(() => {
+      el.textContent = String(unref(content) ?? '')
+    })
 
     onUnmounted(() => stop(runner))
   } else {
