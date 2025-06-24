@@ -1,9 +1,9 @@
 import { ref } from '@vue/reactivity'
-import { h } from './jsx'
-import { nextTick } from './scheduler'
-import { $ } from './reactivity'
 import { dc } from './defineComponent'
 import { useWatch } from './hook'
+import { h } from './jsx'
+import { $ } from './reactivity'
+import { nextTick } from './scheduler'
 
 describe('jsx', () => {
   it('should return dom element', () => {
@@ -101,7 +101,7 @@ describe('jsx', () => {
   })
 
   it('should only work with context when render reactive props', () => {
-    let hasError = vi.fn()
+    const hasError = vi.fn()
 
     try {
       const cls = ref('test')

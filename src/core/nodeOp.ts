@@ -1,4 +1,4 @@
-import { DComponent, DNode, isFragment, normalizeNode } from './node'
+import { type DComponent, type DNode, isFragment, normalizeNode } from './node'
 
 export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
   if (!isFragment(node)) {

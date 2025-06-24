@@ -1,7 +1,7 @@
 import { isString } from '@0x-jerry/utils'
-import { DComponent } from './node'
-import { mount } from './hook'
 import { disableSSR, enableSSR } from './config'
+import { mount } from './hook'
+import type { DComponent } from './node'
 
 export function mountApp(dom: DComponent, selector: string | HTMLElement) {
   const container = isString(selector)

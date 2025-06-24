@@ -1,6 +1,6 @@
 import { ref } from '@vue/reactivity'
-import { watch } from '.'
 import { nextTick } from '../scheduler'
+import { watch } from '.'
 
 describe('watch', () => {
   it('should not trigger immediate', async () => {
@@ -43,7 +43,9 @@ describe('watch', () => {
   it('should be undefined when triggered by the first time', async () => {
     let old = null
 
-    const fn = vi.fn((_v, _old) => (old = _old))
+    const fn = vi.fn((_v, _old) => {
+      old = _old
+    })
 
     const count = ref(0)
 

@@ -1,6 +1,6 @@
 import { computed, reactive } from '@vue/reactivity'
-import { dc } from './core/defineComponent'
 import { $, VMap } from './core'
+import { dc } from './core/defineComponent'
 
 interface TodoOption {
   id: string
@@ -63,10 +63,7 @@ export const TodoApp = dc(() => {
       <VMap
         list={filteredItems}
         render={({ item }) => (
-          <TodoItem
-            item={item}
-            $completed={$(item, 'completed')}
-          ></TodoItem>
+          <TodoItem item={item} $completed={$(item, 'completed')}></TodoItem>
         )}
       />
     </div>

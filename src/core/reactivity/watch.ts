@@ -1,12 +1,12 @@
+import { isArray, isFn, type Promisable } from '@0x-jerry/utils'
 import {
   effect,
   isRef,
+  type ReactiveEffectOptions,
+  type Ref,
   stop,
   unref,
-  type Ref,
-  type ReactiveEffectOptions,
 } from '@vue/reactivity'
-import { type Promisable, isArray, isFn } from '@0x-jerry/utils'
 import { queueJob } from '../scheduler'
 
 export type StopWatcher = () => void

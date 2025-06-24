@@ -1,7 +1,7 @@
 import { isFn } from '@0x-jerry/utils'
-import { DefineProps } from './props'
-import { ToMaybeRef } from '.'
-import { Merge } from 'type-fest'
+import type { Merge } from 'type-fest'
+import type { ToMaybeRef } from '.'
+import type { DefineProps } from './props'
 
 export interface PropOption<T = any> {
   type?: T

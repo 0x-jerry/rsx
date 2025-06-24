@@ -1,11 +1,4 @@
-import { isString, camelCase, PascalCase } from '@0x-jerry/utils'
-import {
-  DComponent,
-  DNode,
-  createFragment,
-  createNativeElement,
-  isDComponent,
-} from './node'
+import { camelCase, isString, PascalCase } from '@0x-jerry/utils'
 import { isRef, unref } from '@vue/reactivity'
 import {
   appendToCurrentContext,
@@ -13,6 +6,13 @@ import {
   popCurrentContext,
   setCurrentContext,
 } from './context'
+import {
+  createFragment,
+  createNativeElement,
+  type DComponent,
+  type DNode,
+  isDComponent,
+} from './node'
 
 type FunctionalComponent = (props?: any, children?: DNode[]) => DComponent
 

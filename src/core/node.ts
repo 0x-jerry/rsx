@@ -1,11 +1,10 @@
-import { PrimitiveType, isPrimitive } from '@0x-jerry/utils'
-import { MaybeRef } from './types'
-import { ReactiveEffectRunner, isRef, stop, unref } from '@vue/reactivity'
-import { isObject } from '@0x-jerry/utils'
+import { isObject, isPrimitive, type PrimitiveType } from '@0x-jerry/utils'
+import { isRef, type ReactiveEffectRunner, stop, unref } from '@vue/reactivity'
+import type { DNodeContext } from './context'
 import { onMounted, onUnmounted } from './hook'
-import { DNodeContext } from './context'
-import { queueEffectJob } from './scheduler'
 import { moveChildren } from './nodeOp'
+import { queueEffectJob } from './scheduler'
+import type { MaybeRef } from './types'
 
 type MixDComponent = {
   _?: DNodeContext
@@ -54,12 +53,7 @@ export function createNativeElement(
       )
 
       // stop it when don't have active deps
-      if (runner.effect.deps.length) {
-        effects.push(runner)
-      } else {
-        stop(runner)
-        state.delete(key)
-      }
+      effects.push(runner)
     }
 
     if (effects.length) {

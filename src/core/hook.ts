@@ -1,8 +1,13 @@
-import { Fn } from '@0x-jerry/utils'
-import { DComponent, getContext } from './node'
-import { DNodeContext, getCurrentContext } from './context'
-import { StopWatcher, TriggerFn, WatchOption, watch } from './reactivity'
-import { Ref } from '@vue/reactivity'
+import type { Fn } from '@0x-jerry/utils'
+import type { Ref } from '@vue/reactivity'
+import { type DNodeContext, getCurrentContext } from './context'
+import { type DComponent, getContext } from './node'
+import {
+  type StopWatcher,
+  type TriggerFn,
+  type WatchOption,
+  watch,
+} from './reactivity'
 
 export function unmount(node: DComponent) {
   const ctx = getContext(node)

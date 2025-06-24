@@ -1,4 +1,4 @@
-import { Merge, UnionToIntersection } from 'type-fest'
+import type { Merge, UnionToIntersection } from 'type-fest'
 
 type Compose<
   Key extends string,

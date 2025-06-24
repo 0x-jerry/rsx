@@ -1,11 +1,11 @@
-import { JsonPrimitive, Optional, makePair } from '@0x-jerry/utils'
+import { type JsonPrimitive, makePair, type Optional } from '@0x-jerry/utils'
 import { computed, unref } from '@vue/reactivity'
-import { DComponent, createFragment } from '../node'
-import { MaybeRef } from '../types'
-import { mount, onMounted, unmount, useContext, useWatch } from '../hook'
 import { runWithContext } from '../context'
+import { mount, onMounted, unmount, useContext, useWatch } from '../hook'
 import { h } from '../jsx'
+import { createFragment, type DComponent } from '../node'
 import { insertBefore } from '../nodeOp'
+import type { MaybeRef } from '../types'
 
 export function VCase(props: {
   condition: JsonPrimitive

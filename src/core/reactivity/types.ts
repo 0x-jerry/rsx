@@ -1,4 +1,4 @@
-import { Ref } from '@vue/reactivity'
+import type { Ref } from '@vue/reactivity'
 
 export type MaybeRef<T> = T | Ref<T>
 

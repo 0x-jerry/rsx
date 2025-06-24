@@ -1,6 +1,6 @@
-import { renderToString } from './op'
 import { dc } from './defineComponent'
 import { h } from './jsx'
+import { renderToString } from './op'
 
 describe('ssr', () => {
   it('should render as string', () => {

@@ -1,6 +1,6 @@
 import { unref } from '@vue/reactivity'
-import { createTextElement } from '../node'
 import { onMounted, useWatch } from '../hook'
+import { createTextElement } from '../node'
 import { moveChildren } from '../nodeOp'
 
 export function Teleport(
