@@ -24,7 +24,7 @@ type Prop<
   : Compose<Key, Value, Required>
 
 type CalcProps<T extends {}> = Omit<T, FilterPrefix<keyof T, '$'>> &
-  UnionToIntersection<MapProp<T, FilterPrefix<keyof T, '$'>>>
+  UnionToIntersection<MapProp<T, FilterPrefix<keyof T, '$'> | {}>>
 
 type FilterPrefix<T, Prefix extends string> = T extends `${Prefix}${infer _}`
   ? T

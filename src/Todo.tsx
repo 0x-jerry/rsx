@@ -48,6 +48,7 @@ export const TodoApp = dc(() => {
     <div class="flex flex-col w-200px">
       <div>
         <button onClick={sort}> sort </button>
+        {$(() => state.items.length)}
       </div>
       <div className="flex">
         <VMap
@@ -67,7 +68,7 @@ export const TodoApp = dc(() => {
 
       <div class="flex">
         <input type="text" $={$(state, 'content')} />
-        <button onClick={addTodo}>add</button>
+        <button onClick={addBatchTodo}>add</button>
       </div>
       <hr />
       <VMap
@@ -83,17 +84,19 @@ export const TodoApp = dc(() => {
     </div>
   )
 
-  function addTodo() {
+  function addBatchTodo() {
     if (!state.content) return
 
-    const item: TodoOption = {
-      id: Math.random().toString(),
-      content: state.content,
-      completed: false,
+    for (let index = 0; index < 10; index++) {
+      const item: TodoOption = {
+        id: Math.random().toString(),
+        content: `${state.content}-${index}`,
+        completed: false,
+      }
+
+      state.items.push(item)
     }
 
-    state.items.push(item)
-    console.log('add item', item)
     state.content = ''
   }
 

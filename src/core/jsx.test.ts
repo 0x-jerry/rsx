@@ -105,9 +105,9 @@ describe('jsx', () => {
       const cls = ref('test')
 
       h('div', { class: cls })
-    } catch (error) {
+    } catch (_error) {
       // fixme, error check
-      // this should only used inside a context
+      // error: this should only used inside a context
       hasError()
     }
 

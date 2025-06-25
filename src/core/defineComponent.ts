@@ -17,11 +17,10 @@ export interface ComponentOption<Props extends PropsType = {}> {
 
 interface CommonProps {
   class?: any
-  [key: string]: any
 }
 
 export type FunctionalComponent<P extends PropsType = {}> = (
-  props: Merge<P, CommonProps>,
+  props: Merge<P, CommonProps> & Record<string, any>,
   children?: any[],
 ) => JSX.Element
 
