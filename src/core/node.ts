@@ -1,34 +1,32 @@
-import { isObject, isPrimitive, type PrimitiveType } from '@0x-jerry/utils'
+import { isObject, type PrimitiveType } from '@0x-jerry/utils'
 import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import { clsx } from 'clsx'
 import type { DNodeContext } from './context'
 import { onMounted, onUnmounted } from './hook'
-import { moveChildren } from './nodeOp'
+import { moveChildren, updateEl } from './nodeOp'
 import { effect, isRef, unref } from './reactivity'
 import type { MaybeRef } from './types'
 
-type MixDComponent = {
-  _?: DNodeContext
+interface DContext {
+  _: DNodeContext
 }
 
-export type DElement = HTMLElement & MixDComponent
+export interface DFragment extends Comment, DContext {
+  __fg: true
+  __children: DElement[]
+}
 
-export type DText = Text & MixDComponent
+/**
+ * TODO: improve render headless component, remove ChildNode inherency
+ */
+export interface DComponent extends ChildNode, DContext {}
 
-export type DFragment = Comment &
-  MixDComponent & {
-    __fg: true
-    __children: DComponent[]
-  }
-
-export type DComponent = ChildNode & MixDComponent
-
-export type DNode = DComponent | MaybeRef<PrimitiveType>
+export type DElement = DComponent | DFragment | HTMLElement | Text
 
 export function createNativeElement(
   type: string,
   props: Record<string, any>,
-  children?: DNode[],
+  children?: unknown[],
 ) {
   const el = document.createElement(type) as DElement
 
@@ -36,17 +34,17 @@ export function createNativeElement(
 
   if (keys.length) {
     const effects: ReactiveEffectRunner[] = []
-    const state = new Map()
+    const previousProps = new Map()
 
     for (const key of keys) {
       const runner = effect(() => {
         const value = transformProps(key, props[key])
 
-        const old = state.get(key)
+        const old = previousProps.get(key)
 
         if (value !== old) {
-          updateEl(el, key, value, old)
-          state.set(key, value)
+          updateEl(el as HTMLElement, key, value, old)
+          previousProps.set(key, value)
         }
       })
 
@@ -56,7 +54,7 @@ export function createNativeElement(
         effects.push(runner)
       } else {
         stop(runner)
-        state.delete(key)
+        previousProps.delete(key)
       }
     }
 
@@ -65,7 +63,7 @@ export function createNativeElement(
     }
   }
 
-  moveChildren(el, children)
+  moveChildren(el as ParentNode, children)
 
   return el
 }
@@ -79,7 +77,7 @@ function transformProps(key: string, value: unknown) {
 }
 
 export function createTextElement(content: MaybeRef<PrimitiveType>) {
-  const el = document.createTextNode('') as DText
+  const el = document.createTextNode('')
 
   if (isRef(content)) {
     const runner = effect(() => {
@@ -94,7 +92,7 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
   return el
 }
 
-export function createFragment(children: DNode[] = []) {
+export function createFragment(children: unknown[] = []) {
   const el = document.createComment('fragment') as DFragment
 
   el.__fg = true
@@ -113,41 +111,18 @@ export function createFragment(children: DNode[] = []) {
 
 // ---- utils ----
 
-function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
-  if (/^on/.test(key)) {
-    const eventName = key.slice(2).toLowerCase()
-
-    if (oldValue) {
-      el.removeEventListener(eventName, oldValue)
-    }
-
-    el.addEventListener(eventName, value)
-    return
-  }
-
-  const isValueKey =
-    el.tagName === 'INPUT' && ['value', 'checked'].includes(key)
-
-  if (isValueKey) {
-    // @ts-ignore
-    el[key] = value
-  } else {
-    if (value == null) {
-      el.removeAttribute(key)
-    } else {
-      el.setAttribute(key, value)
-    }
-  }
-}
-
-export function normalizeNode(node: DNode): DComponent {
+export function normalizeNode(node: unknown): DElement {
   const rawValue = unref(node)
 
-  if (isPrimitive(rawValue)) {
-    return createTextElement(node as MaybeRef<PrimitiveType>)
+  if (isDElement(rawValue)) {
+    return rawValue
   }
 
-  return rawValue
+  return createTextElement(node as MaybeRef<PrimitiveType>)
+}
+
+export function isDElement(o: unknown): o is DElement {
+  return o instanceof Node
 }
 
 export function isDComponent(o: unknown): o is DComponent {

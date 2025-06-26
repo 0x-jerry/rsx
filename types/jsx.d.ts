@@ -1320,11 +1320,11 @@ type EventHandlers<E> = {
     : (payload: E[K]) => void
 }
 
-import { ToMaybeRef, MaybeRef, DNode } from '@/core'
+import { ToMaybeRef, MaybeRef } from '@/core'
 
 export type ReservedProps = {
   $?: any
-  children?: DNode | DNode[]
+  children?: unknown[]
 
   [key: string]: any
 }

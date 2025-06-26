@@ -9,27 +9,23 @@ import {
   createFragment,
   createNativeElement,
   type DComponent,
-  type DNode,
+  type DElement,
   isDComponent,
 } from './node'
 import { isRef, unref } from './reactivity'
 
-type FunctionalComponent = (props?: any, children?: DNode[]) => DComponent
+type FunctionalComponent = (props?: any, children?: unknown[]) => DComponent
 
 export function h(
   type: string | FunctionalComponent | DComponent,
   props?: Record<string, any>,
-  ...children: DNode[]
-): DComponent {
+  ...children: unknown[]
+): DElement {
   if (isDComponent(type)) {
     return type
   }
 
   const _props = transformProps(type, props)
-
-  if (type === Fragment) {
-    return type(_props, children)
-  }
 
   if (isString(type)) {
     return createNativeElement(type, _props, children)
@@ -45,7 +41,7 @@ export const Fragment: FunctionalComponent = (_, children) => {
 function createComponentInstance(
   type: FunctionalComponent,
   props?: any,
-  children?: DNode[],
+  children?: unknown[],
 ) {
   const ctx = createNodeContext(type.name)
 
@@ -109,7 +105,7 @@ function transformProps(type: any, props?: Record<string, any>): any {
 
 // todo, default binding syntax sugar
 // current: $xx={refValue}
-// suppport new sugar: $xx={[data, 'key']}
+// support new sugar: $xx={[data, 'key']}
 function transformDefaultBinding(
   type: any,
   value: any,

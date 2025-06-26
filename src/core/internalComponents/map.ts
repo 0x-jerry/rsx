@@ -1,4 +1,3 @@
-import type { Optional } from '@0x-jerry/utils'
 import { runWithContext } from '../context'
 import { mount, onMounted, unmount, useContext, useWatch } from '../hook'
 import { h } from '../jsx'
@@ -40,7 +39,7 @@ export function VMap<T>(props: {
 
   function update() {
     const c1: ChildElement[] = el.__children
-    const c2: ChildElement[] = generateNewList()
+    const c2: ChildElement[] = buildNewChildren()
 
     let i = 0
     const l2 = c2.length
@@ -85,16 +84,18 @@ export function VMap<T>(props: {
       // already unmounted
       // no need to do anything
     } else {
-      // const s1 = i
+      const s1 = i
       const s2 = i
 
       const newSequence: number[] = []
       const oldToNew = new Map<number, number>()
 
+      const cc1 = c1.slice(s1, e1 + 1)
+
       // todo, move check
       for (let j = s2; j <= e2; j++) {
         const element = c2[j]
-        const oldIdx = c1.indexOf(element)
+        const oldIdx = cc1.indexOf(element)
         if (oldIdx !== -1) {
           newSequence.push(oldIdx)
           oldToNew.set(oldIdx, j)
@@ -104,7 +105,7 @@ export function VMap<T>(props: {
       const increasingNewIndexSequence = getSequence(newSequence)
 
       let anchorPreviousNode =
-        c1[i - 1] || c1[0]?.previousSibling || el.previousSibling
+        c1[i - 1] || (c1[0] ? c1[0]?.previousSibling : el.previousSibling)
 
       for (i = s2; i <= e2; i++) {
         const n2 = c2[i]
@@ -119,13 +120,20 @@ export function VMap<T>(props: {
           continue
         }
 
-        insertBefore(anchorPreviousNode?.nextSibling || el, n2)
+        insertBefore(
+          (anchorPreviousNode
+            ? anchorPreviousNode.nextSibling
+            : c1[0]?.parentElement
+              ? c1[0]
+              : null) || el,
+          n2,
+        )
 
-        if (!n2._r) {
+        if (n2._r) {
+          n2._r = false
+        } else {
           mount(n2)
         }
-
-        n2._r = false
 
         anchorPreviousNode = n2
       }
@@ -134,7 +142,7 @@ export function VMap<T>(props: {
     el.__children = c2
   }
 
-  function generateNewList() {
+  function buildNewChildren() {
     const newList: ChildElement[] = []
 
     const newDataElMap = new Map<T, ChildElement[]>()
@@ -234,15 +242,4 @@ function getSequence(arr: number[]): number[] {
     v = p[v]
   }
   return result
-}
-
-export function vMap<T>(
-  list: MaybeRef<T[]>,
-  key: keyof T,
-  /**
-   * should return jsx
-   */
-  render: (item: T, idx: number) => Optional<DComponent>,
-) {
-  return h(VMap, { list, key, render })
 }

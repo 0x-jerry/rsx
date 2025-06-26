@@ -38,7 +38,7 @@ export function defineComponent<P extends PropsType>(
  */
 export function defineComponent<P extends PropsType>(
   opt: ComponentOption<P>,
-  impl: FunctionalComponent<DefineProps<P>>,
+  impl: FunctionalComponent<DefineProps<NoInfer<P>>>,
 ): FunctionalComponent<ToMaybeRef<P>>
 /**
  * implement

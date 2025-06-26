@@ -1,4 +1,3 @@
-export { reactive, ref } from '@vue/reactivity'
 export * from './config'
 export * from './hook'
 export * from './internalComponents'
