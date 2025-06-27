@@ -1,5 +1,4 @@
-import { $, computed, reactive, VMap } from './core'
-import { dc } from './core/defineComponent'
+import { $, computed, dc, reactive, VMap } from '@/index'
 
 interface TodoOption {
   id: string

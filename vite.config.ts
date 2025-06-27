@@ -10,7 +10,7 @@ export default defineConfig({
     jsx: 'transform',
     jsxFactory: 'h',
     jsxFragment: 'Fragment',
-    jsxInject: `import { h, Fragment } from '@/core'`,
+    jsxInject: `import { h, Fragment } from '@/index'`,
   },
   plugins: [inspect(), uno()],
   resolve: {

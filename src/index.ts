@@ -1,4 +1,5 @@
 export * from './config'
+export * from './defineComponent'
 export * from './hook'
 export * from './internalComponents'
 export * from './jsx'
