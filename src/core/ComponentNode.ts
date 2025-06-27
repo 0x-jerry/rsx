@@ -1,5 +1,4 @@
 import { camelCase, isObject, PascalCase } from '@0x-jerry/utils'
-import { isRef, unref } from '@vue/reactivity'
 import {
   appendToCurrentContext,
   createNodeContext,
@@ -10,6 +9,7 @@ import {
 import type { FunctionalComponent } from './defineComponent'
 import { isHTMLNode } from './node'
 import type { AnyProps } from './props'
+import { isRef, unref } from './reactivity'
 
 let componentId = 0
 

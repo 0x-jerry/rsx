@@ -1,9 +1,13 @@
 import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
-import type { DNodeContext } from '../context'
+import {
+  type ComponentNode,
+  createComponentNode,
+  transformProps,
+} from '../ComponentNode'
+import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
 import { createDynamicNode, dispatchMovedEvent } from '../dynamicNode'
-import { mount, onBeforeMount, unmount, useWatch } from '../hook'
-import { createComponentInstance, transformProps } from '../jsx'
+import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
 import { $, computed } from '../reactivity'
 
@@ -13,20 +17,26 @@ export interface CaseComponentProps {
 }
 
 export const VCase = defineComponent<CaseComponentProps>((props) => {
-  const el = createDynamicNode()
+  const ctx = useContext()
+
+  const el = createDynamicNode('case')
 
   const caseKey = computed(() => String(props.condition))
 
-  let renderedCtxNode: Optional<DNodeContext> = null
+  let renderedCtxNode: Optional<ComponentNode> = null
 
-  useWatch(caseKey, updateCase)
+  const rebuildChildren = () => runWithContext(updateCase, ctx)
 
-  onBeforeMount(updateCase)
+  useWatch(caseKey, rebuildChildren)
+
+  onBeforeMount(rebuildChildren)
 
   el.addEventListener('moved', () => {
-    if (renderedCtxNode?.el) {
-      insertBefore(el, renderedCtxNode.el)
-      dispatchMovedEvent(renderedCtxNode.el)
+    const childEl = renderedCtxNode?.instance.el
+
+    if (childEl) {
+      insertBefore(el, childEl)
+      dispatchMovedEvent(childEl)
     }
   })
 
@@ -34,7 +44,7 @@ export const VCase = defineComponent<CaseComponentProps>((props) => {
 
   function updateCase() {
     if (renderedCtxNode) {
-      unmount(renderedCtxNode)
+      unmount(renderedCtxNode.instance)
       renderedCtxNode = null
     }
 
@@ -42,19 +52,22 @@ export const VCase = defineComponent<CaseComponentProps>((props) => {
   }
 
   function rebuildChild() {
-    const render = props.cases?.[caseKey.value]
-    if (!render) {
+    const Component = props.cases?.[caseKey.value]
+    if (!Component) {
       return
     }
 
-    const newChild = createComponentInstance(render)
-    if (newChild.el) {
-      insertBefore(el, newChild.el)
+    const node = createComponentNode(Component, {}, [])
+
+    node.initialize()
+
+    if (node.instance.el) {
+      insertBefore(el, node.instance.el)
     }
 
-    mount(newChild)
+    mount(node.instance)
 
-    return newChild
+    return node
   }
 })
 
