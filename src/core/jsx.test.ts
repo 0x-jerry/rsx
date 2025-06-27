@@ -1,46 +1,58 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: test case */
+
+import { isComponentNode } from './ComponentNode'
 import { dc } from './defineComponent'
 import { useWatch } from './hook'
 import { h } from './jsx'
 import { $, nextTick, ref } from './reactivity'
+import { mountTestApp } from './test'
 
 describe('jsx', () => {
-  it('should return dom element', () => {
+  it('dom element', () => {
     const el = h('div')
 
-    expect(el).instanceof(HTMLElement)
+    expect(el).instanceof(HTMLDivElement)
+  })
+
+  it('component node', () => {
+    const Comp = () => h('div', { class: 'test' })
+
+    const node = h(Comp)
+
+    expect(isComponentNode(node)).toBe(true)
   })
 
   it('should set props when create', () => {
     const Comp = () => h('div', { class: 'test' })
 
-    const el = h(Comp) as HTMLDivElement
+    const el = mountTestApp(Comp)
 
-    expect(el.classList.contains('test')).toBe(true)
+    expect(el.querySelector('.test')).instanceOf(HTMLDivElement)
   })
 
   it('should update ref props', async () => {
     const v = ref(0)
 
-    const Comp = () => h('div', { 'data-x': v })
+    const Comp = () => h('div', { 'data-x': v, class: 'test' })
 
-    const el = h(Comp) as HTMLDivElement
+    const el = mountTestApp(Comp)
 
-    expect(el.getAttribute('data-x')).toBe('0')
+    expect(el.querySelector('.test')?.getAttribute('data-x')).toBe('0')
     v.value++
 
     await nextTick()
-    expect(el.getAttribute('data-x')).toBe('1')
+    expect(el.querySelector('.test')?.getAttribute('data-x')).toBe('1')
   })
 
   it('should set event listener when create', () => {
     const fn = vi.fn()
 
-    const Comp = () => h('div', { onClick: fn })
+    const Comp = () => h('div', { onClick: fn, class: 'test' })
 
-    const el = h(Comp) as HTMLDivElement
+    const el = mountTestApp(Comp).querySelector('.test')
 
-    el.click()
-    el.click()
+    el?.dispatchEvent(new Event('click'))
+    el?.dispatchEvent(new Event('click'))
     expect(fn).toBeCalledTimes(2)
   })
 
@@ -50,7 +62,7 @@ describe('jsx', () => {
 
       const Comp = () => h('input', { $: v })
 
-      const el = h(Comp) as HTMLInputElement
+      const el = mountTestApp(Comp).querySelector('input')!
 
       expect(el.value).toBe('123')
 
@@ -66,7 +78,7 @@ describe('jsx', () => {
 
       const Comp = () => h('input', { type: 'checkbox', $: v })
 
-      const el = h(Comp) as HTMLInputElement
+      const el = mountTestApp(Comp).querySelector('input')!
 
       expect(el.checked).toBe(true)
 
@@ -82,7 +94,7 @@ describe('jsx', () => {
 
       const Comp = () => h('input', { $: v })
 
-      const el = h(Comp) as HTMLInputElement
+      const el = mountTestApp(Comp).querySelector('input')!
 
       el.value = '12344'
       expect(v.value).toBe('123')
@@ -119,9 +131,9 @@ describe('jsx', () => {
 
     const Comp = () => h('div', {}, v)
 
-    const el = h(Comp) as HTMLDivElement
+    const el = mountTestApp(Comp)
 
-    const text = el.childNodes.item(0)
+    const text = el.firstChild!.childNodes.item(0)
     expect(text).instanceOf(Text)
     expect(text.textContent).toBe('hello')
 
@@ -158,7 +170,7 @@ describe('jsx', () => {
       },
     }
 
-    const el = h(Comp, props)
+    const el = mountTestApp(() => h(Comp, props)).firstChild!
 
     expect(el.textContent).toBe('1')
     expect(props.v.value).toBe('1')
@@ -188,7 +200,8 @@ describe('jsx', () => {
       x: 1,
     }
 
-    h(Comp, props)
+    mountTestApp(() => h(Comp, props))
+
     await nextTick()
     expect(fn).toBeCalledTimes(0)
 

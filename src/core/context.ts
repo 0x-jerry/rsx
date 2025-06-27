@@ -1,5 +1,4 @@
 import { EventEmitter } from '@0x-jerry/utils'
-import { type ComponentNode, isComponentNode } from './ComponentNode'
 
 export const DNodeContextEventName = {
   beforeMount: 'bm',
@@ -35,19 +34,7 @@ export class DNodeContext extends EventEmitter<DNodeEventMap> {
   readonly id = contextId++
   name?: string
   children?: Set<DNodeContext>
-  el?: HTMLElement | ComponentNode
-
-  getEl(): HTMLElement | undefined {
-    if (!this.el) {
-      return this.el
-    }
-
-    if (isComponentNode(this.el)) {
-      return this.el.instance?.getEl()
-    }
-
-    return this.el
-  }
+  el?: ChildNode
 }
 
 export const {

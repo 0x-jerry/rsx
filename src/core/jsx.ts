@@ -12,7 +12,7 @@ export function h(
   type: string | FunctionalComponent,
   props?: AnyProps,
   ...children: unknown[]
-): ChildNode | ComponentNode | undefined {
+): ChildNode | ComponentNode {
   const _props = transformProps(type, props)
 
   if (isString(type)) {

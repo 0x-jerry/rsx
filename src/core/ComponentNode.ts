@@ -8,6 +8,7 @@ import {
   setCurrentContext,
 } from './context'
 import type { FunctionalComponent } from './defineComponent'
+import { isHTMLNode } from './node'
 import type { AnyProps } from './props'
 
 let componentId = 0
@@ -20,7 +21,9 @@ export class ComponentNode {
   props?: AnyProps
   children: unknown[]
 
-  instance?: DNodeContext
+  instance!: DNodeContext
+
+  _initialized = false
 
   constructor(
     type: FunctionalComponent,
@@ -32,16 +35,37 @@ export class ComponentNode {
     this.children = children
   }
 
-  createInstance() {
-    if (!this.instance) {
-      this.instance = createComponentInstance(
-        this.type,
-        this.props,
-        this.children,
-      )
+  initialize() {
+    if (this._initialized) {
+      console.error('[ComponentNode] ComponentNode has been initialized')
+      return
     }
 
-    return this.instance
+    this.instance = this._createComponentInstance()
+  }
+
+  _createComponentInstance() {
+    const ctx = createNodeContext(this.type.name)
+
+    appendToCurrentContext(ctx)
+
+    setCurrentContext(ctx)
+
+    const rootEl = this.type(this.props, this.children)
+
+    if (isComponentNode(rootEl)) {
+      rootEl.initialize()
+
+      ctx.el = rootEl.instance.el
+    } else if (isHTMLNode(rootEl)) {
+      ctx.el = rootEl as ChildNode
+    } else {
+      console.warn('[ComponentNode] Invalid component node', rootEl)
+    }
+
+    popCurrentContext()
+
+    return ctx
   }
 }
 
@@ -57,25 +81,6 @@ export function createComponentNode(
 
 export function isComponentNode(o: unknown): o is ComponentNode {
   return isObject(o) && '__cf' in o && o.__cf === true
-}
-
-function createComponentInstance(
-  type: FunctionalComponent,
-  props?: AnyProps,
-  children?: unknown[],
-) {
-  const ctx = createNodeContext(type.name)
-
-  appendToCurrentContext(ctx)
-
-  setCurrentContext(ctx)
-
-  const el = type(props, children)
-  ctx.el = el
-
-  popCurrentContext()
-
-  return ctx
 }
 
 export function transformProps(type: any, props?: AnyProps): any {

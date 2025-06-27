@@ -424,8 +424,8 @@ describe('map component with fragment', () => {
             list={list}
             render={({ item }) => (
               <>
-                <div class="item">{item}</div>
-                <div class="item">{item}</div>
+                <div class="item">{item}-0</div>
+                <div class="item">{item}-1</div>
               </>
             )}
           />
@@ -443,7 +443,16 @@ describe('map component with fragment', () => {
       .map((item) => item.textContent)
       .toArray()
 
-    expect(contents).eql(['4', '4', '2', '2', '3', '3', '1', '1'])
+    expect(contents).eql([
+      '4-0',
+      '4-1',
+      '2-0',
+      '2-1',
+      '3-0',
+      '3-1',
+      '1-0',
+      '1-1',
+    ])
   })
 
   it('reuse node 1', async () => {
@@ -460,9 +469,9 @@ describe('map component with fragment', () => {
             list={list}
             render={({ item }) => (
               <>
-                <div class="item">{item}</div>
+                <div class="item">{item}-0</div>
                 <>
-                  <div class="item">{item}</div>
+                  <div class="item">{item}-1</div>
                 </>
               </>
             )}
@@ -481,6 +490,15 @@ describe('map component with fragment', () => {
       .map((item) => item.textContent)
       .toArray()
 
-    expect(contents).eql(['4', '4', '2', '2', '3', '3', '1', '1'])
+    expect(contents).eql([
+      '4-0',
+      '4-1',
+      '2-0',
+      '2-1',
+      '3-0',
+      '3-1',
+      '1-0',
+      '1-1',
+    ])
   })
 })

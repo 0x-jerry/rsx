@@ -11,7 +11,7 @@ import { type WatchHandle, type WatchOptions, watch } from './reactivity'
 export function unmount(ctx: DNodeContext) {
   ctx.emit(DNodeContextEventName.beforeUnmount)
 
-  ctx.getEl()?.remove()
+  ctx.el?.remove()
 
   ctx.children?.forEach((child) => unmount(child))
 

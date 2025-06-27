@@ -1,4 +1,5 @@
 import { isString } from '@0x-jerry/utils'
+import { isComponentNode } from './ComponentNode'
 import { disableSSR, enableSSR } from './config'
 import {
   appendToCurrentContext,
@@ -8,6 +9,7 @@ import {
 } from './context'
 import type { FunctionalComponent } from './defineComponent'
 import { mount } from './hook'
+import { isHTMLNode } from './node'
 import { moveTo } from './nodeOp'
 
 export function mountApp(
@@ -29,13 +31,23 @@ export function mountApp(
 
   setCurrentContext(ctx)
 
-  const el = App({}, [])
+  const rootEl = App({}, [])
 
-  ctx.el = el
+  if (isComponentNode(rootEl)) {
+    rootEl.initialize()
 
-  moveTo(container, el)
+    ctx.el = rootEl.instance.el
+  } else if (isHTMLNode(rootEl)) {
+    ctx.el = rootEl as ChildNode
+  } else {
+    console.warn('[ComponentNode] Invalid component node', rootEl)
+  }
 
   popCurrentContext()
+
+  if (ctx.el) {
+    moveTo(container, ctx.el)
+  }
 
   mount(ctx)
 }

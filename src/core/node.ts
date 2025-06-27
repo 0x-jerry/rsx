@@ -76,8 +76,6 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
   return el
 }
 
-// ---- utils ----
-
 export function normalizeNode(node: unknown): ChildNode | null | undefined {
   const rawValue = unref(node)
 
@@ -91,10 +89,10 @@ export function normalizeNode(node: unknown): ChildNode | null | undefined {
 
   if (isComponentNode(node)) {
     if (!node.instance) {
-      node.createInstance()
+      node.initialize()
     }
 
-    return node.instance?.getEl()
+    return node.instance.el
   }
 
   return createTextElement(node as MaybeRef<PrimitiveType>)

@@ -38,7 +38,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
   el.addEventListener('moved', () => {
     children.forEach((child) => {
-      const childEl = child.instance?.getEl()
+      const childEl = child.instance?.el
       if (childEl) {
         insertBefore(el, childEl)
 
@@ -85,13 +85,9 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     if (i > e1) {
       while (i <= e2) {
         const n = c2[i]
-        const anchor = c1[e1 + 1]?.instance?.getEl() || el
+        const anchor = c1[e1 + 1]?.instance.el || el
 
-        if (!n.instance) {
-          n.instance = n.createInstance()
-        }
-
-        const nEl = n.instance.getEl()
+        const nEl = n.instance.el
         if (nEl) {
           insertBefore(anchor, nEl)
           dispatchMovedEvent(nEl)
@@ -126,8 +122,8 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
       const increasingNewIndexSequence = getSequence(newSequence)
 
       let anchorPreviousNode =
-        c1[i - 1]?.instance?.getEl() ||
-        (c1[0] ? c1[0]?.instance?.getEl()?.previousSibling : el.previousSibling)
+        c1[i - 1]?.instance.el ||
+        (c1[0] ? c1[0]?.instance.el?.previousSibling : el.previousSibling)
 
       for (i = s2; i <= e2; i++) {
         const n2 = c2[i]
@@ -142,17 +138,13 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
           continue
         }
 
-        if (!n2.instance) {
-          n2.instance = n2.createInstance()
-        }
-
-        const n2El = n2.instance.getEl()
+        const n2El = n2.instance.el
         if (n2El) {
           const anchor =
             (anchorPreviousNode
               ? anchorPreviousNode.nextSibling
-              : c1[0]?.instance?.getEl()?.parentElement
-                ? c1[0]?.instance?.getEl()
+              : c1[0]?.instance.el?.parentElement
+                ? c1[0]?.instance.el
                 : null) || el
 
           insertBefore(anchor, n2El)
@@ -197,6 +189,8 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
         },
         [],
       )
+
+      newCtx.initialize()
 
       appendElToMap(newDataContextMap, dataKey, newCtx)
       newChildren.push(newCtx)
