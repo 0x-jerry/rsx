@@ -1,68 +1,70 @@
-import { type JsonPrimitive, makePair, type Optional } from '@0x-jerry/utils'
-import { runWithContext } from '../context'
-import { mount, onMounted, unmount, useContext, useWatch } from '../hook'
-import { h } from '../jsx'
-import { createFragment, type DComponent } from '../node'
+import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
+import type { DNodeContext } from '../context'
+import { defineComponent, type FunctionalComponent } from '../defineComponent'
+import { mount, onBeforeMount, unmount, useWatch } from '../hook'
+import { createComponentInstance, transformProps } from '../jsx'
 import { insertBefore } from '../nodeOp'
-import { computed, unref } from '../reactivity'
-import type { MaybeRef } from '../types'
+import { $, computed } from '../reactivity'
+import { createFragment } from './Fragment'
 
-export function VCase(props: {
+export interface CaseComponentProps {
   condition: JsonPrimitive
-  cases?: Record<string, Optional<() => DComponent>>
-}) {
-  const ctx = useContext()
+  cases?: Record<string, Optional<FunctionalComponent>>
+}
 
+export const VCase = defineComponent<CaseComponentProps>((props) => {
   const el = createFragment()
-  el._ = ctx
 
-  const pair = makePair(props.cases || {})
+  const caseKey = computed(() => String(props.condition))
 
-  const caseKey = computed(() => String(unref(props.condition)))
-
-  let renderedEl: Optional<DComponent> = null
+  let renderedCtxNode: Optional<DNodeContext> = null
 
   useWatch(caseKey, updateCase)
 
-  onMounted(updateCase)
+  onBeforeMount(updateCase)
 
   return el
 
   function updateCase() {
-    const oldChild = renderedEl
+    if (renderedCtxNode) {
+      unmount(renderedCtxNode)
+      renderedCtxNode = null
+    }
 
-    if (oldChild) unmount(oldChild)
-
-    const newChild = mountCondition()
-
-    renderedEl = newChild
+    renderedCtxNode = rebuildChild()
   }
 
-  function mountCondition() {
-    const newChild = runWithContext(() => pair(caseKey.value), ctx)
-
-    if (newChild) {
-      insertBefore(el, newChild)
-
-      mount(newChild)
+  function rebuildChild() {
+    const render = props.cases?.[caseKey.value]
+    if (!render) {
+      return
     }
+
+    const newChild = createComponentInstance(render)
+    if (newChild.el) {
+      insertBefore(el, newChild.el)
+    }
+
+    mount(newChild)
 
     return newChild
   }
+})
+
+export interface IfComponentProps {
+  condition: JsonPrimitive
+  truthy?: FunctionalComponent
+  falsy?: FunctionalComponent
 }
 
-export function vCase(
-  condition: MaybeRef<JsonPrimitive>,
-  /**
-   * should return jsx
-   */
-  cases: Record<string, Optional<() => DComponent>>,
-) {
-  return h(VCase, { condition, cases })
-}
+export const VIf = defineComponent<IfComponentProps>((props) => {
+  const _props = transformProps(VIf, {
+    condition: $(() => !!props.condition),
+    cases: {
+      true: props.truthy,
+      false: props.falsy,
+    },
+  })
 
-export const vIf = (
-  condition: MaybeRef<JsonPrimitive>,
-  truthy?: () => DComponent,
-  falsy?: () => DComponent,
-) => vCase(condition, { true: truthy, false: falsy })
+  return VCase(_props)
+})

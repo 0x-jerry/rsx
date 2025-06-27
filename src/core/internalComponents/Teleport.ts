@@ -1,21 +1,21 @@
-import { onMounted, useWatch } from '../hook'
+import { defineComponent } from '../defineComponent'
+import { onBeforeMount, useWatch } from '../hook'
 import { createTextElement } from '../node'
 import { moveChildren } from '../nodeOp'
 import { unref } from '../reactivity'
 
-export function Teleport(
-  props: {
-    to: string
-  },
-  children?: any[],
-) {
+export interface TeleportProps {
+  to: string
+}
+
+export const Teleport = defineComponent<TeleportProps>((props, children) => {
   const el = createTextElement('')
 
   useWatch(() => unref(props.to), update)
 
-  onMounted(update)
+  onBeforeMount(update)
 
-  return el as unknown as JSX.Element
+  return el
 
   function update() {
     const selector = unref(props.to)
@@ -25,6 +25,7 @@ export function Teleport(
       return
     }
 
+    // todo, fix this
     moveChildren(root, children)
   }
-}
+})

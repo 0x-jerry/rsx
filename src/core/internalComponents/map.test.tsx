@@ -1,18 +1,8 @@
-import { dc, type FunctionalComponent } from '../defineComponent'
+import { dc } from '../defineComponent'
 import { onMounted } from '../hook'
-import { h } from '../jsx'
-import { mountApp as _mountApp } from '../op'
 import { nextTick, ref } from '../reactivity'
+import { mountTestApp } from '../test'
 import { VMap } from './map'
-
-function mountApp(App: FunctionalComponent) {
-  const doc = document.createElement('div')
-  doc.id = 'app'
-
-  _mountApp(h(App), doc)
-
-  return doc
-}
 
 describe('map component', () => {
   it('non-reactivity data', async () => {
@@ -28,7 +18,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountApp(App) as HTMLElement
+    const el = mountTestApp(App) as HTMLElement
 
     const contents = el
       .querySelectorAll('.item')
@@ -53,7 +43,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountApp(App) as HTMLElement
+    const el = mountTestApp(App) as HTMLElement
 
     const contents = el
       .querySelectorAll('.item')
@@ -86,7 +76,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountApp(App) as HTMLElement
+    const el = mountTestApp(App) as HTMLElement
 
     await nextTick()
 
@@ -117,7 +107,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountApp(App) as HTMLElement
+    const el = mountTestApp(App) as HTMLElement
 
     await nextTick()
 
@@ -148,7 +138,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountApp(App) as HTMLElement
+    const el = mountTestApp(App) as HTMLElement
 
     await nextTick()
 
@@ -179,7 +169,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountApp(App) as HTMLElement
+    const el = mountTestApp(App) as HTMLElement
 
     await nextTick()
 
@@ -210,7 +200,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountApp(App) as HTMLElement
+    const el = mountTestApp(App) as HTMLElement
 
     await nextTick()
 
@@ -241,7 +231,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountApp(App) as HTMLElement
+    const el = mountTestApp(App) as HTMLElement
 
     await nextTick()
 
@@ -272,7 +262,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountApp(App) as HTMLElement
+    const el = mountTestApp(App) as HTMLElement
 
     await nextTick()
 

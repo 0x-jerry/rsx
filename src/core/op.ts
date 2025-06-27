@@ -1,9 +1,19 @@
 import { isString } from '@0x-jerry/utils'
 import { disableSSR, enableSSR } from './config'
+import {
+  appendToCurrentContext,
+  createNodeContext,
+  popCurrentContext,
+  setCurrentContext,
+} from './context'
+import type { FunctionalComponent } from './defineComponent'
 import { mount } from './hook'
-import type { DComponent } from './node'
+import { moveTo } from './nodeOp'
 
-export function mountApp(dom: DComponent, selector: string | HTMLElement) {
+export function mountApp(
+  App: FunctionalComponent,
+  selector: string | HTMLElement,
+) {
   const container = isString(selector)
     ? document.querySelector(selector)
     : selector
@@ -13,12 +23,24 @@ export function mountApp(dom: DComponent, selector: string | HTMLElement) {
     return
   }
 
-  container.append(dom)
+  const ctx = createNodeContext('Root')
 
-  mount(dom)
+  appendToCurrentContext(ctx)
+
+  setCurrentContext(ctx)
+
+  const el = App({}, [])
+
+  ctx.el = el
+
+  moveTo(container, el)
+
+  popCurrentContext()
+
+  mount(ctx)
 }
 
-export function renderToString(Comp: DComponent) {
+export function renderToString(Comp: FunctionalComponent<any>) {
   // todo
   enableSSR()
 

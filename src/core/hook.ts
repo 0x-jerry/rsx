@@ -1,37 +1,28 @@
 import type { Fn } from '@0x-jerry/utils'
 import type { WatchCallback, WatchEffect, WatchSource } from '@vue/reactivity'
-import { type DNodeContext, getCurrentContext } from './context'
-import { type DComponent, getContext } from './node'
+import {
+  type DNodeContext,
+  DNodeContextEventName,
+  getCurrentContext,
+} from './context'
 import { type WatchHandle, type WatchOptions, watch } from './reactivity'
 
-export function unmount(node: DComponent) {
-  const ctx = getContext(node)
+export function unmount(ctx: DNodeContext) {
+  ctx.emit(DNodeContextEventName.beforeUnmount)
 
-  node.remove()
+  ctx.el?.remove()
 
-  if (!ctx) return
+  ctx.children?.forEach((child) => unmount(child))
 
-  _unmount(ctx)
+  ctx.emit(DNodeContextEventName.unmounted)
 }
 
-function _unmount(ctx: DNodeContext) {
-  ctx.children?.forEach((child) => _unmount(child))
+export function mount(ctx: DNodeContext) {
+  ctx.emit(DNodeContextEventName.beforeMount)
 
-  ctx.emit('unmounted')
-}
+  ctx.children?.forEach((item) => mount(item))
 
-export function mount(node: DComponent) {
-  const ctx = getContext(node)
-
-  if (!ctx) return
-
-  _mount(ctx)
-}
-
-function _mount(ctx: DNodeContext) {
-  ctx.children?.forEach((item) => _mount(item))
-
-  ctx.emit('mounted')
+  ctx.emit(DNodeContextEventName.mounted)
 }
 
 export function useContext() {
@@ -44,16 +35,28 @@ export function useContext() {
   return ctx
 }
 
-export function onMounted(fn: Fn) {
-  const ctx = useContext()
+export function onBeforeMount(fn: Fn, ctx?: DNodeContext) {
+  ctx ||= useContext()
 
-  ctx.on('mounted', fn)
+  ctx.on(DNodeContextEventName.beforeMount, fn)
 }
 
-export function onUnmounted(fn: Fn) {
-  const ctx = useContext()
+export function onMounted(fn: Fn, ctx?: DNodeContext) {
+  ctx ||= useContext()
 
-  ctx.on('unmounted', fn)
+  ctx.on(DNodeContextEventName.mounted, fn)
+}
+
+export function onBeforeUnmount(fn: Fn, ctx?: DNodeContext) {
+  ctx ||= useContext()
+
+  ctx.on(DNodeContextEventName.beforeUnmount, fn)
+}
+
+export function onUnmounted(fn: Fn, ctx?: DNodeContext) {
+  ctx ||= useContext()
+
+  ctx.on(DNodeContextEventName.unmounted, fn)
 }
 
 export function useWatch(
@@ -61,11 +64,9 @@ export function useWatch(
   fn: WatchCallback,
   opt?: WatchOptions,
 ): WatchHandle {
-  const ctx = useContext()
-
   const stop = watch(getter, fn, opt)
 
-  ctx.on('unmounted', stop)
+  onUnmounted(stop)
 
   return stop
 }

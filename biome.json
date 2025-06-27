@@ -7,9 +7,8 @@
   },
   "files": {
     "includes": [
-      "src/**/*.ts",
-      "src/**/*.tsx",
-      "types"
+      "src/**",
+      "types/**"
     ],
     "ignoreUnknown": false
   },

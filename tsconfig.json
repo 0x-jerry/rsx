@@ -11,10 +11,7 @@
       "DOM.Iterable"
     ],
     "jsx": "preserve",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment",
     "strict": true,
-    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [

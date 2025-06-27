@@ -5,25 +5,25 @@
 其逻辑是将
 
 ```jsx
-const Comp = () => <div />
+const Comp = () => <div />;
 
 const el = (
   <div class="text-red">
     <Comp>child</Comp>
     <span> some text </span>
   </div>
-)
+);
 ```
 
 这样一段 jsx 代码转换成这样一段 js 代码
 
 ```js
 const el = h(
-  'div',
-  { class: 'text-red' },
-  h(Comp, null, 'child'),
-  h('span', null, 'some text'),
-)
+  "div",
+  { class: "text-red" },
+  h(Comp, null, "child"),
+  h("span", null, "some text")
+);
 ```
 
 其中 `h` 函数的签名为
@@ -33,7 +33,7 @@ function h(
   type: string | Component,
   props?: Record<string, any>,
   ...children: any[]
-): JSX.Element
+): JSX.Element;
 ```
 
 目前（2023.04.21），利用 jsx 语法的库/框架，都是生成一颗虚拟 dom，然后通过 diff 去操作真实的 dom。
@@ -83,16 +83,16 @@ Vue/Rect/Svelte 都各自使用了 diff 算法来更新列表（仅限带有 key
 
 ```jsx
 const Counter = () => {
-  const count = ref(0)
+  const count = ref(0);
 
   const el = (
     <button onClick={() => count.value++} data-count={count}>
       count: {count}
     </button>
-  )
+  );
 
-  return el
-}
+  return el;
+};
 ```
 
 其中
@@ -102,7 +102,7 @@ const el = (
   <button onClick={() => count.value++} data-count={count}>
     count: {count}
   </button>
-)
+);
 
 // el instanceof HTMLElement === true
 ```
@@ -112,14 +112,37 @@ const el = (
 其中 `data-count={count}`，则会生成一个依赖函数，每当 `count` 变化，则会直接触发更新 dom 操作，大致逻辑如下：
 
 ```jsx
-const $btn = document.createElement('button') // create button element
+const $btn = document.createElement("button"); // create button element
 
 // auto update attribute
 effect(() => {
-  $btn.setAttribute('data-count', unref(count))
-})
+  $btn.setAttribute("data-count", unref(count));
+});
 ```
 
 以同样的方式处理 `count: {count}` 文本。
 
 [jsx]: https://github.com/facebook/jsx
+
+## 渲染逻辑
+
+由于直接生成 DOM 节点，而非先生成虚拟 DOM 树，因此所有动态修改 DOM 的操作都必须通过内置组件完成。
+主要包括两个内置组件（MapComponent、CaseComponent）。MapComponent 用于列表渲染，CaseComponent
+用于条件渲染。
+
+初次渲染过程：
+
+1. 生成组件上下文
+2. 生成组件对应的 DOM 树，绑定响应式数据
+   1. 从上到下依次生成 DOM 节点
+   2. 绑定响应式数据，**响应式清理函数挂载在最近的组件上**
+3. 添加到宿主 DOM 节点中
+4. 触发 mount 事件
+
+更新过程：
+
+响应式数据更新对出发对应绑定的更新函数，从而直接更新 DOM 节点
+
+动态渲染过程：
+
+动态渲染需要通过内置组件完成，详细设计参考对应的内置组件

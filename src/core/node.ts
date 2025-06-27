@@ -1,71 +1,53 @@
-import { isObject, type PrimitiveType } from '@0x-jerry/utils'
+import type { PrimitiveType } from '@0x-jerry/utils'
 import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import { clsx } from 'clsx'
-import type { DNodeContext } from './context'
-import { onMounted, onUnmounted } from './hook'
+import { onUnmounted } from './hook'
 import { moveChildren, updateEl } from './nodeOp'
 import { effect, isRef, unref } from './reactivity'
 import type { MaybeRef } from './types'
-
-interface DContext {
-  _: DNodeContext
-}
-
-export interface DFragment extends Comment, DContext {
-  __fg: true
-  __children: DElement[]
-}
-
-/**
- * TODO: improve render headless component, remove ChildNode inherency
- */
-export interface DComponent extends ChildNode, DContext {}
-
-export type DElement = DComponent | DFragment | HTMLElement | Text
 
 export function createNativeElement(
   type: string,
   props: Record<string, any>,
   children?: unknown[],
 ) {
-  const el = document.createElement(type) as DElement
+  const el = document.createElement(type)
 
-  const keys = Object.keys(props)
+  generateBindingFunction(el, props)
+  moveChildren(el, children)
 
-  if (keys.length) {
-    const effects: ReactiveEffectRunner[] = []
-    const previousProps = new Map()
+  return el
+}
 
-    for (const key of keys) {
-      const runner = effect(() => {
-        const value = transformProps(key, props[key])
+function generateBindingFunction(el: HTMLElement, props: Record<string, any>) {
+  const effects: ReactiveEffectRunner[] = []
+  const previousProps = new Map()
 
-        const old = previousProps.get(key)
+  for (const key in props) {
+    const runner = effect(() => {
+      const value = transformProps(key, props[key])
 
-        if (value !== old) {
-          updateEl(el as HTMLElement, key, value, old)
-          previousProps.set(key, value)
-        }
-      })
+      const old = previousProps.get(key)
 
-      // stop it when don't have active deps
-      const hasDeps = 'deps' in runner.effect && runner.effect.deps
-      if (hasDeps) {
-        effects.push(runner)
-      } else {
-        stop(runner)
-        previousProps.delete(key)
+      if (value !== old) {
+        updateEl(el, key, value, old)
+        previousProps.set(key, value)
       }
-    }
+    })
 
-    if (effects.length) {
-      onUnmounted(() => effects.forEach((item) => stop(item)))
+    // stop it when don't have active deps
+    const hasDeps = 'deps' in runner.effect && runner.effect.deps
+    if (hasDeps) {
+      effects.push(runner)
+    } else {
+      stop(runner)
+      previousProps.delete(key)
     }
   }
 
-  moveChildren(el as ParentNode, children)
-
-  return el
+  if (effects.length) {
+    onUnmounted(() => effects.forEach((item) => stop(item)))
+  }
 }
 
 function transformProps(key: string, value: unknown) {
@@ -92,47 +74,22 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
   return el
 }
 
-export function createFragment(children: unknown[] = []) {
-  const el = document.createComment('fragment') as DFragment
-
-  el.__fg = true
-  el.__children = []
-
-  onMounted(() => {
-    el.__children = moveChildren(el.parentElement!, children, el)
-  })
-
-  onUnmounted(() => {
-    el.__children.forEach((item) => item.remove())
-  })
-
-  return el
-}
-
 // ---- utils ----
 
-export function normalizeNode(node: unknown): DElement {
+export function normalizeNode(node: unknown): ChildNode | null {
   const rawValue = unref(node)
 
-  if (isDElement(rawValue)) {
-    return rawValue
+  if (rawValue == null) {
+    return null
+  }
+
+  if (isHTMLNode(rawValue)) {
+    return rawValue as ChildNode
   }
 
   return createTextElement(node as MaybeRef<PrimitiveType>)
 }
 
-export function isDElement(o: unknown): o is DElement {
+export function isHTMLNode(o: unknown): o is ChildNode {
   return o instanceof Node
-}
-
-export function isDComponent(o: unknown): o is DComponent {
-  return isObject(o) && '_' in o
-}
-
-export function isFragment(o: unknown): o is DFragment {
-  return isObject(o) && '__fg' in o
-}
-
-export function getContext(el?: unknown): DNodeContext | null {
-  return isObject(el) && '_' in el && (el._ as any)
 }

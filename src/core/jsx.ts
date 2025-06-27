@@ -5,40 +5,27 @@ import {
   popCurrentContext,
   setCurrentContext,
 } from './context'
-import {
-  createFragment,
-  createNativeElement,
-  type DComponent,
-  type DElement,
-  isDComponent,
-} from './node'
+import type { FunctionalComponent } from './defineComponent'
+import { createNativeElement } from './node'
 import { isRef, unref } from './reactivity'
 
-type FunctionalComponent = (props?: any, children?: unknown[]) => DComponent
-
 export function h(
-  type: string | FunctionalComponent | DComponent,
+  type: string | FunctionalComponent,
   props?: Record<string, any>,
   ...children: unknown[]
-): DElement {
-  if (isDComponent(type)) {
-    return type
-  }
-
+): ChildNode | undefined {
   const _props = transformProps(type, props)
 
   if (isString(type)) {
     return createNativeElement(type, _props, children)
   }
 
-  return createComponentInstance(type, _props, children)
+  const ctx = createComponentInstance(type, _props, children)
+
+  return ctx.el
 }
 
-export const Fragment: FunctionalComponent = (_, children) => {
-  return createFragment(children || [])
-}
-
-function createComponentInstance(
+export function createComponentInstance(
   type: FunctionalComponent,
   props?: any,
   children?: unknown[],
@@ -50,14 +37,14 @@ function createComponentInstance(
   setCurrentContext(ctx)
 
   const el = type(props, children)
-
-  el._ = ctx
+  ctx.el = el
 
   popCurrentContext()
-  return el
+
+  return ctx
 }
 
-function transformProps(type: any, props?: Record<string, any>): any {
+export function transformProps(type: any, props?: Record<string, any>): any {
   const _raw: Record<string, any> = {}
 
   if (!props) return _raw

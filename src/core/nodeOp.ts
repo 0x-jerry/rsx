@@ -1,29 +1,19 @@
-import { type DElement, isFragment, normalizeNode } from './node'
+import { normalizeNode } from './node'
 
 export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
-  if (!isFragment(node)) {
-    moveSelf()
-
-    return
-  }
-
-  node.__children.forEach((item) => moveTo(parent, item, anchor))
-
-  moveSelf()
-
-  return
-
-  function moveSelf() {
-    if (anchor) {
-      parent.insertBefore(node, anchor)
-    } else {
-      parent.appendChild(node)
-    }
+  if (anchor) {
+    parent.insertBefore(node, anchor)
+  } else {
+    parent.appendChild(node)
   }
 }
 
 export function insertBefore(anchor: Node, node: Node) {
-  moveTo(anchor.parentElement!, node, anchor)
+  if (anchor.parentElement) {
+    moveTo(anchor.parentElement, node, anchor)
+  } else {
+    console.error('Anchor is not attached into DOM', anchor)
+  }
 }
 
 export function moveChildren(
@@ -31,17 +21,13 @@ export function moveChildren(
   children?: unknown[],
   anchor?: Node,
 ) {
-  const _children: DElement[] = []
-
   for (const child of children || []) {
     const childEl = normalizeNode(child)
 
-    moveTo(parent, childEl, anchor)
-
-    _children.push(childEl)
+    if (childEl) {
+      moveTo(parent, childEl, anchor)
+    }
   }
-
-  return _children
 }
 
 export function updateEl(

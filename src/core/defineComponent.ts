@@ -1,5 +1,4 @@
-import { isFn } from '@0x-jerry/utils'
-import type { Merge } from 'type-fest'
+import { type EmptyObject, isFn } from '@0x-jerry/utils'
 import type { ToMaybeRef } from '.'
 import type { DefineProps } from './props'
 
@@ -10,36 +9,36 @@ export interface PropOption<T = any> {
 
 export type PropsType<T = any> = Record<string, T | PropOption<T>>
 
-export interface ComponentOption<Props extends PropsType = {}> {
+export interface ComponentOption<Props extends PropsType = EmptyObject> {
   props?: Props
-  toRefs?: boolean
 }
 
-interface CommonProps {
-  class?: any
-}
-
-export type FunctionalComponent<P extends PropsType = {}> = (
-  props: Merge<P, CommonProps> & Record<string, any>,
+/**
+ * @private
+ */
+export type FunctionalComponent<P extends PropsType = any> = (
+  props: P,
   children?: any[],
-) => JSX.Element
+) => any
+
+type _NoInferProps<P extends EmptyObject> = DefineProps<P> & Record<string, any>
 
 /**
- * without option
+ * Auto calculate props from generic type P
  * @param impl
  */
 export function defineComponent<P extends PropsType>(
-  impl: FunctionalComponent<DefineProps<P>>,
+  impl: NoInfer<FunctionalComponent<_NoInferProps<P>>>,
 ): FunctionalComponent<ToMaybeRef<P>>
+
 /**
- * with option
- * @param opt
+ * Infer props from impl parameter
  * @param impl
  */
 export function defineComponent<P extends PropsType>(
-  opt: ComponentOption<P>,
-  impl: FunctionalComponent<DefineProps<NoInfer<P>>>,
+  impl: FunctionalComponent<P>,
 ): FunctionalComponent<ToMaybeRef<P>>
+
 /**
  * implement
  */

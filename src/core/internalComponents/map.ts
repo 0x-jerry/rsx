@@ -1,45 +1,46 @@
-import { runWithContext } from '../context'
-import { mount, onMounted, unmount, useContext, useWatch } from '../hook'
-import { h } from '../jsx'
-import { createFragment, type DComponent } from '../node'
+import { type DNodeContext, runWithContext } from '../context'
+import { defineComponent, type FunctionalComponent } from '../defineComponent'
+import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
+import { createComponentInstance } from '../jsx'
 import { insertBefore } from '../nodeOp'
 import { unref } from '../reactivity'
-import type { MaybeRef } from '../types'
+import { createFragment } from './Fragment'
 
-export function VMap<T>(props: {
-  list: MaybeRef<T[]>
+export interface MapComponentProps<T> {
+  list: T[]
+  render: FunctionalComponent<{ item: T; index: number }>
+}
+
+interface ChildContext extends DNodeContext {
   /**
-   * should return jsx
+   * mark this is a reuse element
    */
-  render: (props: { item: T; index: number }) => JSX.Element
-}) {
+  _r?: boolean
+}
+
+export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
   const ctx = useContext()
 
-  const el = createFragment()
+  const el = createFragment('map')
 
-  type ChildElement = DComponent & {
-    /**
-     * if should reuse
-     */
-    _r?: boolean
-  }
+  let children: ChildContext[] = []
 
-  let dataElMap = new Map<T, ChildElement[]>()
+  let dataContextMap = new Map<T, ChildContext[]>()
 
   useWatch(
     () => [...unref(props.list)],
-    () => runWithContext(update, ctx),
+    () => runWithContext(() => update(), ctx),
   )
 
-  onMounted(() => {
-    runWithContext(update, ctx)
+  onBeforeMount(() => {
+    runWithContext(() => update(), ctx)
   })
 
   return el
 
   function update() {
-    const c1: ChildElement[] = el.__children
-    const c2: ChildElement[] = buildNewChildren()
+    const c1: ChildContext[] = children
+    const c2: ChildContext[] = buildNewChildren()
 
     let i = 0
     const l2 = c2.length
@@ -73,9 +74,12 @@ export function VMap<T>(props: {
     if (i > e1) {
       while (i <= e2) {
         const n = c2[i]
-        const anchor = c1[e1 + 1] || el
+        const anchor = c1[e1 + 1]?.el || el
 
-        insertBefore(anchor, n)
+        if (n.el) {
+          insertBefore(anchor, n.el)
+        }
+
         mount(n)
 
         i++
@@ -105,7 +109,8 @@ export function VMap<T>(props: {
       const increasingNewIndexSequence = getSequence(newSequence)
 
       let anchorPreviousNode =
-        c1[i - 1] || (c1[0] ? c1[0]?.previousSibling : el.previousSibling)
+        c1[i - 1]?.el ||
+        (c1[0] ? c1[0]?.el?.previousSibling : el.previousSibling)
 
       for (i = s2; i <= e2; i++) {
         const n2 = c2[i]
@@ -115,70 +120,71 @@ export function VMap<T>(props: {
           oldToNew.get(newSequence[increasingNewIndexSequence[0]]) === i
         ) {
           n2._r = false
-          anchorPreviousNode = n2
+          anchorPreviousNode = n2.el as ChildNode | null
           increasingNewIndexSequence.shift()
           continue
         }
 
-        insertBefore(
-          (anchorPreviousNode
-            ? anchorPreviousNode.nextSibling
-            : c1[0]?.parentElement
-              ? c1[0]
-              : null) || el,
-          n2,
-        )
+        if (n2.el) {
+          const anchor =
+            (anchorPreviousNode
+              ? anchorPreviousNode.nextSibling
+              : c1[0]?.el?.parentElement
+                ? c1[0]?.el
+                : null) || el
+
+          insertBefore(anchor, n2.el)
+          anchorPreviousNode = n2.el
+        }
 
         if (n2._r) {
           n2._r = false
         } else {
           mount(n2)
         }
-
-        anchorPreviousNode = n2
       }
     }
 
-    el.__children = c2
+    children = c2
   }
 
   function buildNewChildren() {
-    const newList: ChildElement[] = []
+    const newChildren: ChildContext[] = []
 
-    const newDataElMap = new Map<T, ChildElement[]>()
+    const newDataContextMap = new Map<T, ChildContext[]>()
 
-    unref(props.list).forEach((dataKey, idx) => {
-      if (dataElMap.has(dataKey)) {
-        const reuseEl = popElFromMap(dataElMap, dataKey)
-        reuseEl._r = true
+    props.list.forEach((dataKey, idx) => {
+      if (dataContextMap.has(dataKey)) {
+        const reuseCtx = popElFromMap(dataContextMap, dataKey)
+        reuseCtx._r = true
 
-        appendElToMap(newDataElMap, dataKey, reuseEl)
+        appendElToMap(newDataContextMap, dataKey, reuseCtx)
 
-        newList.push(reuseEl)
+        newChildren.push(reuseCtx)
 
         return
       }
 
-      const newEl = h(props.render, { item: dataKey, index: idx })
+      const newCtx = createComponentInstance(props.render, {
+        item: dataKey,
+        index: idx,
+      })
 
-      if (newEl) {
-        appendElToMap(newDataElMap, dataKey, newEl)
-
-        newList.push(newEl)
-      }
+      appendElToMap(newDataContextMap, dataKey, newCtx)
+      newChildren.push(newCtx)
     })
 
-    dataElMap.values().forEach((item) => {
-      item.forEach((child) => {
-        unmount(child)
+    dataContextMap.values().forEach((ctxList) => {
+      ctxList.forEach((childCtx) => {
+        unmount(childCtx)
       })
     })
 
-    dataElMap = newDataElMap
+    dataContextMap = newDataContextMap
 
-    return newList
+    return newChildren
   }
-}
+})
 
 function appendElToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
   let list = map.get(key)
@@ -191,7 +197,9 @@ function appendElToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
 }
 
 function popElFromMap<K, V>(map: Map<K, V[]>, key: K) {
+  // biome-ignore lint/style/noNonNullAssertion: has checked before
   const collection = map.get(key)!
+  // biome-ignore lint/style/noNonNullAssertion: has checked before
   const reuseEl = collection.shift()!
 
   if (!collection.length) {
@@ -205,7 +213,7 @@ function popElFromMap<K, V>(map: Map<K, V[]>, key: K) {
 function getSequence(arr: number[]): number[] {
   const p = arr.slice()
   const result = [0]
-  // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+  // biome-ignore lint/suspicious/noImplicitAnyLet: just ignored
   let i, j, u, v, c
   const len = arr.length
   for (i = 0; i < len; i++) {

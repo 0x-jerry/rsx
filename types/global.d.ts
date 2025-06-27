@@ -1,9 +1,8 @@
-import type { DComponent } from '../src/core'
 import type { NativeElements } from './jsx'
 
 declare global {
   namespace JSX {
-    interface Element extends DComponent {}
+    interface Element {}
 
     interface ElementAttributesProperty {
       [key: string]: any
@@ -15,7 +14,6 @@ declare global {
     }
 
     interface IntrinsicAttributes {}
-    interface IntrinsicClassAttributes<TT> {}
 
     interface IntrinsicElements extends NativeElements {
       [name: string]: any

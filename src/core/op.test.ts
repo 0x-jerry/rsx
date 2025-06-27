@@ -8,7 +8,7 @@ describe('ssr', () => {
       return h('div', { class: 'test' }, 'hello world!')
     })
 
-    const str = renderToString(h(Comp))
-    await expect(str).toMatchFileSnapshot('test/renderToString.html')
+    const str = renderToString(Comp)
+    expect(str).toMatchSnapshot()
   })
 })

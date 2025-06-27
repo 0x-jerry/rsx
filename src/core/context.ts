@@ -1,13 +1,45 @@
 import { EventEmitter } from '@0x-jerry/utils'
 
+export const DNodeContextEventName = {
+  beforeMount: 'bm',
+  mounted: 'm',
+
+  beforeUnmount: 'bum',
+  unmounted: 'um',
+} as const
+
 type DNodeEventMap = {
-  mounted: []
-  unmounted: []
+  /**
+   * before mount
+   */
+  bm: []
+  /**
+   * mounted
+   */
+  m: []
+
+  /**
+   * before unmount
+   */
+  bum: []
+  /**
+   * unmounted
+   */
+  um: []
 }
 
-export interface DNodeContext extends EventEmitter<DNodeEventMap> {
+let contextId = 1
+
+export class DNodeContext extends EventEmitter<DNodeEventMap> {
+  readonly id = contextId++
   name?: string
   children?: Set<DNodeContext>
+  el?: HTMLElement
+
+  /**
+   * mark this is a fragment
+   */
+  __fg?: true
 }
 
 export const {
@@ -18,7 +50,7 @@ export const {
 } = defineContext<DNodeContext>()
 
 export function createNodeContext(name?: string) {
-  const ctx = new EventEmitter() as DNodeContext
+  const ctx = new DNodeContext()
 
   ctx.name = name
 
@@ -61,11 +93,17 @@ export function appendToCurrentContext(ctx: DNodeContext) {
     return
   }
 
-  ctx.on('unmounted', () => {
+  ctx.on(DNodeContextEventName.unmounted, () => {
     // remove it self
     previousCtx.children?.delete(ctx)
   })
 
   previousCtx.children ||= new Set()
   previousCtx.children.add(ctx)
+}
+
+// ------- utils
+
+export function isFragment(o: DNodeContext) {
+  return o.__fg === true
 }
