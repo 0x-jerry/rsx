@@ -24,13 +24,13 @@
   },
   "description": "",
   "devDependencies": {
-    "@biomejs/biome": "^2.0.5",
+    "@biomejs/biome": "^2.0.6",
     "happy-dom": "^18.0.1",
     "tsup": "^8.5.0",
     "type-fest": "^4.41.0",
     "typescript": "^5.8.3",
-    "unocss": "^66.2.3",
-    "vite": "^6.3.5",
+    "unocss": "^66.3.2",
+    "vite": "^7.0.0",
     "vite-plugin-inspect": "^11.2.0",
     "vitest": "^3.2.4"
   }
