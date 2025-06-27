@@ -1,11 +1,11 @@
 import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
 import type { DNodeContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
+import { createDynamicNode, dispatchMovedEvent } from '../dynamicNode'
 import { mount, onBeforeMount, unmount, useWatch } from '../hook'
 import { createComponentInstance, transformProps } from '../jsx'
 import { insertBefore } from '../nodeOp'
 import { $, computed } from '../reactivity'
-import { createFragment } from './Fragment'
 
 export interface CaseComponentProps {
   condition: JsonPrimitive
@@ -13,7 +13,7 @@ export interface CaseComponentProps {
 }
 
 export const VCase = defineComponent<CaseComponentProps>((props) => {
-  const el = createFragment()
+  const el = createDynamicNode()
 
   const caseKey = computed(() => String(props.condition))
 
@@ -22,6 +22,13 @@ export const VCase = defineComponent<CaseComponentProps>((props) => {
   useWatch(caseKey, updateCase)
 
   onBeforeMount(updateCase)
+
+  el.addEventListener('moved', () => {
+    if (renderedCtxNode?.el) {
+      insertBefore(el, renderedCtxNode.el)
+      dispatchMovedEvent(renderedCtxNode.el)
+    }
+  })
 
   return el
 

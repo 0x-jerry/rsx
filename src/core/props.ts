@@ -37,3 +37,5 @@ type MapProp<O extends {}, T> = T extends keyof O
   : {}
 
 export type DefineProps<T extends {}> = Merge<CalcProps<T>, {}>
+
+export type AnyProps = Record<string, any>

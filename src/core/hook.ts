@@ -3,6 +3,7 @@ import type { WatchCallback, WatchEffect, WatchSource } from '@vue/reactivity'
 import {
   type DNodeContext,
   DNodeContextEventName,
+  type DNodeEventMap,
   getCurrentContext,
 } from './context'
 import { type WatchHandle, type WatchOptions, watch } from './reactivity'
@@ -10,7 +11,7 @@ import { type WatchHandle, type WatchOptions, watch } from './reactivity'
 export function unmount(ctx: DNodeContext) {
   ctx.emit(DNodeContextEventName.beforeUnmount)
 
-  ctx.el?.remove()
+  ctx.getEl()?.remove()
 
   ctx.children?.forEach((child) => unmount(child))
 
@@ -35,29 +36,23 @@ export function useContext() {
   return ctx
 }
 
-export function onBeforeMount(fn: Fn, ctx?: DNodeContext) {
-  ctx ||= useContext()
+function createContextHook(name: keyof DNodeEventMap) {
+  return (fn: Fn, ctx?: DNodeContext) => {
+    ctx ||= useContext()
 
-  ctx.on(DNodeContextEventName.beforeMount, fn)
+    ctx.on(name, fn)
+  }
 }
 
-export function onMounted(fn: Fn, ctx?: DNodeContext) {
-  ctx ||= useContext()
+export const onBeforeMount = createContextHook(
+  DNodeContextEventName.beforeMount,
+)
+export const onMounted = createContextHook(DNodeContextEventName.mounted)
 
-  ctx.on(DNodeContextEventName.mounted, fn)
-}
-
-export function onBeforeUnmount(fn: Fn, ctx?: DNodeContext) {
-  ctx ||= useContext()
-
-  ctx.on(DNodeContextEventName.beforeUnmount, fn)
-}
-
-export function onUnmounted(fn: Fn, ctx?: DNodeContext) {
-  ctx ||= useContext()
-
-  ctx.on(DNodeContextEventName.unmounted, fn)
-}
+export const onBeforeUnmount = createContextHook(
+  DNodeContextEventName.beforeUnmount,
+)
+export const onUnmounted = createContextHook(DNodeContextEventName.unmounted)
 
 export function useWatch(
   getter: WatchSource | WatchSource[] | WatchEffect,

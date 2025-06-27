@@ -1,7 +1,19 @@
 import { normalizeNode } from './node'
 
 export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
+  if (!(node instanceof Node)) {
+    throw new Error('node is not a node')
+  }
+
+  if (!(parent instanceof Node)) {
+    throw new Error('parent is not a node')
+  }
+
   if (anchor) {
+    if (!(anchor instanceof Node)) {
+      throw new Error('anchor is not a node')
+    }
+
     parent.insertBefore(node, anchor)
   } else {
     parent.appendChild(node)
@@ -12,7 +24,8 @@ export function insertBefore(anchor: Node, node: Node) {
   if (anchor.parentElement) {
     moveTo(anchor.parentElement, node, anchor)
   } else {
-    console.error('Anchor is not attached into DOM', anchor)
+    console.error('Anchor is not attached into DOM')
+    // throw new Error('Anchor is not attached into DOM')
   }
 }
 
@@ -24,7 +37,7 @@ export function moveChildren(
   for (const child of children || []) {
     const childEl = normalizeNode(child)
 
-    if (childEl) {
+    if (childEl != null) {
       moveTo(parent, childEl, anchor)
     }
   }

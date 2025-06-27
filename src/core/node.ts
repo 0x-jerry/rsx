@@ -1,14 +1,16 @@
 import type { PrimitiveType } from '@0x-jerry/utils'
 import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import { clsx } from 'clsx'
+import { isComponentNode } from './ComponentNode'
 import { onUnmounted } from './hook'
 import { moveChildren, updateEl } from './nodeOp'
+import type { AnyProps } from './props'
 import { effect, isRef, unref } from './reactivity'
 import type { MaybeRef } from './types'
 
 export function createNativeElement(
   type: string,
-  props: Record<string, any>,
+  props: AnyProps,
   children?: unknown[],
 ) {
   const el = document.createElement(type)
@@ -19,7 +21,7 @@ export function createNativeElement(
   return el
 }
 
-function generateBindingFunction(el: HTMLElement, props: Record<string, any>) {
+function generateBindingFunction(el: HTMLElement, props: AnyProps) {
   const effects: ReactiveEffectRunner[] = []
   const previousProps = new Map()
 
@@ -76,7 +78,7 @@ export function createTextElement(content: MaybeRef<PrimitiveType>) {
 
 // ---- utils ----
 
-export function normalizeNode(node: unknown): ChildNode | null {
+export function normalizeNode(node: unknown): ChildNode | null | undefined {
   const rawValue = unref(node)
 
   if (rawValue == null) {
@@ -85,6 +87,14 @@ export function normalizeNode(node: unknown): ChildNode | null {
 
   if (isHTMLNode(rawValue)) {
     return rawValue as ChildNode
+  }
+
+  if (isComponentNode(node)) {
+    if (!node.instance) {
+      node.createInstance()
+    }
+
+    return node.instance?.getEl()
   }
 
   return createTextElement(node as MaybeRef<PrimitiveType>)

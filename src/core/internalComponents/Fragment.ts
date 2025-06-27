@@ -1,16 +1,19 @@
 import type { FunctionalComponent } from '../defineComponent'
-import { onBeforeMount, onBeforeUnmount, useContext } from '../hook'
+import { createDynamicNode } from '../dynamicNode'
+import { onBeforeMount, onBeforeUnmount, onMounted, useContext } from '../hook'
 import { normalizeNode } from '../node'
 import { insertBefore } from '../nodeOp'
 
 export const Fragment: FunctionalComponent = (_, children) => {
-  const el = createFragment()
-  const ctx = useContext()
-  ctx.__fg = true
+  const el = createDynamicNode('fragment')
 
   const _children: ChildNode[] = []
+  const ctx = useContext()
+
+  console.log('fragment ctx:', ctx.id)
 
   onBeforeMount(() => {
+    console.log('before mount', ctx.id)
     children?.forEach((child) => {
       const node = normalizeNode(child)
       if (node) {
@@ -21,15 +24,19 @@ export const Fragment: FunctionalComponent = (_, children) => {
     })
   })
 
+  onMounted(() => {
+    console.log('mounted', ctx.id)
+  })
+
+  el.addEventListener('moved', () => {
+    _children.forEach((child) => {
+      insertBefore(el, child)
+    })
+  })
+
   onBeforeUnmount(() => {
     _children.forEach((child) => child.remove())
   })
-
-  return el
-}
-
-export function createFragment(name = 'fragment') {
-  const el = document.createComment(name)
 
   return el
 }

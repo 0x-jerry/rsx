@@ -1,4 +1,5 @@
 import { EventEmitter } from '@0x-jerry/utils'
+import { type ComponentNode, isComponentNode } from './ComponentNode'
 
 export const DNodeContextEventName = {
   beforeMount: 'bm',
@@ -8,7 +9,7 @@ export const DNodeContextEventName = {
   unmounted: 'um',
 } as const
 
-type DNodeEventMap = {
+export type DNodeEventMap = {
   /**
    * before mount
    */
@@ -34,12 +35,19 @@ export class DNodeContext extends EventEmitter<DNodeEventMap> {
   readonly id = contextId++
   name?: string
   children?: Set<DNodeContext>
-  el?: HTMLElement
+  el?: HTMLElement | ComponentNode
 
-  /**
-   * mark this is a fragment
-   */
-  __fg?: true
+  getEl(): HTMLElement | undefined {
+    if (!this.el) {
+      return this.el
+    }
+
+    if (isComponentNode(this.el)) {
+      return this.el.instance?.getEl()
+    }
+
+    return this.el
+  }
 }
 
 export const {
@@ -100,10 +108,4 @@ export function appendToCurrentContext(ctx: DNodeContext) {
 
   previousCtx.children ||= new Set()
   previousCtx.children.add(ctx)
-}
-
-// ------- utils
-
-export function isFragment(o: DNodeContext) {
-  return o.__fg === true
 }

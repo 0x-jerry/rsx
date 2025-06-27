@@ -1,17 +1,17 @@
-import { type DNodeContext, runWithContext } from '../context'
+import { type ComponentNode, createComponentNode } from '../ComponentNode'
+import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
+import { createDynamicNode, dispatchMovedEvent } from '../dynamicNode'
 import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
-import { createComponentInstance } from '../jsx'
 import { insertBefore } from '../nodeOp'
 import { unref } from '../reactivity'
-import { createFragment } from './Fragment'
 
 export interface MapComponentProps<T> {
   list: T[]
   render: FunctionalComponent<{ item: T; index: number }>
 }
 
-interface ChildContext extends DNodeContext {
+interface ChildContext extends ComponentNode {
   /**
    * mark this is a reuse element
    */
@@ -21,7 +21,7 @@ interface ChildContext extends DNodeContext {
 export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
   const ctx = useContext()
 
-  const el = createFragment('map')
+  const el = createDynamicNode('map')
 
   let children: ChildContext[] = []
 
@@ -34,6 +34,17 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
   onBeforeMount(() => {
     runWithContext(() => update(), ctx)
+  })
+
+  el.addEventListener('moved', () => {
+    children.forEach((child) => {
+      const childEl = child.instance?.getEl()
+      if (childEl) {
+        insertBefore(el, childEl)
+
+        dispatchMovedEvent(childEl)
+      }
+    })
   })
 
   return el
@@ -74,13 +85,19 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     if (i > e1) {
       while (i <= e2) {
         const n = c2[i]
-        const anchor = c1[e1 + 1]?.el || el
+        const anchor = c1[e1 + 1]?.instance?.getEl() || el
 
-        if (n.el) {
-          insertBefore(anchor, n.el)
+        if (!n.instance) {
+          n.instance = n.createInstance()
         }
 
-        mount(n)
+        const nEl = n.instance.getEl()
+        if (nEl) {
+          insertBefore(anchor, nEl)
+          dispatchMovedEvent(nEl)
+        }
+
+        mount(n.instance)
 
         i++
       }
@@ -109,8 +126,8 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
       const increasingNewIndexSequence = getSequence(newSequence)
 
       let anchorPreviousNode =
-        c1[i - 1]?.el ||
-        (c1[0] ? c1[0]?.el?.previousSibling : el.previousSibling)
+        c1[i - 1]?.instance?.getEl() ||
+        (c1[0] ? c1[0]?.instance?.getEl()?.previousSibling : el.previousSibling)
 
       for (i = s2; i <= e2; i++) {
         const n2 = c2[i]
@@ -120,27 +137,34 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
           oldToNew.get(newSequence[increasingNewIndexSequence[0]]) === i
         ) {
           n2._r = false
-          anchorPreviousNode = n2.el as ChildNode | null
+          anchorPreviousNode = n2.instance?.el as ChildNode | null
           increasingNewIndexSequence.shift()
           continue
         }
 
-        if (n2.el) {
+        if (!n2.instance) {
+          n2.instance = n2.createInstance()
+        }
+
+        const n2El = n2.instance.getEl()
+        if (n2El) {
           const anchor =
             (anchorPreviousNode
               ? anchorPreviousNode.nextSibling
-              : c1[0]?.el?.parentElement
-                ? c1[0]?.el
+              : c1[0]?.instance?.getEl()?.parentElement
+                ? c1[0]?.instance?.getEl()
                 : null) || el
 
-          insertBefore(anchor, n2.el)
-          anchorPreviousNode = n2.el
+          insertBefore(anchor, n2El)
+          dispatchMovedEvent(n2El)
+
+          anchorPreviousNode = n2El
         }
 
         if (n2._r) {
           n2._r = false
         } else {
-          mount(n2)
+          mount(n2.instance)
         }
       }
     }
@@ -165,18 +189,26 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
         return
       }
 
-      const newCtx = createComponentInstance(props.render, {
-        item: dataKey,
-        index: idx,
-      })
+      const newCtx = createComponentNode(
+        props.render,
+        {
+          item: dataKey,
+          index: idx,
+        },
+        [],
+      )
 
       appendElToMap(newDataContextMap, dataKey, newCtx)
       newChildren.push(newCtx)
     })
 
     dataContextMap.values().forEach((ctxList) => {
-      ctxList.forEach((childCtx) => {
-        unmount(childCtx)
+      ctxList.forEach((child) => {
+        if (child.instance) {
+          unmount(child.instance)
+        } else {
+          throw new Error('child without instance')
+        }
       })
     })
 
