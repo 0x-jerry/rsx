@@ -1,14 +1,12 @@
 import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
-import {
-  type ComponentNode,
-  createComponentNode,
-  transformProps,
-} from '../ComponentNode'
+import { defineComponentName } from '@/test'
+import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
 import { createDynamicNode, dispatchMovedEvent } from '../dynamicNode'
 import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
+import { transformProps } from '../props'
 import { $, computed } from '../reactivity'
 
 export interface CaseComponentProps {
@@ -71,6 +69,8 @@ export const VCase = defineComponent<CaseComponentProps>((props) => {
   }
 })
 
+defineComponentName(VCase, 'VCase')
+
 export interface IfComponentProps {
   condition: JsonPrimitive
   truthy?: FunctionalComponent
@@ -88,3 +88,5 @@ export const VIf = defineComponent<IfComponentProps>((props) => {
 
   return VCase(_props)
 })
+
+defineComponentName(VIf, 'VIf')

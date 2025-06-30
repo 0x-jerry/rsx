@@ -1,12 +1,10 @@
-import type { PrimitiveType } from '@0x-jerry/utils'
 import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
-import { clsx } from 'clsx'
+import { type ClassValue, clsx } from 'clsx'
 import { isComponentNode } from './ComponentNode'
 import { onUnmounted } from './hook'
 import { moveChildren, updateEl } from './nodeOp'
 import type { AnyProps } from './props'
 import { effect, isRef, unref } from './reactivity'
-import type { MaybeRef } from './types'
 
 export function createNativeElement(
   type: string,
@@ -54,13 +52,13 @@ function generateBindingFunction(el: HTMLElement, props: AnyProps) {
 
 function transformProps(key: string, value: unknown) {
   if (key === 'class') {
-    return clsx(value as any)
+    return clsx(value as ClassValue)
   }
 
   return value
 }
 
-export function createTextElement(content: MaybeRef<PrimitiveType>) {
+export function createTextElement(content: unknown) {
   const el = document.createTextNode('')
 
   if (isRef(content)) {
@@ -95,7 +93,7 @@ export function normalizeNode(node: unknown): ChildNode | null | undefined {
     return node.instance.el
   }
 
-  return createTextElement(node as MaybeRef<PrimitiveType>)
+  return createTextElement(node)
 }
 
 export function isHTMLNode(o: unknown): o is ChildNode {

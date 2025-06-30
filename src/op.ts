@@ -21,8 +21,7 @@ export function mountApp(
     : selector
 
   if (!container) {
-    console.warn(`Can't find container`)
-    return
+    throw new Error(`Can't find container`)
   }
 
   const ctx = createNodeContext('Root')
@@ -50,6 +49,8 @@ export function mountApp(
   }
 
   mount(ctx)
+
+  return ctx
 }
 
 export function renderToString(Comp: FunctionalComponent<any>) {

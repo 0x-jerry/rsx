@@ -1,0 +1,73 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`case context tree > reactive value 1`] = `"<div id="app"><div class="A"><span>a</span>0</div><!--case--></div>"`;
+
+exports[`case context tree > reactive value 2`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [],
+              "name": "A",
+            },
+          ],
+          "name": "0",
+        },
+      ],
+      "name": "VCase",
+    },
+  ],
+  "name": "Root",
+}
+`;
+
+exports[`case context tree > reactive value 3`] = `"<div id="app"><div class="B"><span>b</span>1</div><!--case--></div>"`;
+
+exports[`case context tree > reactive value 4`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [],
+              "name": "B",
+            },
+          ],
+          "name": "1",
+        },
+      ],
+      "name": "VCase",
+    },
+  ],
+  "name": "Root",
+}
+`;
+
+exports[`case context tree > static value 1`] = `"<div id="app"><div class="A"><span>a</span>0</div><!--case--></div>"`;
+
+exports[`case context tree > static value 2`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [],
+              "name": "A",
+            },
+          ],
+          "name": "0",
+        },
+      ],
+      "name": "VCase",
+    },
+  ],
+  "name": "Root",
+}
+`;

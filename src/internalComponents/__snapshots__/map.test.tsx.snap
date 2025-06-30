@@ -1,0 +1,151 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`map context tree > reactive value 1`] = `"<div id="app"><div class="A"><span>a</span><div class="B"><span>b</span>1</div><div class="B"><span>b</span>2</div><div class="B"><span>b</span>3</div><!--map--></div></div>"`;
+
+exports[`map context tree > reactive value 2`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+          ],
+          "name": "VMap",
+        },
+      ],
+      "name": "A",
+    },
+  ],
+  "name": "Root",
+}
+`;
+
+exports[`map context tree > reactive value 3`] = `"<div id="app"><div class="A"><span>a</span><div class="B"><span>b</span>2</div><div class="B"><span>b</span>1</div><div class="B"><span>b</span>4</div><div class="B"><span>b</span>3</div><!--map--></div></div>"`;
+
+exports[`map context tree > reactive value 4`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+          ],
+          "name": "VMap",
+        },
+      ],
+      "name": "A",
+    },
+  ],
+  "name": "Root",
+}
+`;
+
+exports[`map context tree > static value 1`] = `"<div id="app"><div class="A"><span>a</span><div class="B"><span>b</span>1</div><div class="B"><span>b</span>2</div><div class="B"><span>b</span>3</div><!--map--></div></div>"`;
+
+exports[`map context tree > static value 2`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "B",
+                },
+              ],
+              "name": "VMap.item",
+            },
+          ],
+          "name": "VMap",
+        },
+      ],
+      "name": "A",
+    },
+  ],
+  "name": "Root",
+}
+`;

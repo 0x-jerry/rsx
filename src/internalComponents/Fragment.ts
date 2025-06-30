@@ -1,3 +1,4 @@
+import { defineComponentName } from '@/test'
 import { runWithContext } from '../context'
 import type { FunctionalComponent } from '../defineComponent'
 import { createDynamicNode, dispatchMovedEvent } from '../dynamicNode'
@@ -38,3 +39,5 @@ export const Fragment: FunctionalComponent = (_, children) => {
 
   return el
 }
+
+defineComponentName(Fragment, 'Fragment')

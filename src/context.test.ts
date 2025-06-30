@@ -70,6 +70,6 @@ describe('context', () => {
       appendToCurrentContext(c2)
     }, c1)
 
-    expect(c1.children!.has(c2)).toBe(true)
+    expect(c1.children?.has(c2)).toBe(true)
   })
 })

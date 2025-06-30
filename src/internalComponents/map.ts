@@ -1,3 +1,4 @@
+import { defineComponentName } from '@/test'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
@@ -191,6 +192,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
       )
 
       newCtx.initialize()
+      newCtx.instance.name = 'VMap.item'
 
       appendElToMap(newDataContextMap, dataKey, newCtx)
       newChildren.push(newCtx)
@@ -211,6 +213,8 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     return newChildren
   }
 })
+
+defineComponentName(VMap, 'VMap')
 
 function appendElToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
   let list = map.get(key)

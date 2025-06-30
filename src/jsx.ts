@@ -1,12 +1,8 @@
 import { isString } from '@0x-jerry/utils'
-import {
-  type ComponentNode,
-  createComponentNode,
-  transformProps,
-} from './ComponentNode'
+import { type ComponentNode, createComponentNode } from './ComponentNode'
 import type { FunctionalComponent } from './defineComponent'
 import { createNativeElement } from './node'
-import type { AnyProps } from './props'
+import { type AnyProps, transformProps } from './props'
 
 export function h(
   type: string | FunctionalComponent,

@@ -1,7 +1,7 @@
 import { dc } from '../defineComponent'
 import { onMounted } from '../hook'
 import { nextTick, ref } from '../reactivity'
-import { mountTestApp } from '../test'
+import { contextToJson, defineComponentName, mountTestApp } from '../test'
 import { VMap } from './map'
 
 describe('map component', () => {
@@ -470,6 +470,7 @@ describe('map component with fragment', () => {
             render={({ item }) => (
               <>
                 <div class="item">{item}-0</div>
+                {/** biome-ignore lint/complexity/noUselessFragments: test purpose */}
                 <>
                   <div class="item">{item}-1</div>
                 </>
@@ -500,5 +501,95 @@ describe('map component with fragment', () => {
       '1-0',
       '1-1',
     ])
+  })
+})
+
+describe('map context tree', () => {
+  it('static value', () => {
+    const A = dc((_, children) => (
+      <div class="A">
+        <span>a</span>
+        {children}
+      </div>
+    ))
+
+    defineComponentName(A, 'A')
+
+    const B = dc((_, children) => (
+      <div class="B">
+        <span>b</span>
+        {children}
+      </div>
+    ))
+
+    defineComponentName(B, 'B')
+
+    const App = dc(() => (
+      <A>
+        <VMap list={[1, 2, 3]} render={(props) => <B>{props.item}</B>} />
+      </A>
+    ))
+
+    defineComponentName(App, 'App')
+
+    const root = mountTestApp(App)
+
+    expect(root.outerHTML).toMatchSnapshot()
+
+    const ctxTree = contextToJson(root._)
+
+    expect(ctxTree).toMatchSnapshot()
+  })
+
+  it('reactive value', async () => {
+    const A = dc((_, children) => (
+      <div class="A">
+        <span>a</span>
+        {children}
+      </div>
+    ))
+
+    defineComponentName(A, 'A')
+
+    const B = dc((_, children) => (
+      <div class="B">
+        <span>b</span>
+        {children}
+      </div>
+    ))
+
+    defineComponentName(B, 'B')
+
+    const App = dc(() => {
+      const data = ref([1, 2, 3])
+
+      onMounted(() => {
+        data.value = [2, 1, 4, 3]
+      })
+
+      return (
+        <A>
+          <VMap list={data} render={(props) => <B>{props.item}</B>} />
+        </A>
+      )
+    })
+
+    defineComponentName(App, 'App')
+
+    const root = mountTestApp(App)
+
+    expect(root.outerHTML).toMatchSnapshot()
+
+    const ctxTree = contextToJson(root._)
+
+    expect(ctxTree).toMatchSnapshot()
+
+    await nextTick()
+
+    expect(root.outerHTML).toMatchSnapshot()
+
+    const ctxTree1 = contextToJson(root._)
+
+    expect(ctxTree1).toMatchSnapshot()
   })
 })

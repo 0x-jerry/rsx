@@ -1,0 +1,20 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`fragment context tree > static value 1`] = `"<div id="app">1<div class="A"><span>a</span></div>2<!--fragment--></div>"`;
+
+exports[`fragment context tree > static value 2`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [],
+          "name": "A",
+        },
+      ],
+      "name": "Fragment",
+    },
+  ],
+  "name": "Root",
+}
+`;

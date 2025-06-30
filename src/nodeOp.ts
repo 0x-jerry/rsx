@@ -34,7 +34,15 @@ export function moveChildren(
   children?: unknown[],
   anchor?: Node,
 ) {
-  for (const child of children || []) {
+  const stack = children || []
+
+  while (stack.length) {
+    const child = stack.shift()
+    if (Array.isArray(child)) {
+      stack.push(...child)
+      continue
+    }
+
     const childEl = normalizeNode(child)
 
     if (childEl != null) {

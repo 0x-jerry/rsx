@@ -1,4 +1,4 @@
-import { type EmptyObject, isFn } from '@0x-jerry/utils'
+import type { EmptyObject } from '@0x-jerry/utils'
 import type { ToMaybeRef } from '.'
 import type { DefineProps } from './props'
 
@@ -9,9 +9,10 @@ export interface PropOption<T = any> {
 
 export type PropsType<T = any> = Record<string, T | PropOption<T>>
 
-export interface ComponentOption<Props extends PropsType = EmptyObject> {
-  props?: Props
-}
+// export interface ComponentOption<Props extends PropsType = EmptyObject> {
+//   name?: string
+//   props?: Props
+// }
 
 /**
  * @private
@@ -42,9 +43,7 @@ export function defineComponent<P extends PropsType>(
 /**
  * implement
  */
-export function defineComponent(opt: unknown, impl?: any): any {
-  if (isFn(opt)) return opt
-
+export function defineComponent(impl?: any): any {
   // todo check props type
   return impl
 }

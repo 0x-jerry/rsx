@@ -5,7 +5,7 @@ import { dc } from './defineComponent'
 import { useWatch } from './hook'
 import { h } from './jsx'
 import { $, nextTick, ref } from './reactivity'
-import { mountTestApp } from './test'
+import { contextToJson, defineComponentName, mountTestApp } from './test'
 
 describe('jsx', () => {
   it('dom element', () => {
@@ -208,5 +208,49 @@ describe('jsx', () => {
     props.v.value++
     await nextTick()
     expect(fn).toBeCalledTimes(1)
+  })
+})
+
+describe('jsx context tree', () => {
+  it('context tree', () => {
+    const A = dc((_, children) => (
+      <div class="A">
+        <span>a</span>
+        {children}
+      </div>
+    ))
+
+    defineComponentName(A, 'A')
+
+    const B = dc((_, children) => (
+      <div class="B">
+        <span>b</span>
+        {children}
+      </div>
+    ))
+
+    defineComponentName(B, 'B')
+
+    const App = dc(() => (
+      <A>
+        <span>1</span>
+        <B>
+          <span>2</span>
+          <A></A>
+        </B>
+        <A></A>
+        <span>3</span>
+      </A>
+    ))
+
+    defineComponentName(App, 'App')
+
+    const root = mountTestApp(App)
+
+    expect(root.outerHTML).toMatchSnapshot()
+
+    const ctxTree = contextToJson(root._)
+
+    expect(ctxTree).toMatchSnapshot()
   })
 })
