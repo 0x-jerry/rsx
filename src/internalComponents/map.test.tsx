@@ -1,6 +1,6 @@
 import { dc } from '../defineComponent'
 import { onMounted } from '../hook'
-import { nextTick, ref } from '../reactivity'
+import { $, nextTick, ref, toBindingRefs } from '../reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from '../test'
 import { VMap } from './map'
 
@@ -70,7 +70,7 @@ describe('map component', () => {
         <div>
           <VMap
             list={list}
-            render={({ item }) => <div class="item">{item}</div>}
+            render={(props) => <div class="item">{props.item}</div>}
           />
         </div>
       )
@@ -87,6 +87,110 @@ describe('map component', () => {
       .toArray()
 
     expect(contents).eql(['4', '5', '6'])
+  })
+
+  it('reactivity data with index', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value = [2, 1, 3]
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={(props) => {
+              const { item, index } = toBindingRefs(props)
+
+              return (
+                <div class="item">
+                  {item}-{index}
+                </div>
+              )
+            }}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App) as HTMLElement
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql(['2-0', '1-1', '3-2'])
+  })
+
+  it('custom keyed reactivity data', async () => {
+    interface Item {
+      name: string
+      key: number
+    }
+
+    const App = dc(() => {
+      const list = ref<Item[]>([
+        {
+          name: '1',
+          key: 1,
+        },
+        {
+          name: '2',
+          key: 2,
+        },
+        {
+          name: '3',
+          key: 3,
+        },
+      ])
+
+      onMounted(() => {
+        list.value = [
+          {
+            name: '2',
+            key: 1,
+          },
+          {
+            name: '1',
+            key: 2,
+          },
+          {
+            name: '4',
+            key: 3,
+          },
+        ]
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            key={(item) => item.key}
+            render={(props) => {
+              return <div class="item">{$(() => props.item.name)}</div>
+            }}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App) as HTMLElement
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql(['2', '1', '4'])
   })
 
   it('reuse node', async () => {

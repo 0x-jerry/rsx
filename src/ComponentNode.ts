@@ -8,7 +8,7 @@ import {
 } from './context'
 import type { FunctionalComponent } from './defineComponent'
 import { isHTMLNode } from './node'
-import type { AnyProps } from './props'
+import { type AnyProps, normalizeProps } from './props'
 
 let componentId = 0
 
@@ -51,7 +51,9 @@ export class ComponentNode {
 
     setCurrentContext(ctx)
 
-    const rootEl = this.type(this.props, this.children)
+    const _props = normalizeProps(this.type, this.props)
+
+    const rootEl = this.type(_props, this.children)
 
     if (isComponentNode(rootEl)) {
       rootEl.initialize()

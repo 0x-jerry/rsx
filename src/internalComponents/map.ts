@@ -1,14 +1,17 @@
+import { type Ref, shallowRef } from '@vue/reactivity'
+import { normalizeProps } from '@/props'
 import { defineComponentName } from '@/test'
+import { createAnchorNode, dispatchAnchorMovedEvent } from '../anchorNode'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
-import { createDynamicNode, dispatchMovedEvent } from '../dynamicNode'
 import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
 import { unref } from '../reactivity'
 
 export interface MapComponentProps<T> {
   list: T[]
+  key?: (item: T, index: number) => unknown
   render: FunctionalComponent<{ item: T; index: number }>
 }
 
@@ -17,16 +20,20 @@ interface ChildContext extends ComponentNode {
    * mark this is a reuse element
    */
   _r?: boolean
+  _props?: {
+    item: Ref<unknown>
+    index: Ref<number>
+  }
 }
 
 export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
   const ctx = useContext()
 
-  const el = createDynamicNode('map')
+  const el = createAnchorNode('map')
 
   let children: ChildContext[] = []
 
-  let dataContextMap = new Map<T, ChildContext[]>()
+  let dataContextMap = new Map<unknown, ChildContext[]>()
 
   useWatch(
     () => [...unref(props.list)],
@@ -43,7 +50,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
       if (childEl) {
         insertBefore(el, childEl)
 
-        dispatchMovedEvent(childEl)
+        dispatchAnchorMovedEvent(childEl)
       }
     })
   })
@@ -91,7 +98,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
         const nEl = n.instance.el
         if (nEl) {
           insertBefore(anchor, nEl)
-          dispatchMovedEvent(nEl)
+          dispatchAnchorMovedEvent(nEl)
         }
 
         mount(n.instance)
@@ -149,7 +156,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
                 : null) || el
 
           insertBefore(anchor, n2El)
-          dispatchMovedEvent(n2El)
+          dispatchAnchorMovedEvent(n2El)
 
           anchorPreviousNode = n2El
         }
@@ -168,12 +175,18 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
   function buildNewChildren() {
     const newChildren: ChildContext[] = []
 
-    const newDataContextMap = new Map<T, ChildContext[]>()
+    const newDataContextMap = new Map<unknown, ChildContext[]>()
 
-    props.list.forEach((dataKey, idx) => {
+    props.list.forEach((item, idx) => {
+      const dataKey = getItemKey(item, idx)
+
       if (dataContextMap.has(dataKey)) {
         const reuseCtx = popElFromMap(dataContextMap, dataKey)
         reuseCtx._r = true
+        if (reuseCtx._props) {
+          reuseCtx._props.item.value = item
+          reuseCtx._props.index.value = idx
+        }
 
         appendElToMap(newDataContextMap, dataKey, reuseCtx)
 
@@ -182,14 +195,18 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
         return
       }
 
+      const childProps = {
+        item: shallowRef(item),
+        index: shallowRef(idx),
+      }
+
       const newCtx = createComponentNode(
         props.render,
-        {
-          item: dataKey,
-          index: idx,
-        },
+        childProps,
         [],
-      )
+      ) as ChildContext
+
+      newCtx._props = childProps
 
       newCtx.initialize()
       newCtx.instance.name = 'VMap.item'
@@ -212,6 +229,10 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
     return newChildren
   }
+
+  function getItemKey(item: T, idx: number) {
+    return props.key ? props.key(item, idx) : item
+  }
 })
 
 defineComponentName(VMap, 'VMap')
@@ -227,9 +248,9 @@ function appendElToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
 }
 
 function popElFromMap<K, V>(map: Map<K, V[]>, key: K) {
-  // biome-ignore lint/style/noNonNullAssertion: has checked before
+  // biome-ignore lint/style/noNonNullAssertion: already checked before use it
   const collection = map.get(key)!
-  // biome-ignore lint/style/noNonNullAssertion: has checked before
+  // biome-ignore lint/style/noNonNullAssertion: already checked before use it
   const reuseEl = collection.shift()!
 
   if (!collection.length) {
@@ -243,7 +264,7 @@ function popElFromMap<K, V>(map: Map<K, V[]>, key: K) {
 function getSequence(arr: number[]): number[] {
   const p = arr.slice()
   const result = [0]
-  // biome-ignore lint/suspicious/noImplicitAnyLet: just ignored
+  // biome-ignore lint/suspicious/noImplicitAnyLet: just ignore this
   let i, j, u, v, c
   const len = arr.length
   for (i = 0; i < len; i++) {
