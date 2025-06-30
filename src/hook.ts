@@ -65,3 +65,28 @@ export function useWatch(
 
   return stop
 }
+
+export type InjectKey<T> = (string | symbol) & { _: T }
+
+export function provide<T = unknown>(
+  key: string | symbol | InjectKey<T>,
+  value: T,
+) {
+  const ctx = useContext()
+  ctx.ex ||= {}
+  ctx.ex[key] = value
+}
+
+export function inject<T>(key: string | symbol | InjectKey<T>): T | undefined {
+  const ctx = useContext()
+
+  let node = ctx.parent
+
+  while (node) {
+    if (node.ex?.[key]) {
+      return node.ex[key] as T
+    }
+
+    node = node.parent
+  }
+}
