@@ -1,11 +1,11 @@
-const airConfig = {
+const rsxConfig = {
   ssr: false,
 }
 
 export function enableSSR() {
-  airConfig.ssr = true
+  rsxConfig.ssr = true
 }
 
 export function disableSSR() {
-  airConfig.ssr = false
+  rsxConfig.ssr = false
 }

@@ -1,5 +1,6 @@
 import { isFn } from '@0x-jerry/utils'
 import { isRef as _isRef, type ComputedRef, type Ref } from '@vue/reactivity'
+import type { AnyProps } from '@/props'
 
 /**
  * @private
@@ -28,6 +29,9 @@ export class BindingRef {
 }
 
 /**
+ *
+ * Generate a lightweight binding ref
+ *
  * @param o
  * @param key
  */
@@ -48,4 +52,18 @@ export function isRef(value: unknown): value is Ref<unknown> {
 
 export function unref<T>(value: T | Ref<T> | ComputedRef<T>): T {
   return isRef(value) ? value.value : value
+}
+
+export type BindingRefs<T extends AnyProps> = {
+  [key in keyof T]: Ref<T[key]>
+}
+
+export function toBindingRefs<T extends AnyProps>(object: T): BindingRefs<T> {
+  const refs = {} as BindingRefs<T>
+
+  for (const key in object) {
+    refs[key] = toBindingRef(object, key)
+  }
+
+  return refs
 }

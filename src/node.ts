@@ -3,17 +3,21 @@ import { type ClassValue, clsx } from 'clsx'
 import { isComponentNode } from './ComponentNode'
 import { onUnmounted } from './hook'
 import { moveChildren, updateEl } from './nodeOp'
-import type { AnyProps } from './props'
+import { type AnyProps, normalizeProps } from './props'
 import { effect, isRef, unref } from './reactivity'
 
 export function createNativeElement(
   type: string,
-  props: AnyProps,
+  props?: AnyProps,
   children?: unknown[],
 ) {
   const el = document.createElement(type)
 
-  generateBindingFunction(el, props)
+  if (props) {
+    const _props = normalizeProps(type, props)
+    generateBindingFunction(el, _props)
+  }
+
   moveChildren(el, children)
 
   return el
@@ -25,7 +29,7 @@ function generateBindingFunction(el: HTMLElement, props: AnyProps) {
 
   for (const key in props) {
     const runner = effect(() => {
-      const value = transformProps(key, props[key])
+      const value = convertAttrValue(key, props[key])
 
       const old = previousProps.get(key)
 
@@ -50,8 +54,8 @@ function generateBindingFunction(el: HTMLElement, props: AnyProps) {
   }
 }
 
-function transformProps(key: string, value: unknown) {
-  if (key === 'class') {
+function convertAttrValue(attr: string, value: unknown) {
+  if (attr === 'class') {
     return clsx(value as ClassValue)
   }
 

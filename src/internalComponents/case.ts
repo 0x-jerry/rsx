@@ -1,12 +1,12 @@
 import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
 import { defineComponentName } from '@/test'
+import { createAnchorNode, dispatchAnchorMovedEvent } from '../anchorNode'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
-import { createDynamicNode, dispatchMovedEvent } from '../dynamicNode'
 import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
-import { transformProps } from '../props'
+import { normalizeProps } from '../props'
 import { $, computed } from '../reactivity'
 
 export interface CaseComponentProps {
@@ -17,7 +17,7 @@ export interface CaseComponentProps {
 export const VCase = defineComponent<CaseComponentProps>((props) => {
   const ctx = useContext()
 
-  const el = createDynamicNode('case')
+  const el = createAnchorNode('case')
 
   const caseKey = computed(() => String(props.condition))
 
@@ -34,7 +34,7 @@ export const VCase = defineComponent<CaseComponentProps>((props) => {
 
     if (childEl) {
       insertBefore(el, childEl)
-      dispatchMovedEvent(childEl)
+      dispatchAnchorMovedEvent(childEl)
     }
   })
 
@@ -78,7 +78,7 @@ export interface IfComponentProps {
 }
 
 export const VIf = defineComponent<IfComponentProps>((props) => {
-  const _props = transformProps(VIf, {
+  const _props = normalizeProps(VIf, {
     condition: $(() => !!props.condition),
     cases: {
       true: props.truthy,
@@ -86,7 +86,7 @@ export const VIf = defineComponent<IfComponentProps>((props) => {
     },
   })
 
-  return VCase(_props)
+  return VCase(_props as CaseComponentProps)
 })
 
 defineComponentName(VIf, 'VIf')

@@ -53,7 +53,7 @@ export function mountApp(
   return ctx
 }
 
-export function renderToString(Comp: FunctionalComponent<any>) {
+export function renderToString(Comp: FunctionalComponent) {
   // todo
   enableSSR()
 

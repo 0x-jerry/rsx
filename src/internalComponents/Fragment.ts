@@ -1,13 +1,13 @@
 import { defineComponentName } from '@/test'
+import { createAnchorNode, dispatchAnchorMovedEvent } from '../anchorNode'
 import { runWithContext } from '../context'
 import type { FunctionalComponent } from '../defineComponent'
-import { createDynamicNode, dispatchMovedEvent } from '../dynamicNode'
 import { onBeforeMount, onBeforeUnmount, useContext } from '../hook'
 import { normalizeNode } from '../node'
 import { insertBefore } from '../nodeOp'
 
 export const Fragment: FunctionalComponent = (_, children) => {
-  const el = createDynamicNode('fragment')
+  const el = createAnchorNode('fragment')
   const ctx = useContext()
 
   onBeforeMount(() => {
@@ -28,7 +28,7 @@ export const Fragment: FunctionalComponent = (_, children) => {
 
       if (childEl != null) {
         insertBefore(el, childEl)
-        dispatchMovedEvent(childEl)
+        dispatchAnchorMovedEvent(childEl)
       }
     }
   })

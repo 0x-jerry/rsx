@@ -35,6 +35,12 @@ export class DNodeContext extends EventEmitter<DNodeEventMap> {
   name?: string
   children?: Set<DNodeContext>
   el?: ChildNode
+  parent?: DNodeContext | null
+
+  /**
+   * Extra Data
+   */
+  ex?: Record<string | symbol, unknown>
 }
 
 export const {
@@ -82,17 +88,19 @@ function defineContext<T>() {
 }
 
 export function appendToCurrentContext(ctx: DNodeContext) {
-  const previousCtx = getCurrentContext()
+  const parentCtx = getCurrentContext()
 
-  if (!previousCtx) {
+  if (!parentCtx) {
     return
   }
 
   ctx.on(DNodeContextEventName.unmounted, () => {
     // remove it self
-    previousCtx.children?.delete(ctx)
+    parentCtx.children?.delete(ctx)
+    ctx.parent = null
   })
 
-  previousCtx.children ||= new Set()
-  previousCtx.children.add(ctx)
+  parentCtx.children ||= new Set()
+  parentCtx.children.add(ctx)
+  ctx.parent = parentCtx
 }
