@@ -1,31 +1,30 @@
+import { runWithContext } from '@/context'
+import { defineComponentName } from '@/test'
 import { defineComponent } from '../defineComponent'
-import { onBeforeMount, useWatch } from '../hook'
-import { createTextElement } from '../node'
+import { onBeforeMount, useContext, useWatch } from '../hook'
 import { moveChildren } from '../nodeOp'
-import { unref } from '../reactivity'
 
 export interface TeleportProps {
-  to: string
+  to?: string
 }
 
 export const Teleport = defineComponent<TeleportProps>((props, children) => {
-  const el = createTextElement('')
+  const ctx = useContext()
 
-  useWatch(() => unref(props.to), update)
+  const _update = () => runWithContext(update, ctx)
 
-  onBeforeMount(update)
+  useWatch(() => props.to, _update)
+  onBeforeMount(_update)
 
-  return el
+  const nonExistsContainer = document.createDocumentFragment()
 
   function update() {
-    const selector = unref(props.to)
-    const root = document.querySelector(selector)
+    const root = props.to
+      ? document.querySelector(props.to) || nonExistsContainer
+      : nonExistsContainer
 
-    if (!root) {
-      return
-    }
-
-    // todo, fix this
     moveChildren(root, children)
   }
 })
+
+defineComponentName(Teleport, 'Teleport')
