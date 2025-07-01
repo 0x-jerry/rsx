@@ -1,3 +1,9 @@
+import { Counter } from './Counter'
 import { TodoApp } from './Todo'
 
-export const App = () => <TodoApp></TodoApp>
+export const App = () => (
+  <div>
+    <Counter />
+    <TodoApp></TodoApp>
+  </div>
+)
