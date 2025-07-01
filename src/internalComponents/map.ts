@@ -4,9 +4,11 @@ import {
   AnchorNodeEventNames,
   createAnchorNode,
   dispatchAnchorMovedEvent,
+  getAnchorFirstChildNode,
+  isAnchorNode,
 } from '../anchorNode'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
-import { runWithContext } from '../context'
+import { type DNodeContext, runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
 import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
@@ -32,7 +34,7 @@ interface ChildContext extends ComponentNode {
 export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
   const ctx = useContext()
 
-  const el = createAnchorNode('map')
+  const anchorNode = createAnchorNode('map')
 
   let children: ChildContext[] = []
 
@@ -48,18 +50,18 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     runWithContext(() => update(), ctx)
   })
 
-  el.addEventListener(AnchorNodeEventNames.Moved, () => {
+  anchorNode.addEventListener(AnchorNodeEventNames.Moved, () => {
     children.forEach((child) => {
       const childEl = child.instance?.el
       if (childEl) {
-        insertBefore(el, childEl)
+        insertBefore(anchorNode, childEl)
 
         dispatchAnchorMovedEvent(childEl)
       }
     })
   })
 
-  return el
+  return anchorNode
 
   function update() {
     const c1: ChildContext[] = children
@@ -97,7 +99,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     if (i > e1) {
       while (i <= e2) {
         const n = c2[i]
-        const anchor = c1[e1 + 1]?.instance.el || el
+        const anchor = getFirstChildOfNode(c1[e1 + 1]?.instance) || anchorNode
 
         const nEl = n.instance.el
         if (nEl) {
@@ -135,7 +137,9 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
       let anchorPreviousNode =
         c1[i - 1]?.instance.el ||
-        (c1[0] ? c1[0]?.instance.el?.previousSibling : el.previousSibling)
+        (c1[0]
+          ? getFirstChildOfNode(c1[0]?.instance)?.previousSibling
+          : anchorNode.previousSibling)
 
       for (i = s2; i <= e2; i++) {
         const n2 = c2[i]
@@ -145,7 +149,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
           oldToNew.get(newSequence[increasingNewIndexSequence[0]]) === i
         ) {
           n2._r = false
-          anchorPreviousNode = n2.instance?.el as ChildNode | null
+          anchorPreviousNode = n2.instance.el
           increasingNewIndexSequence.shift()
           continue
         }
@@ -156,8 +160,8 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
             (anchorPreviousNode
               ? anchorPreviousNode.nextSibling
               : c1[0]?.instance.el?.parentElement
-                ? c1[0]?.instance.el
-                : null) || el
+                ? getFirstChildOfNode(c1[0]?.instance)
+                : null) || anchorNode
 
           insertBefore(anchor, n2El)
           dispatchAnchorMovedEvent(n2El)
@@ -174,6 +178,12 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     }
 
     children = c2
+
+    // update first child
+    {
+      const firstEl = c1.find((child) => child.instance.el)?.instance.el
+      anchorNode.__firstChild = firstEl
+    }
   }
 
   function buildNewChildren() {
@@ -305,4 +315,14 @@ function getSequence(arr: number[]): number[] {
     v = p[v]
   }
   return result
+}
+
+function getFirstChildOfNode(node?: DNodeContext) {
+  if (!node?.el) return
+
+  if (isAnchorNode(node.el)) {
+    return getAnchorFirstChildNode(node.el)
+  }
+
+  return node.el
 }

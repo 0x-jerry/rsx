@@ -18,7 +18,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     const contents = el
       .querySelectorAll('.item')
@@ -43,7 +43,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     const contents = el
       .querySelectorAll('.item')
@@ -76,7 +76,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -115,7 +115,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -180,7 +180,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -211,7 +211,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -242,7 +242,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -273,7 +273,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -286,7 +286,7 @@ describe('map component', () => {
     expect(contents).eql(['4', '1', '2', '3'])
   })
 
-  it('add item from end', async () => {
+  it('add item to the end', async () => {
     const App = dc(() => {
       const list = ref([1, 2, 3])
 
@@ -304,7 +304,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -335,7 +335,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -366,7 +366,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -397,7 +397,7 @@ describe('map component', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -460,7 +460,7 @@ describe('map component with fragment', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     const contents = el
       .querySelectorAll('.item')
@@ -501,7 +501,7 @@ describe('map component with fragment', () => {
       )
     })
 
-    const el = mountTestApp(App) as HTMLElement
+    const el = mountTestApp(App)
 
     await nextTick()
 
@@ -604,6 +604,546 @@ describe('map component with fragment', () => {
       '3-1',
       '1-0',
       '1-1',
+    ])
+  })
+
+  it('add item to list', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value = [1, 4, 2, 3]
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={({ item }) => (
+              <>
+                <div class="item">{item}-0</div>
+                <div class="item">{item}-1</div>
+              </>
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql([
+      '1-0',
+      '1-1',
+      '4-0',
+      '4-1',
+      '2-0',
+      '2-1',
+      '3-0',
+      '3-1',
+    ])
+  })
+
+  it('add item from start', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value.unshift(4)
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={({ item }) => (
+              <>
+                <div class="item">{item}-0</div>
+                <div class="item">{item}-1</div>
+              </>
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql([
+      '4-0',
+      '4-1',
+      '1-0',
+      '1-1',
+      '2-0',
+      '2-1',
+      '3-0',
+      '3-1',
+    ])
+  })
+
+  it('add item to the end', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value.push(4)
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={({ item }) => (
+              <>
+                <div class="item">{item}-0</div>
+                <div class="item">{item}-1</div>
+              </>
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql([
+      '1-0',
+      '1-1',
+      '2-0',
+      '2-1',
+      '3-0',
+      '3-1',
+      '4-0',
+      '4-1',
+    ])
+  })
+
+  it('delete item to list', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value = [1, 3]
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={({ item }) => (
+              <>
+                <div class="item">{item}-0</div>
+                <div class="item">{item}-1</div>
+              </>
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql(['1-0', '1-1', '3-0', '3-1'])
+  })
+
+  it('delete item from start', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value.shift()
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={({ item }) => (
+              <>
+                <div class="item">{item}-0</div>
+                <div class="item">{item}-1</div>
+              </>
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql(['2-0', '2-1', '3-0', '3-1'])
+  })
+
+  it('delete item from end', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value.pop()
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={({ item }) => (
+              <>
+                <div class="item">{item}-0</div>
+                <div class="item">{item}-1</div>
+              </>
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql(['1-0', '1-1', '2-0', '2-1'])
+  })
+})
+
+describe('map with map', () => {
+  it('non-reactivity data', async () => {
+    const App = dc(() => {
+      const list = [1, 2, 3]
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={(props) => (
+              <VMap
+                list={[1, 2]}
+                render={(props1) => (
+                  <>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-0`)}
+                    </div>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-1`)}
+                    </div>
+                  </>
+                )}
+              />
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql([
+      '1-1-0',
+      '1-1-1',
+      '1-2-0',
+      '1-2-1',
+      '2-1-0',
+      '2-1-1',
+      '2-2-0',
+      '2-2-1',
+      '3-1-0',
+      '3-1-1',
+      '3-2-0',
+      '3-2-1',
+    ])
+  })
+
+  it('reactivity data', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value = [4, 5, 6]
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={(props) => (
+              <VMap
+                list={[1, 2]}
+                render={(props1) => (
+                  <>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-0`)}
+                    </div>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-1`)}
+                    </div>
+                  </>
+                )}
+              />
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql([
+      '4-1-0',
+      '4-1-1',
+      '4-2-0',
+      '4-2-1',
+      '5-1-0',
+      '5-1-1',
+      '5-2-0',
+      '5-2-1',
+      '6-1-0',
+      '6-1-1',
+      '6-2-0',
+      '6-2-1',
+    ])
+  })
+
+  it('add item to list', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value = [1, 4, 2, 3]
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={(props) => (
+              <VMap
+                list={[1, 2]}
+                render={(props1) => (
+                  <>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-0`)}
+                    </div>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-1`)}
+                    </div>
+                  </>
+                )}
+              />
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql([
+      '1-1-0',
+      '1-1-1',
+      '1-2-0',
+      '1-2-1',
+      '4-1-0',
+      '4-1-1',
+      '4-2-0',
+      '4-2-1',
+      '2-1-0',
+      '2-1-1',
+      '2-2-0',
+      '2-2-1',
+      '3-1-0',
+      '3-1-1',
+      '3-2-0',
+      '3-2-1',
+    ])
+  })
+
+  it('add item from start', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value.unshift(4)
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={(props) => (
+              <VMap
+                list={[1, 2]}
+                render={(props1) => (
+                  <>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-0`)}
+                    </div>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-1`)}
+                    </div>
+                  </>
+                )}
+              />
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql([
+      '4-1-0',
+      '4-1-1',
+      '4-2-0',
+      '4-2-1',
+      '1-1-0',
+      '1-1-1',
+      '1-2-0',
+      '1-2-1',
+      '2-1-0',
+      '2-1-1',
+      '2-2-0',
+      '2-2-1',
+      '3-1-0',
+      '3-1-1',
+      '3-2-0',
+      '3-2-1',
+    ])
+  })
+
+  it('add item to the end', async () => {
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value.push(4)
+      })
+
+      return (
+        <div>
+          <VMap
+            list={list}
+            render={(props) => (
+              <VMap
+                list={[1, 2]}
+                render={(props1) => (
+                  <>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-0`)}
+                    </div>
+                    <div class="item">
+                      {$(() => `${props.item}-${props1.item}-1`)}
+                    </div>
+                  </>
+                )}
+              />
+            )}
+          />
+        </div>
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    await nextTick()
+
+    const contents = el
+      .querySelectorAll('.item')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+
+    expect(contents).eql([
+      '1-1-0',
+      '1-1-1',
+      '1-2-0',
+      '1-2-1',
+      '2-1-0',
+      '2-1-1',
+      '2-2-0',
+      '2-2-1',
+      '3-1-0',
+      '3-1-1',
+      '3-2-0',
+      '3-2-1',
+      '4-1-0',
+      '4-1-1',
+      '4-2-0',
+      '4-2-1',
     ])
   })
 })

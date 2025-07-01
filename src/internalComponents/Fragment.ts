@@ -11,7 +11,7 @@ import { normalizeNode } from '../node'
 import { insertBefore } from '../nodeOp'
 
 export const Fragment: FunctionalComponent = (_, children) => {
-  const el = createAnchorNode('fragment')
+  const anchorNode = createAnchorNode('fragment')
   const ctx = useContext()
 
   onBeforeMount(() => {
@@ -20,18 +20,22 @@ export const Fragment: FunctionalComponent = (_, children) => {
         const childEl = normalizeNode(child)
 
         if (childEl != null) {
-          insertBefore(el, childEl)
+          insertBefore(anchorNode, childEl)
+
+          if (!anchorNode.__firstChild) {
+            anchorNode.__firstChild = childEl
+          }
         }
       }
     }, ctx)
   })
 
-  el.addEventListener(AnchorNodeEventNames.Moved, () => {
+  anchorNode.addEventListener(AnchorNodeEventNames.Moved, () => {
     for (const child of children || []) {
       const childEl = normalizeNode(child)
 
       if (childEl != null) {
-        insertBefore(el, childEl)
+        insertBefore(anchorNode, childEl)
         dispatchAnchorMovedEvent(childEl)
       }
     }
@@ -41,7 +45,7 @@ export const Fragment: FunctionalComponent = (_, children) => {
     children?.forEach((child) => child.remove())
   })
 
-  return el
+  return anchorNode
 }
 
 defineComponentName(Fragment, 'Fragment')

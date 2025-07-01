@@ -36,28 +36,34 @@ export interface CaseComponentProps<T = unknown> {
 export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
   const ctx = useContext()
 
-  const anchorEl = createAnchorNode('case')
+  const anchorNode = createAnchorNode('case')
 
-  const caseKey = computed(() => props.condition)
+  const ChildComponent = computed(() => {
+    if (Array.isArray(props.cases)) {
+      return props.cases.find((n) => n.where(props.condition))?.render
+    }
+
+    return props.cases?.[String(props.condition)]
+  })
 
   let renderedCtxNode: Optional<ComponentNode> = null
 
   const rebuildChildren = () => runWithContext(updateCase, ctx)
 
-  useWatch(caseKey, rebuildChildren)
+  useWatch(ChildComponent, rebuildChildren)
 
   onBeforeMount(rebuildChildren)
 
-  anchorEl.addEventListener(AnchorNodeEventNames.Moved, () => {
+  anchorNode.addEventListener(AnchorNodeEventNames.Moved, () => {
     const childEl = renderedCtxNode?.instance.el
 
     if (childEl) {
-      insertBefore(anchorEl, childEl)
+      insertBefore(anchorNode, childEl)
       dispatchAnchorMovedEvent(childEl)
     }
   })
 
-  return anchorEl
+  return anchorNode
 
   function updateCase() {
     if (renderedCtxNode) {
@@ -66,10 +72,13 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
     }
 
     renderedCtxNode = rebuildChild()
+
+    anchorNode.__firstChild = renderedCtxNode?.instance.el
   }
 
   function rebuildChild() {
-    const Component = getComponent()
+    const Component = ChildComponent.value
+
     if (!Component) {
       return
     }
@@ -83,20 +92,12 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
     node.initialize()
 
     if (node.instance.el) {
-      insertBefore(anchorEl, node.instance.el)
+      insertBefore(anchorNode, node.instance.el)
     }
 
     mount(node.instance)
 
     return node
-  }
-
-  function getComponent() {
-    if (Array.isArray(props.cases)) {
-      return props.cases.find((n) => n.where(caseKey.value))?.render
-    }
-
-    return props.cases?.[String(caseKey.value)]
   }
 })
 
