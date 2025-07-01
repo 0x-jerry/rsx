@@ -1,6 +1,6 @@
 class AnchorNodeMovedEvent extends Event {
   constructor() {
-    super('moved')
+    super(AnchorNodeEventNames.Moved)
   }
 }
 
@@ -17,6 +17,10 @@ interface AnchorNode extends Comment {
     listener: (event: AnchorNodeMovedEvent) => void,
   ): void
 }
+
+export const AnchorNodeEventNames = {
+  Moved: 'moved',
+} as const
 
 /**
  * Used by dynamic component, which will change children position by internal logic

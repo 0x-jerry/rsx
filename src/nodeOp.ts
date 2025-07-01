@@ -34,7 +34,7 @@ export function moveChildren(
   children?: unknown[],
   anchor?: Node,
 ) {
-  const stack = children || []
+  const stack = (children || [])?.slice()
 
   while (stack.length) {
     const child = stack.shift()

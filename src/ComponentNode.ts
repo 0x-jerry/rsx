@@ -55,14 +55,16 @@ export class ComponentNode {
 
     const rootEl = this.type(_props, this.children)
 
-    if (isComponentNode(rootEl)) {
-      rootEl.initialize()
+    if (rootEl != null) {
+      if (isComponentNode(rootEl)) {
+        rootEl.initialize()
 
-      ctx.el = rootEl.instance.el
-    } else if (isHTMLNode(rootEl)) {
-      ctx.el = rootEl as ChildNode
-    } else {
-      console.warn('[ComponentNode] Invalid component node', rootEl)
+        ctx.el = rootEl.instance.el
+      } else if (isHTMLNode(rootEl)) {
+        ctx.el = rootEl as ChildNode
+      } else {
+        console.warn('[ComponentNode] Invalid component node', rootEl)
+      }
     }
 
     popCurrentContext()

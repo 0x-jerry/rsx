@@ -10,6 +10,7 @@ export interface RootNode extends HTMLElement {
 
 export function mountTestApp(App: FunctionalComponent) {
   const doc = document.createElement('div') as unknown as RootNode
+  document.body.append(doc)
   doc.id = 'app'
 
   doc._ = mountApp(App, doc)

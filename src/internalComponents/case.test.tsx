@@ -1,6 +1,6 @@
 import { dc } from '../defineComponent'
 import { onMounted } from '../hook'
-import { nextTick, ref } from '../reactivity'
+import { $, nextTick, ref } from '../reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from '../test'
 import { VCase, VIf } from './case'
 
@@ -65,6 +65,46 @@ describe('VCase', () => {
     await nextTick()
 
     expect(getContent()).eql(['1'])
+  })
+
+  it('where case condition', async () => {
+    const value = ref(7)
+
+    const App = dc(() => {
+      return (
+        <VCase
+          condition={value}
+          cases={[
+            {
+              where: (value) => value > 10,
+              render: (props) => <p>{$(() => props.value)} 1</p>,
+            },
+            {
+              where: (value) => 5 > value,
+              render: (props) => <p>{$(() => props.value)} 2</p>,
+            },
+            {
+              where: () => true,
+              render: (props) => <p>{$(() => props.value)} 3</p>,
+            },
+          ]}
+        />
+      )
+    })
+
+    const el = mountTestApp(App)
+
+    const getContent = () => el.querySelector('p')?.textContent
+
+    expect(getContent()).eql('7 3')
+
+    value.value = 11
+    await nextTick()
+    expect(getContent()).eql('11 1')
+
+    value.value = 3
+    await nextTick()
+    expect(getContent()).eql('3 2')
   })
 })
 

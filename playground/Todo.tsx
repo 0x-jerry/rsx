@@ -6,24 +6,14 @@ interface TodoOption {
   content: string
 }
 
-const TodoItem = dc<{ item: TodoOption; class: string; $completed: boolean }>(
-  (props) => {
-    const { item } = props
-
-    return (
-      <label class={$(() => ['flex', props.class])}>
-        <input
-          type="checkbox"
-          checked={$(item, 'completed')}
-          onChange={(e) =>
-            props.onUpdateCompleted?.((e.target as HTMLInputElement).checked)
-          }
-        />
-        {$(item, 'content')}
-      </label>
-    )
-  },
-)
+const TodoItem = dc<{ item: TodoOption; $completed: boolean }>((props) => {
+  return (
+    <label class={$(() => ['flex', props.item.completed ? 'bg-red' : ''])}>
+      <input type="checkbox" $={$(() => props.item, 'completed')} />
+      {$(() => props.item.content)}
+    </label>
+  )
+})
 
 export const TodoApp = dc(() => {
   const state = reactive({
@@ -43,43 +33,60 @@ export const TodoApp = dc(() => {
     return items
   })
 
-  return (
-    <div class="flex flex-col w-200px">
-      <div>
-        <button onClick={sort}> sort </button>
-        {$(() => state.items.length)}
-      </div>
-      <div className="flex">
-        <VMap
-          list={['all', 'completed', 'uncompleted']}
-          render={({ item }) => (
-            <button
-              onClick={() => {
-                state.type = item
-              }}
-              class={$(() => (state.type === item ? 'bg-green' : ''))}
-            >
-              {item}
-            </button>
-          )}
-        />
-      </div>
+  const Filter = (
+    <div className="flex">
+      <VMap
+        list={['all', 'completed', 'uncompleted']}
+        render={({ item }) => (
+          <button
+            onClick={() => {
+              state.type = item
+            }}
+            class={$(() => (state.type === item ? 'bg-green' : ''))}
+          >
+            {item}
+          </button>
+        )}
+      />
+    </div>
+  )
 
-      <div class="flex">
-        <input type="text" $={$(state, 'content')} />
-        <button onClick={addBatchTodo}>add</button>
-      </div>
+  const Toolbar = (
+    <div>
+      <button onClick={sort}> sort </button>
+      {$(() => state.items.length)}
+    </div>
+  )
+
+  const AddBar = (
+    <div class="flex">
+      <input type="text" $={$(state, 'content')} />
+      <button onClick={addBatchTodo}>add</button>
+    </div>
+  )
+
+  const TodoList = (
+    <>
       <hr />
       <VMap
         list={filteredItems}
-        render={({ item }) => (
+        render={(props) => (
           <TodoItem
-            item={item}
-            $completed={$(item, 'completed')}
-            class={$(() => (item.completed ? 'bg-red' : ''))}
-          ></TodoItem>
+            item={$(() => props.item)}
+            $completed={$(() => props.item, 'completed')}
+          />
         )}
       />
+    </>
+  )
+
+  return (
+    <div class="flex flex-col w-200px">
+      {Toolbar}
+      {Filter}
+
+      {AddBar}
+      {TodoList}
     </div>
   )
 

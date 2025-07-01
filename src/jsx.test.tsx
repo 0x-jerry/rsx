@@ -90,40 +90,39 @@ describe('jsx', () => {
     })
 
     it('should handle $ prop on select element', () => {
-      const v = ref('123')
+      const v = ref('1')
 
-      const Comp = () => h('input', { $: v })
+      const Comp = () => (
+        <select $={v}>
+          <option value="1"></option>
+          <option value="2"></option>
+        </select>
+      )
 
-      const el = mountTestApp(Comp).querySelector('input')!
+      const el = mountTestApp(Comp).querySelector('select')!
 
-      el.value = '12344'
-      expect(v.value).toBe('123')
+      el.value = '2'
+      expect(v.value).toBe('1')
 
-      el.dispatchEvent(new Event('input'))
-      expect(v.value).toBe('12344')
+      el.dispatchEvent(new Event('change'))
+      expect(v.value).toBe('2')
     })
   })
 
-  it('should work without context when render non-reactive props', () => {
+  it('should work without context when render with non-reactive props', () => {
     const el = h('div', { class: 'test' }) as HTMLDivElement
 
     expect(el.classList.contains('test')).toBe(true)
   })
 
-  it('should only work with context when render reactive props', () => {
-    const hasError = vi.fn()
-
-    try {
+  it('should only work with context when render with reactive props', () => {
+    const fn = () => {
       const cls = ref('test')
 
       h('div', { class: cls })
-    } catch (_error) {
-      // fixme, error check
-      // error: this should only used inside a context
-      hasError()
     }
 
-    expect(hasError).toBeCalledTimes(1)
+    expect(fn).throw('This should only used inside functional component')
   })
 
   it('should render as text node', async () => {
@@ -143,13 +142,13 @@ describe('jsx', () => {
     expect(text.textContent).toBe('world')
   })
 
-  it('should not allow change props directly', async () => {
+  it('should not allowed to change props directly', async () => {
     type Props = {
       $v: string
     }
 
     const Comp = dc<Props>((props) => {
-      // should not working
+      // should not work
       props.v = '123'
 
       return h(
@@ -178,11 +177,12 @@ describe('jsx', () => {
     el.dispatchEvent(new Event('click'))
 
     expect(props.v.value).toBe('123')
+    expect(el.textContent).toBe('1')
     await nextTick()
     expect(el.textContent).toBe('123')
   })
 
-  it('should be reactive when pass ref value', async () => {
+  it('should remain reactive when passing a ref value', async () => {
     type Props = {
       v: number
     }

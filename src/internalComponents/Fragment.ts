@@ -1,5 +1,9 @@
 import { defineComponentName } from '@/test'
-import { createAnchorNode, dispatchAnchorMovedEvent } from '../anchorNode'
+import {
+  AnchorNodeEventNames,
+  createAnchorNode,
+  dispatchAnchorMovedEvent,
+} from '../anchorNode'
 import { runWithContext } from '../context'
 import type { FunctionalComponent } from '../defineComponent'
 import { onBeforeMount, onBeforeUnmount, useContext } from '../hook'
@@ -22,7 +26,7 @@ export const Fragment: FunctionalComponent = (_, children) => {
     }, ctx)
   })
 
-  el.addEventListener('moved', () => {
+  el.addEventListener(AnchorNodeEventNames.Moved, () => {
     for (const child of children || []) {
       const childEl = normalizeNode(child)
 

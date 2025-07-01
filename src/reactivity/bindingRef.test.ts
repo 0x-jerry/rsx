@@ -1,3 +1,4 @@
+import { ref } from '.'
 import { $, toBindingRefs } from './bindingRef'
 
 describe('binding ref', () => {
@@ -21,6 +22,17 @@ describe('binding ref', () => {
     expect(a.value).toBe(1)
     a.value = 2
     expect(data.a).toBe(1)
+  })
+
+  it('binding ref data', () => {
+    const data = ref({
+      a: 1,
+    })
+    const a = $(data, 'a')
+
+    expect(a.value).toBe(1)
+    a.value = 2
+    expect(data.value.a).toBe(2)
   })
 
   it('toBindingRefs', () => {

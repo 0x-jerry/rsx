@@ -1,13 +1,16 @@
 import { type Ref, shallowRef } from '@vue/reactivity'
-import { normalizeProps } from '@/props'
 import { defineComponentName } from '@/test'
-import { createAnchorNode, dispatchAnchorMovedEvent } from '../anchorNode'
+import {
+  AnchorNodeEventNames,
+  createAnchorNode,
+  dispatchAnchorMovedEvent,
+} from '../anchorNode'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
 import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
-import { unref } from '../reactivity'
+import { computed } from '../reactivity'
 
 export interface MapComponentProps<T> {
   list: T[]
@@ -35,16 +38,17 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
   let dataContextMap = new Map<unknown, ChildContext[]>()
 
-  useWatch(
-    () => [...unref(props.list)],
-    () => runWithContext(() => update(), ctx),
+  const childrenKeys = computed(() =>
+    props.list.map((item, idx) => getItemKey(item, idx)),
   )
+
+  useWatch(childrenKeys, () => runWithContext(() => update(), ctx))
 
   onBeforeMount(() => {
     runWithContext(() => update(), ctx)
   })
 
-  el.addEventListener('moved', () => {
+  el.addEventListener(AnchorNodeEventNames.Moved, () => {
     children.forEach((child) => {
       const childEl = child.instance?.el
       if (childEl) {
@@ -178,17 +182,17 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     const newDataContextMap = new Map<unknown, ChildContext[]>()
 
     props.list.forEach((item, idx) => {
-      const dataKey = getItemKey(item, idx)
+      const dataKey = childrenKeys.value[idx]
 
       if (dataContextMap.has(dataKey)) {
-        const reuseCtx = popElFromMap(dataContextMap, dataKey)
+        const reuseCtx = popItemFromMap(dataContextMap, dataKey)
         reuseCtx._r = true
         if (reuseCtx._props) {
           reuseCtx._props.item.value = item
           reuseCtx._props.index.value = idx
         }
 
-        appendElToMap(newDataContextMap, dataKey, reuseCtx)
+        appendItemToMap(newDataContextMap, dataKey, reuseCtx)
 
         newChildren.push(reuseCtx)
 
@@ -211,7 +215,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
       newCtx.initialize()
       newCtx.instance.name = 'VMap.item'
 
-      appendElToMap(newDataContextMap, dataKey, newCtx)
+      appendItemToMap(newDataContextMap, dataKey, newCtx)
       newChildren.push(newCtx)
     })
 
@@ -237,7 +241,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
 defineComponentName(VMap, 'VMap')
 
-function appendElToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
+function appendItemToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
   let list = map.get(key)
   if (!list) {
     list = []
@@ -247,17 +251,17 @@ function appendElToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
   list.push(value)
 }
 
-function popElFromMap<K, V>(map: Map<K, V[]>, key: K) {
+function popItemFromMap<K, V>(map: Map<K, V[]>, key: K) {
   // biome-ignore lint/style/noNonNullAssertion: already checked before use it
   const collection = map.get(key)!
   // biome-ignore lint/style/noNonNullAssertion: already checked before use it
-  const reuseEl = collection.shift()!
+  const item = collection.shift()!
 
   if (!collection.length) {
     map.delete(key)
   }
 
-  return reuseEl
+  return item
 }
 
 // https://en.wikipedia.org/wiki/Longest_increasing_subsequence
