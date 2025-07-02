@@ -9,7 +9,9 @@
     "includes": [
       "src/**",
       "playground/**",
-      "types/**"
+      "types/**",
+      "tests/**",
+      "*.ts"
     ],
     "ignoreUnknown": false
   },

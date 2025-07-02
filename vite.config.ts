@@ -1,9 +1,9 @@
 /// <reference types="vitest" />
 
+import path from 'path'
+import uno from 'unocss/vite'
 import { defineConfig } from 'vite'
 import inspect from 'vite-plugin-inspect'
-import uno from 'unocss/vite'
-import path from 'path'
 
 export default defineConfig({
   esbuild: {
@@ -22,7 +22,7 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     coverage: {
-      include: ['src/**']
-    }
+      include: ['src/**'],
+    },
   },
 })

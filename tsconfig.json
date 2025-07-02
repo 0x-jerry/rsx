@@ -5,14 +5,27 @@
     "esModuleInterop": true,
     "moduleResolution": "bundler",
     "forceConsistentCasingInFileNames": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "jsx": "preserve",
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
-    "types": ["vitest/globals"]
+    "types": [
+      "vitest/globals"
+    ]
   },
-  "include": ["src", "types", "playground"]
+  "include": [
+    "src",
+    "types",
+    "playground",
+    "tests"
+  ]
 }
