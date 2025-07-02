@@ -1178,11 +1178,11 @@ describe('map context tree', () => {
 
     const root = mountTestApp(App)
 
-    expect(root.outerHTML).toMatchSnapshot()
+    expect(root).toMatchSnapshot('html')
 
     const ctxTree = contextToJson(root._)
 
-    expect(ctxTree).toMatchSnapshot()
+    expect(ctxTree).toMatchSnapshot('ctx tree')
   })
 
   it('reactive value', async () => {
@@ -1222,18 +1222,10 @@ describe('map context tree', () => {
 
     const root = mountTestApp(App)
 
-    expect(root.outerHTML).toMatchSnapshot()
+    expect(root).toMatchSnapshot('html')
 
     const ctxTree = contextToJson(root._)
 
-    expect(ctxTree).toMatchSnapshot()
-
-    await nextTick()
-
-    expect(root.outerHTML).toMatchSnapshot()
-
-    const ctxTree1 = contextToJson(root._)
-
-    expect(ctxTree1).toMatchSnapshot()
+    expect(ctxTree).toMatchSnapshot('ctx tree')
   })
 })

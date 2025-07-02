@@ -45,10 +45,10 @@ describe('fragment context tree', () => {
 
     const root = mountTestApp(App)
 
-    expect(root.outerHTML).toMatchSnapshot()
+    expect(root).toMatchSnapshot('html')
 
     const ctxTree = contextToJson(root._)
 
-    expect(ctxTree).toMatchSnapshot()
+    expect(ctxTree).toMatchSnapshot('ctx tree')
   })
 })

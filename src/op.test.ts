@@ -9,6 +9,6 @@ describe('ssr', () => {
     })
 
     const str = renderToString(Comp)
-    expect(str).toMatchSnapshot()
+    expect(str).toMatchSnapshot('html')
   })
 })

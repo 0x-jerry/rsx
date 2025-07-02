@@ -26,7 +26,7 @@ describe('Teleport', () => {
 
     const root = mountTestApp(App)
 
-    expect(root.outerHTML).toMatchSnapshot()
+    expect(root).toMatchSnapshot('html')
   })
 
   it('reactivity data', async () => {
@@ -58,7 +58,7 @@ describe('Teleport', () => {
     const root = mountTestApp(App)
     await nextTick()
 
-    expect(root.outerHTML).toMatchSnapshot()
+    expect(root).toMatchSnapshot('html')
   })
 
   it('container node is not exists', async () => {
@@ -90,6 +90,6 @@ describe('Teleport', () => {
     const root = mountTestApp(App)
     await nextTick()
 
-    expect(root.outerHTML).toMatchSnapshot()
+    expect(root).toMatchSnapshot('html')
   })
 })

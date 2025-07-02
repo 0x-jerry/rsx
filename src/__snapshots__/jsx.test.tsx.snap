@@ -1,8 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`jsx context tree > context tree 1`] = `"<div id="app"><div class="A"><span>a</span><span>1</span><div class="B"><span>b</span><span>2</span><div class="A"><span>a</span></div></div><div class="A"><span>a</span></div><span>3</span></div></div>"`;
-
-exports[`jsx context tree > context tree 2`] = `
+exports[`jsx context tree > context tree > ctx tree 1`] = `
 {
   "children": [
     {
@@ -26,4 +24,48 @@ exports[`jsx context tree > context tree 2`] = `
   ],
   "name": "Root",
 }
+`;
+
+exports[`jsx context tree > context tree > html 1`] = `
+<div
+  id="app"
+>
+  <div
+    class="A"
+  >
+    <span>
+      a
+    </span>
+    <span>
+      1
+    </span>
+    <div
+      class="B"
+    >
+      <span>
+        b
+      </span>
+      <span>
+        2
+      </span>
+      <div
+        class="A"
+      >
+        <span>
+          a
+        </span>
+      </div>
+    </div>
+    <div
+      class="A"
+    >
+      <span>
+        a
+      </span>
+    </div>
+    <span>
+      3
+    </span>
+  </div>
+</div>
 `;

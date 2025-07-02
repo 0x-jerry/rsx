@@ -1,7 +1,72 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Teleport > container node is not exists 1`] = `"<div id="app"><span>1</span><div><span>0</span><div id="tp"></div><div id="tp2"></div></div><!--fragment--></div>"`;
+exports[`Teleport > container node is not exists > html 1`] = `
+<div
+  id="app"
+>
+  <span>
+    1
+  </span>
+  <div>
+    <span>
+      0
+    </span>
+    <div
+      id="tp"
+    />
+    <div
+      id="tp2"
+    />
+  </div>
+  <!--fragment-->
+</div>
+`;
 
-exports[`Teleport > non-reactivity data 1`] = `"<div id="app"><span>1</span><div><span>0</span><div id="tp"><span>2</span></div></div><!--fragment--></div>"`;
+exports[`Teleport > non-reactivity data > html 1`] = `
+<div
+  id="app"
+>
+  <span>
+    1
+  </span>
+  <div>
+    <span>
+      0
+    </span>
+    <div
+      id="tp"
+    >
+      <span>
+        2
+      </span>
+    </div>
+  </div>
+  <!--fragment-->
+</div>
+`;
 
-exports[`Teleport > reactivity data 1`] = `"<div id="app"><span>1</span><div><span>0</span><div id="tp"></div><div id="tp2"><span>2</span></div></div><!--fragment--></div>"`;
+exports[`Teleport > reactivity data > html 1`] = `
+<div
+  id="app"
+>
+  <span>
+    1
+  </span>
+  <div>
+    <span>
+      0
+    </span>
+    <div
+      id="tp"
+    />
+    <div
+      id="tp2"
+    >
+      <span>
+        2
+      </span>
+    </div>
+  </div>
+  <!--fragment-->
+</div>
+`;

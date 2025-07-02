@@ -59,11 +59,11 @@ export function useWatch(
   fn: WatchCallback,
   opt?: WatchOptions,
 ): WatchHandle {
-  const stop = watch(getter, fn, opt)
+  const stopHandle = watch(getter, fn, opt)
 
-  onUnmounted(stop)
+  onUnmounted(stopHandle)
 
-  return stop
+  return stopHandle
 }
 
 export type InjectKey<T> = (string | symbol) & { _: T }

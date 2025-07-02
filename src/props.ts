@@ -1,13 +1,13 @@
 import {
   camelCase,
   type EmptyObject,
-  isFn,
   isString,
   PascalCase,
 } from '@0x-jerry/utils'
 import type { Merge, UnionToIntersection } from 'type-fest'
 import type { FunctionalComponent } from '.'
 import { isRef, unref } from './reactivity'
+import { composeEventListeners } from './utils'
 
 type Compose<
   Key extends string,
@@ -61,7 +61,11 @@ export function normalizeProps(
     const value = props[key]
     if (!key.startsWith('$')) {
       // Prevent change props directly.
-      _raw[key] = value
+      // Skip overridden event
+      if (!_raw[key]) {
+        _raw[key] = value
+      }
+
       continue
     }
 
@@ -70,7 +74,7 @@ export function normalizeProps(
         ? transformNativeBindingRef(type, value, props)
         : {}
 
-      // todo, check duplicate key
+      // todo, warning when key is duplicated
       Object.assign(_raw, newProps)
       continue
     }
@@ -86,16 +90,9 @@ export function normalizeProps(
       const evtKey = `onUpdate${PascalCase(name)}`
       const existCallback = _raw[evtKey]
 
-      if (isFn(existCallback)) {
-        _raw[evtKey] = (v: unknown) => {
-          value.value = v
-          existCallback(v)
-        }
-      } else {
-        _raw[evtKey] = (v: unknown) => {
-          value.value = v
-        }
-      }
+      _raw[evtKey] = composeEventListeners((v: unknown) => {
+        value.value = v
+      }, existCallback)
     }
   }
 
@@ -131,26 +128,26 @@ function transformNativeBindingRef(
     if (unref(allProps.type) === 'checkbox') {
       props.checked = value
       if (isRef(value)) {
-        props.onChange = (e: InputEvent) => {
+        props.onChange = composeEventListeners((e: InputEvent) => {
           value.value = (e.target as HTMLInputElement).checked
-        }
+        }, allProps.onChange)
       }
     } else {
       props.value = value
 
       if (isRef(value)) {
-        props.onInput = (e: InputEvent) => {
+        props.onInput = composeEventListeners((e: InputEvent) => {
           value.value = (e.target as HTMLInputElement).value
-        }
+        }, allProps.onInput)
       }
     }
   } else if (type === 'select') {
     props.value = value
 
     if (isRef(value)) {
-      props.onChange = (e: InputEvent) => {
+      props.onChange = composeEventListeners((e: InputEvent) => {
         value.value = (e.target as HTMLSelectElement).value
-      }
+      }, allProps.onChange)
     }
   }
 
