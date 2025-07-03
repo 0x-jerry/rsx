@@ -1,6 +1,6 @@
 import { $, dc, toBindingRefs } from '@/index'
+import styles from './Button.module.css'
 import type { CommonProps } from './utils'
-import './Button.scss'
 
 export interface ButtonProps extends CommonProps {
   type?: 'link'
@@ -11,9 +11,9 @@ export const Button = dc<ButtonProps>((props, children) => {
   const { class: _class, type, ...rest } = toBindingRefs(props)
 
   const classes = $(() => [
-    'btn',
+    styles.btn,
     _class?.value,
-    type?.value === 'link' && 'btn-link',
+    type?.value === 'link' && styles.btnLink,
   ])
 
   return (

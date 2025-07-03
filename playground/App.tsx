@@ -3,11 +3,27 @@ import { Button } from './components/Button'
 import { DemoSection } from './components/DemoSection'
 import { Input } from './components/Input'
 import { InputNumber } from './components/InputNumber'
+import { Select } from './components/Select'
+import { Tooltip } from './components/Tooltip'
 
 export const App = () => {
   const inputState = {
     text: ref('text'),
     num: ref(123),
+  }
+
+  const selectState = {
+    value: ref(1),
+    options: ref([
+      {
+        label: '1',
+        value: 1,
+      },
+      {
+        label: '2',
+        value: 2,
+      },
+    ]),
   }
 
   return (
@@ -21,7 +37,24 @@ export const App = () => {
           <Button>Button</Button>
           <Button type="link">Link Button</Button>
         </DemoSection>
-        <DemoSection title="Select"></DemoSection>
+        <DemoSection title="Tooltip">
+          <div class="flex flex-col gap-2">
+            <div>
+              <Tooltip>
+                Hover me
+                <Tooltip.Content>
+                  <p>This is content</p>
+                </Tooltip.Content>
+              </Tooltip>
+            </div>
+          </div>
+        </DemoSection>
+        <DemoSection title="Select">
+          <div class="flex flex-col gap-2">
+            <Select options={selectState.options} $value={selectState.value} />
+            {selectState.value}
+          </div>
+        </DemoSection>
         <DemoSection title="Input">
           <div class="flex flex-col gap-2">
             <div class="flex gap-1 items-center">
@@ -30,7 +63,8 @@ export const App = () => {
               <span>{inputState.text}</span>
               <Button
                 onClick={() => {
-                  inputState.num.value = inputState.text.value as any
+                  inputState.num.value = inputState.text
+                    .value as unknown as number
                 }}
               >
                 Apply to InputNumber

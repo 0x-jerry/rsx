@@ -1,4 +1,5 @@
 import { $, dc, toBindingRefs } from '@/index'
+import styles from './Input.module.css'
 import type { CommonProps } from './utils'
 
 export interface InputProps extends CommonProps {
@@ -8,7 +9,7 @@ export interface InputProps extends CommonProps {
 export const Input = dc<InputProps>((props) => {
   const { class: _class, value, ...rest } = toBindingRefs(props)
 
-  const classes = $(() => ['input', _class?.value])
+  const classes = $(() => [styles.input, _class?.value])
 
   return (
     <input

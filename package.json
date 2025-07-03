@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@0x-jerry/utils": "^5.0.0",
+    "@floating-ui/dom": "^1.7.2",
     "@vue/reactivity": "^3.5.17",
     "clsx": "^2.1.1"
   },

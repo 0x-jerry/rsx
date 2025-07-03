@@ -7,7 +7,7 @@
   @apply active:(bg-primary border-primary-5);
 }
 
-.btn-link {
+.btnLink {
   @apply bg-transparent border-(1 solid transparent);
   @apply hover:(bg-transparent border-transparent);
   @apply active:(bg-transparent border-transparent);

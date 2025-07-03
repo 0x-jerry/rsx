@@ -1,0 +1,22 @@
+.select {
+  cursor: pointer;
+}
+
+.select .placeholder {
+  @apply px-1 py-0.5;
+
+  @apply border-(1 solid gray);
+}
+
+.option {
+  /* @apply bg-white; */
+}
+
+.option:hover {
+  @apply bg-light-7;
+}
+
+.optionWrapper {
+  position: relative;
+  cursor: pointer;
+}

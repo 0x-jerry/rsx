@@ -15,7 +15,12 @@ export default defineConfig({
   plugins: [inspect(), uno()],
   resolve: {
     alias: {
-      '@/': path.resolve('src') + '/',
+      '@/': `${path.resolve('src')}/`,
+    },
+  },
+  css: {
+    modules: {
+      generateScopedName: (name) => `r-${name}`,
     },
   },
   test: {

@@ -1,0 +1,31 @@
+.tooltip {
+  position: absolute;
+  width: max-content;
+
+  display: none;
+  opacity: 0;
+
+  @apply transition;
+
+  transition-property: opacity, display;
+  transition-behavior: allow-discrete;
+
+  @apply rounded-sm px-2 py-1;
+  @apply bg-white border-(1 solid primary);
+}
+
+.tooltip.show {
+  display: block;
+  opacity: 1;
+}
+
+@starting-style {
+  .tooltip.show {
+    display: block;
+    opacity: 0;
+  }
+}
+
+.reference {
+  display: inline-block;
+}

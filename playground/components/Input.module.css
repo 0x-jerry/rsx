@@ -1,0 +1,9 @@
+.input {
+  outline: none;
+  appearance: none;
+  border: 1px solid;
+
+  @apply p-1 py-0.5;
+
+  @apply border-primary;
+}
