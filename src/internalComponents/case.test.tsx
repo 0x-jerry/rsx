@@ -1,5 +1,5 @@
 import { dc } from '../defineComponent'
-import { onMounted } from '../hook'
+import { onBeforeMount, onMounted, onUnmounted } from '../hook'
 import { $, nextTick, ref } from '../reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from '../test'
 import { VCase, VIf } from './case'
@@ -60,6 +60,8 @@ describe('VCase', () => {
         .map((item) => item.textContent)
         .toArray()
 
+    expect(getContent()).eql(['0'])
+    await nextTick()
     expect(getContent()).eql(['1'])
   })
 
@@ -156,6 +158,8 @@ describe('VIf', () => {
         .map((item) => item.textContent)
         .toArray()
 
+    expect(getContent()).eql(['0'])
+    await nextTick()
     expect(getContent()).eql(['1'])
   })
 })
@@ -245,11 +249,89 @@ describe('case context tree', () => {
     defineComponentName(App, 'App')
 
     const root = mountTestApp(App)
+    await nextTick()
 
     expect(root).toMatchSnapshot('html')
 
     const ctxTree = contextToJson(root._)
 
     expect(ctxTree).toMatchSnapshot('ctx tree')
+  })
+
+  it('lifecycle hook', async () => {
+    const mountedFnA = vi.fn()
+    const beforeMountFnA = vi.fn()
+    const unmountedFnA = vi.fn()
+
+    const A = () => {
+      onBeforeMount(beforeMountFnA)
+      onMounted(mountedFnA)
+      onUnmounted(unmountedFnA)
+
+      return (
+        <div class="A">
+          <span>a</span>
+        </div>
+      )
+    }
+
+    const mountedFnB = vi.fn()
+    const beforeMountFnB = vi.fn()
+    const unmountedFnB = vi.fn()
+
+    const B = () => {
+      onBeforeMount(beforeMountFnB)
+      onMounted(mountedFnB)
+      onUnmounted(unmountedFnB)
+
+      return (
+        <div class="B">
+          <span>b</span>
+        </div>
+      )
+    }
+
+    const value = ref(0)
+
+    const App = dc(() => {
+      return (
+        <VCase
+          condition={value}
+          cases={{
+            '0': () => <A>0</A>,
+            '1': () => <B>1</B>,
+          }}
+        />
+      )
+    })
+
+    expect(mountedFnA).toBeCalledTimes(0)
+    expect(beforeMountFnA).toBeCalledTimes(0)
+    expect(unmountedFnA).toBeCalledTimes(0)
+
+    expect(mountedFnB).toBeCalledTimes(0)
+    expect(beforeMountFnB).toBeCalledTimes(0)
+    expect(unmountedFnB).toBeCalledTimes(0)
+
+    mountTestApp(App)
+
+    expect(mountedFnA).toBeCalledTimes(1)
+    expect(beforeMountFnA).toBeCalledTimes(1)
+    expect(unmountedFnA).toBeCalledTimes(0)
+
+    expect(mountedFnB).toBeCalledTimes(0)
+    expect(beforeMountFnB).toBeCalledTimes(0)
+    expect(unmountedFnB).toBeCalledTimes(0)
+
+    value.value = 1
+    await nextTick()
+
+    expect(mountedFnA).toBeCalledTimes(1)
+    expect(beforeMountFnA).toBeCalledTimes(1)
+    expect(unmountedFnA).toBeCalledTimes(1)
+
+    expect(mountedFnB).toBeCalledTimes(1)
+    expect(beforeMountFnB).toBeCalledTimes(1)
+    expect(unmountedFnB).toBeCalledTimes(0)
   })
 })

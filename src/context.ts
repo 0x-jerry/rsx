@@ -41,6 +41,9 @@ export class DNodeContext extends EventEmitter<DNodeEventMap> {
    * Extra Data
    */
   ex?: Record<string | symbol, unknown>
+
+  _mounted?: boolean
+  _unmounted?: boolean
 }
 
 export const {

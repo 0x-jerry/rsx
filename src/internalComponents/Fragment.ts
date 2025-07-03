@@ -7,45 +7,50 @@ import {
 import { runWithContext } from '../context'
 import type { FunctionalComponent } from '../defineComponent'
 import { onBeforeMount, onBeforeUnmount, useContext } from '../hook'
-import { normalizeNode } from '../node'
-import { insertBefore } from '../nodeOp'
+import { insertBefore, processRawChildren } from '../nodeOp'
 
 export const Fragment: FunctionalComponent = (_, children) => {
   const anchorNode = createAnchorNode('fragment')
   const ctx = useContext()
 
+  const childNodes: ChildNode[] = []
+
   onBeforeMount(() => {
     runWithContext(() => {
-      for (const child of children || []) {
-        const childEl = normalizeNode(child)
+      processRawChildren(children || [], (childEl) => {
+        childNodes.push(childEl)
 
-        if (childEl != null) {
-          insertBefore(anchorNode, childEl)
+        insertBefore(anchorNode, childEl)
 
-          if (!anchorNode.__firstChild) {
-            anchorNode.__firstChild = childEl
-          }
+        if (!anchorNode.__firstChild) {
+          anchorNode.__firstChild = childEl
         }
-      }
+      })
     }, ctx)
   })
 
   anchorNode.addEventListener(AnchorNodeEventNames.Moved, () => {
-    for (const child of children || []) {
-      const childEl = normalizeNode(child)
-
-      if (childEl != null) {
-        insertBefore(anchorNode, childEl)
-        dispatchAnchorMovedEvent(childEl)
-      }
+    for (const childEl of childNodes) {
+      insertBefore(anchorNode, childEl)
+      dispatchAnchorMovedEvent(childEl)
     }
   })
 
   onBeforeUnmount(() => {
-    children?.forEach((child) => child.remove())
+    for (const childEl of childNodes) {
+      childEl.remove()
+    }
   })
 
   return anchorNode
 }
 
 defineComponentName(Fragment, 'Fragment')
+
+export function createNamedFragment(name: string) {
+  const Component = Fragment.bind({})
+
+  defineComponentName(Component, name)
+
+  return Component
+}

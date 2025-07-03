@@ -1,5 +1,5 @@
 import { dc } from '../defineComponent'
-import { onMounted } from '../hook'
+import { onBeforeMount, onMounted, onUnmounted } from '../hook'
 import { $, nextTick, ref, toBindingRefs } from '../reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from '../test'
 import { VMap } from './map'
@@ -1146,6 +1146,49 @@ describe('map with map', () => {
       '4-2-1',
     ])
   })
+
+  it('lifecycle hook', async () => {
+    const lifecycle: string[] = []
+
+    const Item = dc<{ item: number }>((props) => {
+      onUnmounted(() => {
+        lifecycle.push(`um-${props.item}`)
+      })
+      onBeforeMount(() => {
+        lifecycle.push(`bm-${props.item}`)
+      })
+      onMounted(() => {
+        lifecycle.push(`m-${props.item}`)
+      })
+
+      return <div>{props.item}</div>
+    })
+
+    const App = dc(() => {
+      const list = ref([1, 2, 3])
+
+      onMounted(() => {
+        list.value = [3, 1, 4]
+      })
+
+      return <VMap list={list} render={Item} />
+    })
+
+    mountTestApp(App)
+    await nextTick()
+
+    expect(lifecycle).eql([
+      'bm-1',
+      'm-1',
+      'bm-2',
+      'm-2',
+      'bm-3',
+      'm-3',
+      'um-2',
+      'bm-4',
+      'm-4',
+    ])
+  })
 })
 
 describe('map context tree', () => {
@@ -1221,6 +1264,7 @@ describe('map context tree', () => {
     defineComponentName(App, 'App')
 
     const root = mountTestApp(App)
+    await nextTick()
 
     expect(root).toMatchSnapshot('html')
 

@@ -15,6 +15,7 @@ export function unmount(ctx: DNodeContext) {
 
   ctx.children?.forEach((child) => unmount(child))
 
+  ctx._unmounted = true
   ctx.emit(DNodeContextEventName.unmounted)
 }
 
@@ -23,6 +24,7 @@ export function mount(ctx: DNodeContext) {
 
   ctx.children?.forEach((item) => mount(item))
 
+  ctx._mounted = true
   ctx.emit(DNodeContextEventName.mounted)
 }
 

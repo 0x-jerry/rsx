@@ -34,7 +34,22 @@ export function moveChildren(
   children?: unknown[],
   anchor?: Node,
 ) {
-  const stack = (children || [])?.slice()
+  processRawChildren(children || [], (childEl) => {
+    moveTo(parent, childEl, anchor)
+  })
+}
+
+/**
+ * Flat and normalize children items
+ *
+ * @param children
+ * @param cb
+ */
+export function processRawChildren(
+  children: unknown[],
+  cb: (childEl: ChildNode) => void,
+) {
+  const stack = children.slice()
 
   while (stack.length) {
     const child = stack.shift()
@@ -46,7 +61,7 @@ export function moveChildren(
     const childEl = normalizeNode(child)
 
     if (childEl != null) {
-      moveTo(parent, childEl, anchor)
+      cb(childEl)
     }
   }
 }

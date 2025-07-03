@@ -1,18 +1,17 @@
 import type { EmptyObject } from '@0x-jerry/utils'
-import type { ToMaybeRef } from '.'
 import type { DefineProps } from './props'
+import type { IsStartWithCapitalizedLetter, MaybeRef } from './types'
 
-export interface PropOption<T = any> {
-  type?: T
-  default?: T | (() => T)
+export type PropsType<T = any> = Record<string, T>
+
+type ToPropRefs<T extends {}> = {
+  /**
+   * Start with capitalized letter means this prop is not used as reactive prop
+   */
+  [key in keyof T]: key extends IsStartWithCapitalizedLetter<key>
+    ? T[key]
+    : MaybeRef<T[key]>
 }
-
-export type PropsType<T = any> = Record<string, T | PropOption<T>>
-
-// export interface ComponentOption<Props extends PropsType = EmptyObject> {
-//   name?: string
-//   props?: Props
-// }
 
 /**
  * @private
@@ -24,13 +23,16 @@ export type FunctionalComponent<P extends PropsType = any> = (
 
 type _NoInferProps<P extends EmptyObject> = DefineProps<P> & Record<string, any>
 
+export type ExposedFunctionalComponent<P extends PropsType = any> =
+  FunctionalComponent<ToPropRefs<P>>
+
 /**
  * Auto calculate props from generic type P
  * @param impl
  */
 export function defineComponent<P extends PropsType>(
   impl: NoInfer<FunctionalComponent<_NoInferProps<P>>>,
-): FunctionalComponent<ToMaybeRef<P>>
+): ExposedFunctionalComponent<P>
 
 /**
  * Infer props from impl parameter
@@ -38,7 +40,7 @@ export function defineComponent<P extends PropsType>(
  */
 export function defineComponent<P extends PropsType>(
   impl: FunctionalComponent<P>,
-): FunctionalComponent<ToMaybeRef<P>>
+): ExposedFunctionalComponent<P>
 
 /**
  * implement

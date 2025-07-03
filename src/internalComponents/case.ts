@@ -1,4 +1,5 @@
 import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
+import { asyncWatcherScheduler } from '@/reactivity/scheduler'
 import { defineComponentName } from '@/test'
 import {
   AnchorNodeEventNames,
@@ -50,7 +51,9 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
 
   const rebuildChildren = () => runWithContext(updateCase, ctx)
 
-  useWatch(ChildComponent, rebuildChildren)
+  useWatch(ChildComponent, rebuildChildren, {
+    scheduler: asyncWatcherScheduler,
+  })
 
   onBeforeMount(rebuildChildren)
 
@@ -95,7 +98,9 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
       insertBefore(anchorNode, node.instance.el)
     }
 
-    mount(node.instance)
+    if (ctx._mounted) {
+      mount(node.instance)
+    }
 
     return node
   }

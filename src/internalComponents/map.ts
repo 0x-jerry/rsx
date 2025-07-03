@@ -1,4 +1,5 @@
 import { type Ref, shallowRef } from '@vue/reactivity'
+import { asyncWatcherScheduler } from '@/reactivity/scheduler'
 import { defineComponentName } from '@/test'
 import {
   AnchorNodeEventNames,
@@ -9,15 +10,28 @@ import {
 } from '../anchorNode'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { type DNodeContext, runWithContext } from '../context'
-import { defineComponent, type FunctionalComponent } from '../defineComponent'
+import {
+  defineComponent,
+  type ExposedFunctionalComponent,
+  type FunctionalComponent,
+} from '../defineComponent'
 import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
 import { computed } from '../reactivity'
 
+export interface MapItemProps<Item> {
+  item: Item
+  index: number
+}
+
+export type MapItemComponent<Item> = ExposedFunctionalComponent<
+  MapItemProps<Item>
+>
+
 export interface MapComponentProps<T> {
   list: T[]
   key?: (item: T, index: number) => unknown
-  render: FunctionalComponent<{ item: T; index: number }>
+  render: FunctionalComponent<MapItemProps<T>>
 }
 
 interface ChildContext extends ComponentNode {
@@ -44,10 +58,18 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     props.list.map((item, idx) => getItemKey(item, idx)),
   )
 
-  useWatch(childrenKeys, () => runWithContext(() => update(), ctx))
+  useWatch(
+    childrenKeys,
+    () => {
+      runWithContext(update, ctx)
+    },
+    {
+      scheduler: asyncWatcherScheduler,
+    },
+  )
 
   onBeforeMount(() => {
-    runWithContext(() => update(), ctx)
+    runWithContext(update, ctx)
   })
 
   anchorNode.addEventListener(AnchorNodeEventNames.Moved, () => {
@@ -107,7 +129,9 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
           dispatchAnchorMovedEvent(nEl)
         }
 
-        mount(n.instance)
+        if (ctx._mounted) {
+          mount(n.instance)
+        }
 
         i++
       }
@@ -172,7 +196,9 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
         if (n2._r) {
           n2._r = false
         } else {
-          mount(n2.instance)
+          if (ctx._mounted) {
+            mount(n2.instance)
+          }
         }
       }
     }
@@ -181,7 +207,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
     // update first child
     {
-      const firstEl = c1.find((child) => child.instance.el)?.instance.el
+      const firstEl = children.find((child) => child.instance.el)?.instance.el
       anchorNode.__firstChild = firstEl
     }
   }

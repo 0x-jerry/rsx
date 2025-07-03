@@ -4,11 +4,12 @@ import { disableSSR, enableSSR } from './config'
 import {
   appendToCurrentContext,
   createNodeContext,
+  type DNodeContext,
   popCurrentContext,
   setCurrentContext,
 } from './context'
 import type { FunctionalComponent } from './defineComponent'
-import { mount } from './hook'
+import { mount, unmount } from './hook'
 import { isHTMLNode } from './node'
 import { moveTo } from './nodeOp'
 
@@ -51,6 +52,14 @@ export function mountApp(
   mount(ctx)
 
   return ctx
+}
+
+export function unmountApp(app: DNodeContext) {
+  if (app._unmounted) {
+    return
+  }
+
+  unmount(app)
 }
 
 export function renderToString(Comp: FunctionalComponent) {

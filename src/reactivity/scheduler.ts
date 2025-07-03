@@ -1,3 +1,5 @@
+import type { WatchScheduler } from '@vue/reactivity'
+
 const resolvedPromise = Promise.resolve()
 
 let currentPromise: Promise<void> | null = null
@@ -28,4 +30,8 @@ export function queueJob(job: Job) {
   if (currentPromise) return
 
   currentPromise = resolvedPromise.then(flushJobs)
+}
+
+export const asyncWatcherScheduler: WatchScheduler = (job, _isFirstRun) => {
+  queueJob(job)
 }
