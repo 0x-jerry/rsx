@@ -17,7 +17,15 @@ export class ComponentNode {
 
   id = componentId++
   type: FunctionalComponent
-  props?: AnyProps
+
+  /**
+   * Original props, not normalized
+   */
+  props: AnyProps
+
+  /**
+   * Original children, not normalized
+   */
   children: unknown[]
 
   instance!: DNodeContext
@@ -30,7 +38,7 @@ export class ComponentNode {
     children: unknown[],
   ) {
     this.type = type
-    this.props = props
+    this.props = Object.assign({}, props)
     this.children = children
   }
 
@@ -46,14 +54,15 @@ export class ComponentNode {
 
   _createComponentInstance() {
     const ctx = createNodeContext(this.type.name)
+    ctx._node = this
 
     appendToCurrentContext(ctx)
 
     setCurrentContext(ctx)
 
-    const _props = normalizeProps(this.type, this.props)
+    const proxiedProps = normalizeProps(this.type, this.props)
 
-    const rootEl = this.type(_props, this.children)
+    const rootEl = this.type(proxiedProps, this.children)
 
     if (rootEl != null) {
       if (isComponentNode(rootEl)) {
@@ -70,6 +79,10 @@ export class ComponentNode {
     popCurrentContext()
 
     return ctx
+  }
+
+  clone() {
+    return createComponentNode(this.type, this.props, this.children)
   }
 }
 

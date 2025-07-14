@@ -69,3 +69,71 @@ exports[`jsx context tree > context tree > html 1`] = `
   </div>
 </div>
 `;
+
+exports[`jsx context tree > instance Component inside Component > ctx tree 1`] = `
+{
+  "children": [
+    {
+      "children": [
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [],
+                  "name": "A",
+                },
+              ],
+              "name": "InstanceA",
+            },
+          ],
+          "name": "B",
+        },
+        {
+          "children": [],
+          "name": "A",
+        },
+      ],
+      "name": "A",
+    },
+  ],
+  "name": "Root",
+}
+`;
+
+exports[`jsx context tree > instance Component inside Component > html 1`] = `
+<div
+  id="app"
+>
+  <div
+    class="A"
+  >
+    <span>
+      a
+    </span>
+    <div
+      class="B"
+    >
+      <span>
+        b
+      </span>
+      <div>
+        <div
+          class="A"
+        >
+          <span>
+            a
+          </span>
+        </div>
+      </div>
+    </div>
+    <div
+      class="A"
+    >
+      <span>
+        a
+      </span>
+    </div>
+  </div>
+</div>
+`;

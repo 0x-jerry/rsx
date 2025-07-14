@@ -4,6 +4,7 @@ import { DemoSection } from './components/DemoSection'
 import { Input } from './components/Input'
 import { InputNumber } from './components/InputNumber'
 import { Select } from './components/Select'
+import { TestSlotApp } from './components/TestSlot'
 import { Tooltip } from './components/Tooltip'
 
 export const App = () => {
@@ -33,11 +34,15 @@ export const App = () => {
       <h2>Components</h2>
 
       <div class="flex flex-col gap-1">
-        <DemoSection title="Button" description="按钮组件预览">
+        <DemoSection>
+          <DemoSection.Title>Button</DemoSection.Title>
+          <DemoSection.Description>按钮组件预览</DemoSection.Description>
+
           <Button>Button</Button>
           <Button type="link">Link Button</Button>
         </DemoSection>
-        <DemoSection title="Tooltip">
+        <DemoSection>
+          <DemoSection.Title>Tooltip</DemoSection.Title>
           <div class="flex flex-col gap-2">
             <div>
               <Tooltip>
@@ -49,13 +54,15 @@ export const App = () => {
             </div>
           </div>
         </DemoSection>
-        <DemoSection title="Select">
+        <DemoSection>
+          <DemoSection.Title>Select</DemoSection.Title>
           <div class="flex flex-col gap-2">
             <Select options={selectState.options} $value={selectState.value} />
             {selectState.value}
           </div>
         </DemoSection>
-        <DemoSection title="Input">
+        <DemoSection>
+          <DemoSection.Title>Input</DemoSection.Title>
           <div class="flex flex-col gap-2">
             <div class="flex gap-1 items-center">
               <span>Text:</span>
@@ -76,6 +83,12 @@ export const App = () => {
               <InputNumber $value={inputState.num} />
               <span>{inputState.num}</span>
             </div>
+          </div>
+        </DemoSection>
+        <DemoSection>
+          <DemoSection.Title>Slot</DemoSection.Title>
+          <div class="flex flex-col gap-2">
+            <TestSlotApp />
           </div>
         </DemoSection>
       </div>

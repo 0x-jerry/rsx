@@ -1,0 +1,19 @@
+.btn {
+  @apply flex-inline px-2 py-1 outline-none border-none bg-transparent;
+  @apply rounded-sm cursor-pointer;
+
+  @apply bg-primary border-(1 solid primary-5) text-light;
+  @apply hover:(bg-primary-5 border-blue-6);
+  @apply active:(bg-primary border-primary-5);
+}
+
+.btn-link {
+  @apply bg-transparent border-(1 solid transparent);
+  @apply hover:(bg-transparent border-transparent);
+  @apply active:(bg-transparent border-transparent);
+
+  @apply text-primary;
+
+  @apply hover:(text-primary-5 underline);
+  @apply active:(text-primary);
+}

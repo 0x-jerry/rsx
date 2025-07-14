@@ -16,6 +16,11 @@ export function createNativeElement(
   if (props) {
     const _props = normalizeProps(type, props)
     generateBindingFunction(el, _props)
+
+    // Respect `ref` prop
+    if (isRef(props.ref)) {
+      props.ref.value = el
+    }
   }
 
   moveChildren(el, children)

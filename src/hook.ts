@@ -1,12 +1,19 @@
-import type { Fn } from '@0x-jerry/utils'
-import type { WatchCallback, WatchEffect, WatchSource } from '@vue/reactivity'
+import { type EmptyObject, type Fn, remove } from '@0x-jerry/utils'
+import {
+  readonly,
+  type WatchCallback,
+  type WatchEffect,
+  type WatchSource,
+} from '@vue/reactivity'
+import type { FunctionalComponent } from '.'
+import { isComponentNode } from './ComponentNode'
 import {
   type DNodeContext,
   DNodeContextEventName,
   type DNodeEventMap,
   getCurrentContext,
 } from './context'
-import { type WatchHandle, type WatchOptions, watch } from './reactivity'
+import { isRef, type WatchHandle, type WatchOptions, watch } from './reactivity'
 
 export function unmount(ctx: DNodeContext) {
   ctx.emit(DNodeContextEventName.beforeUnmount)
@@ -91,4 +98,22 @@ export function inject<T>(key: string | symbol | InjectKey<T>): T | undefined {
 
     node = node.parent
   }
+}
+
+export function useRawProps() {
+  const ctx = useContext()
+
+  return ctx._node?.props || {}
+}
+
+export function useExpose<T extends EmptyObject>(exposed: T) {
+  const ref = useRawProps().ref
+
+  if (isRef(ref)) {
+    ref.value = readonly(exposed)
+  }
+}
+
+export function useRawChildren() {
+  return useContext()._node?.children || []
 }

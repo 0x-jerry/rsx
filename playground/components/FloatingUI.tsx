@@ -34,6 +34,10 @@ export class FloatingUI {
   }
 
   show = () => {
+    if (this.visible) {
+      return
+    }
+
     this.visible = true
 
     this._content.classList.add(...this.onClasses)
@@ -46,12 +50,24 @@ export class FloatingUI {
   }
 
   hide = () => {
+    if (!this.visible) {
+      return
+    }
+
     this.visible = false
 
     this._content.classList.remove(...this.onClasses)
 
     this._autoUpdateCleanupHandle?.()
     this._autoUpdateCleanupHandle = undefined
+  }
+
+  toggle = () => {
+    if (this.visible) {
+      this.hide()
+    } else {
+      this.show()
+    }
   }
 
   update = async () => {

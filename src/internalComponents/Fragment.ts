@@ -46,11 +46,3 @@ export const Fragment: FunctionalComponent = (_, children) => {
 }
 
 defineComponentName(Fragment, 'Fragment')
-
-export function createNamedFragment(name: string) {
-  const Component = Fragment.bind({})
-
-  defineComponentName(Component, name)
-
-  return Component
-}

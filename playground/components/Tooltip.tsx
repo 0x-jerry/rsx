@@ -1,26 +1,31 @@
-import { remove } from '@0x-jerry/utils'
-import { isComponentNode } from '@/ComponentNode'
 import { onMounted, onUnmounted } from '@/hook'
-import {
-  $,
-  createNamedFragment,
-  defineComponent,
-  type ExposedFunctionalComponent,
-  type FunctionalComponent,
-} from '@/index'
+import { $, defineComponent, useExpose } from '@/index'
+import { defineNamedSlot, useSlot } from '@/Slot'
+import { useClickOutside } from '../hooks/useClickOutside'
 import { useTimeout } from '../hooks/useTimeout'
 import { FloatingUI, type FloatingUIOption } from './FloatingUI'
 import styles from './Tooltip.module.css'
 
+export enum TooltipTriggerType {
+  Click = 'click',
+  Hover = 'hover',
+}
+
+export interface TooltipInstance extends FloatingUI {}
+
 export interface TooltipProps extends FloatingUIOption {
-  trigger?: 'hover'
+  /**
+   * @default 'hover'
+   */
+  trigger?: `${TooltipTriggerType}`
   delay?: number
 }
 
 const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
-  const ContentChildren = getTooltipContents(children ?? [])
+  const ContentChildren = useSlot(Tooltip.Content)
 
   const fui = new FloatingUI()
+
   fui.onClasses = [styles.show]
   fui.option = {
     fitWidth: props.fitWidth,
@@ -31,10 +36,21 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
     $(() => props.delay ?? 100),
   )
 
+  useExpose(fui)
+
+  onMounted(async () => {
+    fui.init(Reference, TooltipContent)
+  })
+
+  onUnmounted(() => {
+    fui.destroy()
+  })
+
   const Reference = (
     <div
       class={styles.reference}
       aria-describedby="tooltip"
+      onClick={toggleTooltip}
       onMouseenter={showTooltip}
       onMouseleave={hideTooltip}
     >
@@ -42,34 +58,42 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
     </div>
   )
 
-  const Content = (
+  const TooltipContent = (
     <div
       class={styles.tooltip}
       role="tooltip"
       onMouseenter={showTooltip}
       onMouseleave={hideTooltip}
     >
-      {ContentChildren}
+      <ContentChildren />
     </div>
   )
 
-  onMounted(async () => {
-    fui.init(Reference, Content)
-  })
-
-  onUnmounted(() => {
-    fui.destroy()
+  useClickOutside([TooltipContent, Reference], () => {
+    fui.hide()
   })
 
   return (
     <>
       {Reference}
-      {Content}
+      {TooltipContent}
     </>
   )
 
+  function toggleTooltip() {
+    if (props.trigger !== TooltipTriggerType.Click) {
+      return
+    }
+
+    fui.toggle()
+  }
+
   function showTooltip(event: Event) {
     if (event.target !== event.currentTarget) {
+      return
+    }
+
+    if (props.trigger && props.trigger !== TooltipTriggerType.Hover) {
       return
     }
 
@@ -82,22 +106,14 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
       return
     }
 
+    if (props.trigger && props.trigger !== TooltipTriggerType.Hover) {
+      return
+    }
+
     hideHandler.restart()
   }
 })
 
-export const Tooltip =
-  TooltipImpl as ExposedFunctionalComponent<TooltipProps> & {
-    Content: FunctionalComponent
-  }
-
-Tooltip.Content = createNamedFragment('Tooltip.Content')
-
-function getTooltipContents(children: unknown[]) {
-  const Contents = remove(
-    children,
-    (child) => isComponentNode(child) && child.type === Tooltip.Content,
-  )
-
-  return Contents
-}
+export const Tooltip = Object.assign(TooltipImpl, {
+  Content: defineNamedSlot('Tooltip.Content'),
+})

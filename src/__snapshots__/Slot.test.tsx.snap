@@ -1,0 +1,40 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Slot > get slot content > html 1`] = `
+<div
+  id="app"
+>
+  <div>
+    <div
+      class="A"
+    >
+      <div
+        class="title"
+      >
+        title
+        <!--fragment-->
+        <!--fragment-->
+      </div>
+      <span>
+        -
+      </span>
+      <div
+        class="content"
+      >
+        content
+        <!--fragment-->
+        <!--fragment-->
+      </div>
+      <span>
+        1
+      </span>
+      <span>
+        2
+      </span>
+      <span>
+        3
+      </span>
+    </div>
+  </div>
+</div>
+`;

@@ -1,4 +1,5 @@
 import { EventEmitter } from '@0x-jerry/utils'
+import type { ComponentNode } from './ComponentNode'
 
 export const DNodeContextEventName = {
   beforeMount: 'bm',
@@ -41,6 +42,8 @@ export class DNodeContext extends EventEmitter<DNodeEventMap> {
    * Extra Data
    */
   ex?: Record<string | symbol, unknown>
+
+  _node?: ComponentNode
 
   _mounted?: boolean
   _unmounted?: boolean

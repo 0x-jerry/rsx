@@ -4,11 +4,12 @@ import {
   defineComponent,
   type MapItemComponent,
   type MapItemProps,
+  ref,
   toBindingRefs,
   VMap,
 } from '@/index'
 import styles from './Select.module.css'
-import { Tooltip } from './Tooltip'
+import { Tooltip, type TooltipInstance, TooltipTriggerType } from './Tooltip'
 import type { CommonProps } from './utils'
 
 const Option = defineComponent(OptionImpl)
@@ -33,37 +34,41 @@ export interface SelectProps<Value extends OptionValue> extends CommonProps {
 function SelectImpl<T extends OptionValue>(props: DefineProps<SelectProps<T>>) {
   const { options } = toBindingRefs(props)
 
-  const Options = (
-    <Tooltip.Content>
-      <VMap
-        list={options}
-        render={(itemProps) => {
-          const OptionComponent = (props.Option ?? OptionImpl) as typeof Option
+  const tooltip = ref<TooltipInstance>()
 
-          return (
-            <div
-              class={styles.optionWrapper}
-              onClick={() => handleChange(itemProps.item)}
-            >
-              <OptionComponent {...toBindingRefs(itemProps)} />
-            </div>
-          )
-        }}
-      />
-    </Tooltip.Content>
+  const Options = () => (
+    <VMap
+      list={options}
+      render={(itemProps) => {
+        const OptionComponent = (props.Option ?? OptionImpl) as typeof Option
+
+        return (
+          <div
+            class={styles.optionWrapper}
+            onClick={() => handleChange(itemProps.item)}
+          >
+            <OptionComponent {...toBindingRefs(itemProps)} />
+          </div>
+        )
+      }}
+    />
   )
 
   return (
-    <Tooltip fitWidth={true}>
+    <Tooltip ref={tooltip} fitWidth={true} trigger={TooltipTriggerType.Click}>
       <div class={styles.select}>
         <div class={styles.placeholder}>{$(() => props.value)}</div>
       </div>
-      {Options}
+      <Tooltip.Content>
+        <Options />
+      </Tooltip.Content>
     </Tooltip>
   )
 
   function handleChange(item: OptionItem<T>) {
     props.onUpdateValue?.(item.value)
+
+    tooltip.value?.toggle()
   }
 }
 

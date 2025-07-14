@@ -1,3 +1,4 @@
+import { Ref } from '@vue/reactivity'
 import type { NativeElements } from './jsx'
 
 declare global {
@@ -13,7 +14,9 @@ declare global {
       [key: string]: any
     }
 
-    interface IntrinsicAttributes {}
+    interface IntrinsicAttributes {
+      ref?: Ref<any>
+    }
 
     interface IntrinsicElements extends NativeElements {
       [name: string]: any

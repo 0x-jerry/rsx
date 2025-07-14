@@ -12,7 +12,7 @@
     ],
     "jsx": "preserve",
     "strict": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "@/*": [
         "src/*"

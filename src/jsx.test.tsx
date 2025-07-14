@@ -253,4 +253,53 @@ describe('jsx context tree', () => {
 
     expect(ctxTree).toMatchSnapshot('ctx tree')
   })
+
+  /**
+   * TODO: need a solution, this will break context tree,
+   * maybe this can not be resolved.
+   */
+  it.skip('instance Component inside Component', () => {
+    const A = dc((_, children) => (
+      <div class="A">
+        <span>a</span>
+        {children}
+      </div>
+    ))
+
+    defineComponentName(A, 'A')
+
+    const B = dc((_, children) => (
+      <div class="B">
+        <span>b</span>
+        {children}
+      </div>
+    ))
+
+    defineComponentName(B, 'B')
+
+    const App = dc(() => {
+      const InstanceA = (
+        <div>
+          <A></A>
+        </div>
+      )
+
+      return (
+        <A>
+          <B>{InstanceA}</B>
+          <A></A>
+        </A>
+      )
+    })
+
+    defineComponentName(App, 'App')
+
+    const root = mountTestApp(App)
+
+    expect(root).toMatchSnapshot('html')
+
+    const ctxTree = contextToJson(root._)
+
+    expect(ctxTree).toMatchSnapshot('ctx tree')
+  })
 })
