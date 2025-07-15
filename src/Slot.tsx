@@ -54,17 +54,14 @@ export function defineNamedSlot<T extends AnyProps = AnyProps>(name?: string) {
   return defineSlotProps<T>(Component)
 }
 
-type SlotWithData<T extends AnyProps> = Slot & T
+type SlotWithData<T extends AnyProps> = Slot & { [key in keyof T]: Ref<T[key]> }
 
 function defineSlotProps<T extends AnyProps>(Slot: Slot) {
-  let currentSlotCtx: DNodeContext | null = null
-
-  const cachedProps: Record<string, Ref> = {}
-
   const createProp = (key: string) => {
+    let currentSlotCtx: DNodeContext | null = null
     return $(() => {
       if (!currentSlotCtx) {
-        currentSlotCtx = useContext()
+        currentSlotCtx = resolveContext()
       }
 
       const data = (currentSlotCtx.ex?.[SlotDataKey] as any)?.[key]
@@ -73,22 +70,30 @@ function defineSlotProps<T extends AnyProps>(Slot: Slot) {
     })
   }
 
-  const _Slot = new Proxy(Slot, {
+  const ProxiedSlot = new Proxy(Slot, {
     get(_target, p, _receiver) {
       const key = p as string
 
-      let prop = cachedProps[key]
-
-      if (!prop) {
-        prop = createProp(key)
-        cachedProps[key] = prop
-      }
-
-      return prop
+      return createProp(key)
     },
   })
 
-  return _Slot as SlotWithData<T>
+  return ProxiedSlot as SlotWithData<T>
+
+  function resolveContext() {
+    let ctx: DNodeContext | undefined | null = useContext()
+
+    while (ctx) {
+      if (ctx._node?.type === ProxiedSlot) {
+        return ctx
+      }
+      ctx = ctx.parent
+    }
+
+    throw Error(
+      `Slot data should only used inside the corelative Slot instance.`,
+    )
+  }
 }
 
 export function useSlot<T extends AnyProps>(SlotComponent: SlotWithData<T>) {
