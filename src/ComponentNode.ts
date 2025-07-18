@@ -80,10 +80,6 @@ export class ComponentNode {
 
     return ctx
   }
-
-  clone() {
-    return createComponentNode(this.type, this.props, this.children)
-  }
 }
 
 export function createComponentNode(

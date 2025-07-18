@@ -89,7 +89,6 @@ export function normalizeProps(
     _raw[camelCase(name)] = value
 
     if (isRef(value)) {
-      // fix me: compose events
       const evtKey = `onUpdate${PascalCase(name)}`
       const existCallback = _raw[evtKey]
 

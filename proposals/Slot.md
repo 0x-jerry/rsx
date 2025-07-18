@@ -58,4 +58,44 @@ const App = () => {
 如果能实现通过某种方式，让 `DefaultSlot.count` 直接代理实例 `DefaultSlot` 的 `count` 值，
 那么这种写法也就和 vue/svelte 的 slot 写法很类似了。
 
-## 实现
+## 实现的阻碍
+
+在实现的过程中，如果是单实例，挺好实现的。由于 `RSX` 的渲染方式，可以在渲染的过程中直接获取父级的
+上下文，因此很容易就可以获取的对应实例的 Props，但是目前有一个限制，就是无法用多实例的 slot，例如：
+
+```tsx
+const DefaultSlot = defineSlot(); // Pseudo Code
+
+const Counter = () => {
+  const Default = useSlot(DefaultSlot);
+
+  return (
+    <div>
+      <Default count={1} />
+      <Default count={2} /> {/* 多实例 */}
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <Counter>
+      <DefaultSlot>{DefaultSlot.count}</DefaultSlot>
+    </Counter>
+  );
+};
+```
+
+也是由于 `RSX` 的渲染机制，其 dom 节点只会在申明的时候创建一次，如果负责 dom 节点的话，
+则会失去响应式。要解决这个问题，目前有两个方案：1、设计一种复制机制，2、延后初始化的过程。
+
+### 复制节点
+
+复制节点的难点：
+
+由于渲染的实现方式，无法实现 1:1 的复制，仅能保证节点的 Props 和类型相同，无法确保节点
+的 Children 一致，且无法处理动态节点（尚无方案）。
+
+### 延后初始化的过程
+
+这个方案需要重写渲染过程，具体实现还需要思考。

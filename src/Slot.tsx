@@ -100,13 +100,11 @@ export function useSlot<T extends AnyProps>(SlotComponent: SlotWithData<T>) {
   const rawChildren = useRawChildrenBySlot(SlotComponent)
 
   const Slot = defineComponent<T>((props) => {
-    const clonedChildren = rawChildren.map((child) => child.clone())
-
-    clonedChildren.forEach((child) => {
+    rawChildren.forEach((child) => {
       Object.assign(child.props, toBindingRefs(props))
     })
 
-    return <>{clonedChildren}</>
+    return <>{rawChildren}</>
   })
 
   return Slot

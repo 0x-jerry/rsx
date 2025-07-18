@@ -181,4 +181,52 @@ describe('Slot', () => {
       .toArray()
     expect(text).eql(['title 1', 'title 2'])
   })
+
+  it.skip('multiple slot instance', async () => {
+    const AImpl = defineComponent<{ count: number }>((props, children) => {
+      const Title = useSlot(A.Title)
+
+      return (
+        <div class="A">
+          <div class="title">
+            <Title count={$(() => props.count)} />
+          </div>
+          <div class="title">
+            <Title count={$(() => props.count + 1)} />
+          </div>
+          {children}
+        </div>
+      )
+    })
+
+    const A = Object.assign(AImpl, {
+      Title: defineNamedSlot<{ count: number }>('A.Title'),
+    })
+
+    const B = defineComponent((_, children) => {
+      return <div>{children}</div>
+    })
+
+    const App = () => {
+      return (
+        <div>
+          <A count={1}>
+            <span>1</span>
+            <A.Title>
+              <B>title {A.Title.count}</B>
+            </A.Title>
+          </A>
+        </div>
+      )
+    }
+
+    const rootEl = mountTestApp(App)
+
+    const text = rootEl
+      .querySelectorAll('.title')
+      .values()
+      .map((item) => item.textContent)
+      .toArray()
+    expect(text).eql(['title 1', 'title 2'])
+  })
 })

@@ -2,11 +2,12 @@ import { type Ref, shallowRef } from '@vue/reactivity'
 import { asyncWatcherScheduler } from '@/reactivity/scheduler'
 import { defineComponentName } from '@/test'
 import {
-  AnchorNodeEventNames,
   createAnchorNode,
   dispatchAnchorMovedEvent,
   getAnchorFirstChildNode,
   isAnchorNode,
+  listenAnchorMoveEvent,
+  setAnchorNodeFirstChildren,
 } from '../anchorNode'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { type DNodeContext, runWithContext } from '../context'
@@ -72,7 +73,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     runWithContext(update, ctx)
   })
 
-  anchorNode.addEventListener(AnchorNodeEventNames.Moved, () => {
+  listenAnchorMoveEvent(anchorNode, () => {
     children.forEach((child) => {
       const childEl = child.instance?.el
       if (childEl) {
@@ -208,7 +209,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     // update first child
     {
       const firstEl = children.find((child) => child.instance.el)?.instance.el
-      anchorNode.__firstChild = firstEl
+      setAnchorNodeFirstChildren(anchorNode, firstEl)
     }
   }
 

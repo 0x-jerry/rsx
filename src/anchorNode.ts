@@ -1,31 +1,19 @@
-class AnchorNodeMovedEvent extends Event {
-  constructor() {
-    super(AnchorNodeEventNames.Moved)
-  }
+import { EventEmitter } from '@0x-jerry/utils'
+
+type AnchorNodeEvents = {
+  moved: []
+}
+
+class AnchorNodeContext extends EventEmitter<AnchorNodeEvents> {
+  firstChild?: ChildNode | null
 }
 
 export interface AnchorNode extends Comment {
-  __dyn: true
-
   /**
-   * Used by position check in dynamic component
+   * @private
    */
-  __firstChild?: ChildNode | null
-
-  addEventListener(
-    type: 'moved',
-    listener: (event: AnchorNodeMovedEvent) => void,
-  ): void
-
-  removeEventListener(
-    type: 'moved',
-    listener: (event: AnchorNodeMovedEvent) => void,
-  ): void
+  __dyn: AnchorNodeContext
 }
-
-export const AnchorNodeEventNames = {
-  Moved: 'moved',
-} as const
 
 /**
  * Used by dynamic component, which will change children position by internal logic
@@ -35,29 +23,45 @@ export const AnchorNodeEventNames = {
  */
 export function createAnchorNode(name = 'dynamic') {
   const el = document.createComment(name) as AnchorNode
-  el.__dyn = true
+  el.__dyn = new AnchorNodeContext()
 
   return el
 }
 
 export function isAnchorNode(o: Node): o is AnchorNode {
-  return '__dyn' in o && o.__dyn === true
+  return '__dyn' in o && o.__dyn instanceof AnchorNodeContext
+}
+
+export function listenAnchorMoveEvent(node: AnchorNode, callback: () => void) {
+  return node.__dyn.on('moved', callback)
 }
 
 export function dispatchAnchorMovedEvent(el: Node) {
   if (isAnchorNode(el)) {
-    el.dispatchEvent(new AnchorNodeMovedEvent())
+    el.__dyn.emit('moved')
   }
 }
 
+export function setAnchorNodeFirstChildren(
+  anchorNode: AnchorNode,
+  childEl?: ChildNode | null,
+) {
+  anchorNode.__dyn.firstChild = childEl
+}
+
+export function isAnchorNodeHasFirstChildren(anchorNode: AnchorNode) {
+  return anchorNode.__dyn.firstChild != null
+}
+
 export function getAnchorFirstChildNode(node: AnchorNode) {
-  if (!node.__firstChild) {
+  const firstChild = node.__dyn.firstChild
+  if (!firstChild) {
     return node
   }
 
-  if (isAnchorNode(node.__firstChild)) {
-    return getAnchorFirstChildNode(node.__firstChild)
+  if (isAnchorNode(firstChild)) {
+    return getAnchorFirstChildNode(firstChild)
   }
 
-  return node.__firstChild
+  return firstChild
 }

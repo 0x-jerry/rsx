@@ -1,8 +1,10 @@
 import { defineComponentName } from '@/test'
 import {
-  AnchorNodeEventNames,
   createAnchorNode,
   dispatchAnchorMovedEvent,
+  isAnchorNodeHasFirstChildren,
+  listenAnchorMoveEvent,
+  setAnchorNodeFirstChildren,
 } from '../anchorNode'
 import { runWithContext } from '../context'
 import type { FunctionalComponent } from '../defineComponent'
@@ -22,14 +24,14 @@ export const Fragment: FunctionalComponent = (_, children) => {
 
         insertBefore(anchorNode, childEl)
 
-        if (!anchorNode.__firstChild) {
-          anchorNode.__firstChild = childEl
+        if (!isAnchorNodeHasFirstChildren(anchorNode)) {
+          setAnchorNodeFirstChildren(anchorNode, childEl)
         }
       })
     }, ctx)
   })
 
-  anchorNode.addEventListener(AnchorNodeEventNames.Moved, () => {
+  listenAnchorMoveEvent(anchorNode, () => {
     for (const childEl of childNodes) {
       insertBefore(anchorNode, childEl)
       dispatchAnchorMovedEvent(childEl)

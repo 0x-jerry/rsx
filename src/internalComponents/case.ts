@@ -2,9 +2,10 @@ import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
 import { asyncWatcherScheduler } from '@/reactivity/scheduler'
 import { defineComponentName } from '@/test'
 import {
-  AnchorNodeEventNames,
   createAnchorNode,
   dispatchAnchorMovedEvent,
+  listenAnchorMoveEvent,
+  setAnchorNodeFirstChildren,
 } from '../anchorNode'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { runWithContext } from '../context'
@@ -57,7 +58,7 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
 
   onBeforeMount(rebuildChildren)
 
-  anchorNode.addEventListener(AnchorNodeEventNames.Moved, () => {
+  listenAnchorMoveEvent(anchorNode, () => {
     const childEl = renderedCtxNode?.instance.el
 
     if (childEl) {
@@ -76,7 +77,7 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
 
     renderedCtxNode = rebuildChild()
 
-    anchorNode.__firstChild = renderedCtxNode?.instance.el
+    setAnchorNodeFirstChildren(anchorNode, renderedCtxNode?.instance.el)
   }
 
   function rebuildChild() {

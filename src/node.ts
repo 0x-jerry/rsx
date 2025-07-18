@@ -13,14 +13,17 @@ export function createNativeElement(
 ) {
   const el = document.createElement(type)
 
-  if (props) {
-    const _props = normalizeProps(type, props)
-    generateBindingFunction(el, _props)
+  const { ref, ...otherProps } = props || {}
 
-    // Respect `ref` prop
-    if (isRef(props.ref)) {
-      props.ref.value = el
-    }
+  const cleanup = bindingProperties(el, normalizeProps(type, otherProps))
+
+  if (cleanup) {
+    onUnmounted(cleanup)
+  }
+
+  // Respect `ref` prop
+  if (isRef(ref)) {
+    ref.value = el
   }
 
   moveChildren(el, children)
@@ -28,7 +31,7 @@ export function createNativeElement(
   return el
 }
 
-function generateBindingFunction(el: HTMLElement, props: AnyProps) {
+function bindingProperties(el: HTMLElement, props: AnyProps) {
   const effects: ReactiveEffectRunner[] = []
   const previousProps = new Map()
 
@@ -55,7 +58,7 @@ function generateBindingFunction(el: HTMLElement, props: AnyProps) {
   }
 
   if (effects.length) {
-    onUnmounted(() => effects.forEach((item) => stop(item)))
+    return () => effects.forEach((item) => stop(item))
   }
 }
 
