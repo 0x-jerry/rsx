@@ -1,12 +1,10 @@
-import { type EmptyObject, type Fn, remove } from '@0x-jerry/utils'
+import type { EmptyObject, Fn } from '@0x-jerry/utils'
 import {
   readonly,
   type WatchCallback,
   type WatchEffect,
   type WatchSource,
 } from '@vue/reactivity'
-import type { FunctionalComponent } from '.'
-import { isComponentNode } from './ComponentNode'
 import {
   type DNodeContext,
   DNodeContextEventName,

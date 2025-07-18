@@ -7,11 +7,11 @@ import {
   listenAnchorMoveEvent,
   setAnchorNodeFirstChildren,
 } from '../anchorNode'
-import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
 import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
+import { type ComponentNode, createComponentNode } from '../nodes/ComponentNode'
 import { normalizeProps } from '../props'
 import { $, computed } from '../reactivity'
 
@@ -59,7 +59,7 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
   onBeforeMount(rebuildChildren)
 
   listenAnchorMoveEvent(anchorNode, () => {
-    const childEl = renderedCtxNode?.instance.el
+    const childEl = renderedCtxNode?.context.el
 
     if (childEl) {
       insertBefore(anchorNode, childEl)
@@ -71,13 +71,13 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
 
   function updateCase() {
     if (renderedCtxNode) {
-      unmount(renderedCtxNode.instance)
+      unmount(renderedCtxNode.context)
       renderedCtxNode = null
     }
 
     renderedCtxNode = rebuildChild()
 
-    setAnchorNodeFirstChildren(anchorNode, renderedCtxNode?.instance.el)
+    setAnchorNodeFirstChildren(anchorNode, renderedCtxNode?.context.el)
   }
 
   function rebuildChild() {
@@ -95,12 +95,12 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
 
     node.initialize()
 
-    if (node.instance.el) {
-      insertBefore(anchorNode, node.instance.el)
+    if (node.context.el) {
+      insertBefore(anchorNode, node.context.el)
     }
 
     if (ctx._mounted) {
-      mount(node.instance)
+      mount(node.context)
     }
 
     return node

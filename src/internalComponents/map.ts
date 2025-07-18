@@ -9,7 +9,6 @@ import {
   listenAnchorMoveEvent,
   setAnchorNodeFirstChildren,
 } from '../anchorNode'
-import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { type DNodeContext, runWithContext } from '../context'
 import {
   defineComponent,
@@ -18,6 +17,7 @@ import {
 } from '../defineComponent'
 import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
+import { type ComponentNode, createComponentNode } from '../nodes/ComponentNode'
 import { computed } from '../reactivity'
 
 export interface MapItemProps<Item> {
@@ -75,7 +75,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
   listenAnchorMoveEvent(anchorNode, () => {
     children.forEach((child) => {
-      const childEl = child.instance?.el
+      const childEl = child.context?.el
       if (childEl) {
         insertBefore(anchorNode, childEl)
 
@@ -122,16 +122,16 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     if (i > e1) {
       while (i <= e2) {
         const n = c2[i]
-        const anchor = getFirstChildOfNode(c1[e1 + 1]?.instance) || anchorNode
+        const anchor = getFirstChildOfNode(c1[e1 + 1]?.context) || anchorNode
 
-        const nEl = n.instance.el
+        const nEl = n.context.el
         if (nEl) {
           insertBefore(anchor, nEl)
           dispatchAnchorMovedEvent(nEl)
         }
 
         if (ctx._mounted) {
-          mount(n.instance)
+          mount(n.context)
         }
 
         i++
@@ -161,9 +161,9 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
       const increasingNewIndexSequence = getSequence(newSequence)
 
       let anchorPreviousNode =
-        c1[i - 1]?.instance.el ||
+        c1[i - 1]?.context.el ||
         (c1[0]
-          ? getFirstChildOfNode(c1[0]?.instance)?.previousSibling
+          ? getFirstChildOfNode(c1[0]?.context)?.previousSibling
           : anchorNode.previousSibling)
 
       for (i = s2; i <= e2; i++) {
@@ -174,18 +174,18 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
           oldToNew.get(newSequence[increasingNewIndexSequence[0]]) === i
         ) {
           n2._r = false
-          anchorPreviousNode = n2.instance.el
+          anchorPreviousNode = n2.context.el
           increasingNewIndexSequence.shift()
           continue
         }
 
-        const n2El = n2.instance.el
+        const n2El = n2.context.el
         if (n2El) {
           const anchor =
             (anchorPreviousNode
               ? anchorPreviousNode.nextSibling
-              : c1[0]?.instance.el?.parentElement
-                ? getFirstChildOfNode(c1[0]?.instance)
+              : c1[0]?.context.el?.parentElement
+                ? getFirstChildOfNode(c1[0]?.context)
                 : null) || anchorNode
 
           insertBefore(anchor, n2El)
@@ -198,7 +198,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
           n2._r = false
         } else {
           if (ctx._mounted) {
-            mount(n2.instance)
+            mount(n2.context)
           }
         }
       }
@@ -208,7 +208,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
     // update first child
     {
-      const firstEl = children.find((child) => child.instance.el)?.instance.el
+      const firstEl = children.find((child) => child.context.el)?.context.el
       setAnchorNodeFirstChildren(anchorNode, firstEl)
     }
   }
@@ -250,7 +250,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
       newCtx._props = childProps
 
       newCtx.initialize()
-      newCtx.instance.name = 'VMap.item'
+      newCtx.context.name = 'VMap.item'
 
       appendItemToMap(newDataContextMap, dataKey, newCtx)
       newChildren.push(newCtx)
@@ -258,8 +258,8 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
     dataContextMap.values().forEach((ctxList) => {
       ctxList.forEach((child) => {
-        if (child.instance) {
-          unmount(child.instance)
+        if (child.context) {
+          unmount(child.context)
         } else {
           throw new Error('child without instance')
         }

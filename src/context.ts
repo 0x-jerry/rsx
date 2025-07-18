@@ -1,5 +1,5 @@
 import { EventEmitter } from '@0x-jerry/utils'
-import type { ComponentNode } from './ComponentNode'
+import type { ComponentNode } from './nodes/ComponentNode'
 
 export const DNodeContextEventName = {
   beforeMount: 'bm',
@@ -35,6 +35,10 @@ export class DNodeContext extends EventEmitter<DNodeEventMap> {
   readonly id = contextId++
   name?: string
   children?: Set<DNodeContext>
+
+  /**
+   * @deprecated Use `this._node.el` instead of.
+   */
   el?: ChildNode
   parent?: DNodeContext | null
 

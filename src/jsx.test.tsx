@@ -1,9 +1,9 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: test case */
 
-import { isComponentNode } from './ComponentNode'
 import { dc } from './defineComponent'
 import { useWatch } from './hook'
 import { h } from './jsx'
+import { isComponentNode } from './nodes/ComponentNode'
 import { $, nextTick, ref } from './reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from './test'
 

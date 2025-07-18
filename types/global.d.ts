@@ -1,9 +1,10 @@
-import { Ref } from '@vue/reactivity'
+import type { Ref } from '@vue/reactivity'
+import type { NodeElement } from '@/nodes/shared'
 import type { NativeElements } from './jsx'
 
 declare global {
   namespace JSX {
-    type Element = any
+    type Element = NodeElement
 
     interface ElementAttributesProperty {
       [key: string]: any

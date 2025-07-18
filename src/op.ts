@@ -1,17 +1,10 @@
 import { isString } from '@0x-jerry/utils'
-import { isComponentNode } from './ComponentNode'
 import { disableSSR, enableSSR } from './config'
-import {
-  appendToCurrentContext,
-  createNodeContext,
-  type DNodeContext,
-  popCurrentContext,
-  setCurrentContext,
-} from './context'
 import type { FunctionalComponent } from './defineComponent'
 import { mount, unmount } from './hook'
-import { isHTMLNode } from './node'
+import { h } from './jsx'
 import { moveTo } from './nodeOp'
+import type { ComponentNode } from './nodes/ComponentNode'
 
 export function mountApp(
   App: FunctionalComponent,
@@ -25,41 +18,25 @@ export function mountApp(
     throw new Error(`Can't find container`)
   }
 
-  const ctx = createNodeContext('Root')
+  const rootEl = h(App) as ComponentNode
 
-  appendToCurrentContext(ctx)
+  rootEl.initialize()
 
-  setCurrentContext(ctx)
-
-  const rootEl = App({}, [])
-
-  if (isComponentNode(rootEl)) {
-    rootEl.initialize()
-
-    ctx.el = rootEl.instance.el
-  } else if (isHTMLNode(rootEl)) {
-    ctx.el = rootEl as ChildNode
-  } else {
-    console.warn('[ComponentNode] Invalid component node', rootEl)
+  if (rootEl.el) {
+    moveTo(container, rootEl.el)
   }
 
-  popCurrentContext()
+  mount(rootEl.context)
 
-  if (ctx.el) {
-    moveTo(container, ctx.el)
-  }
-
-  mount(ctx)
-
-  return ctx
+  return rootEl
 }
 
-export function unmountApp(app: DNodeContext) {
-  if (app._unmounted) {
+export function unmountApp(app: ComponentNode) {
+  if (app.context._unmounted) {
     return
   }
 
-  unmount(app)
+  unmount(app.context)
 }
 
 export function renderToString(Comp: FunctionalComponent) {

@@ -1,4 +1,5 @@
 import { normalizeNode } from './node'
+import type { NativeNode } from './nodes/NativeNode'
 
 export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
   if (!(node instanceof Node)) {
@@ -96,4 +97,10 @@ export function updateEl(
       el.setAttribute(key, value)
     }
   }
+}
+
+export function mount(node: NativeNode) {
+  processRawChildren(node.children || [], (node) => {
+    // todo
+  })
 }

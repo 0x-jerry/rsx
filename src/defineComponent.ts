@@ -1,4 +1,5 @@
 import type { EmptyObject } from '@0x-jerry/utils'
+import type { NodeElement } from './nodes/shared'
 import type { DefineProps } from './props'
 import type { IsStartWithCapitalizedLetter, MaybeRef } from './types'
 
@@ -19,7 +20,7 @@ type ToPropRefs<T extends {}> = {
 export type FunctionalComponent<P extends PropsType = any> = (
   props: P,
   children?: any[],
-) => any
+) => NodeElement | null
 
 type _NoInferProps<P extends EmptyObject> = DefineProps<P> & Record<string, any>
 

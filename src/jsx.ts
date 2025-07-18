@@ -1,16 +1,17 @@
 import { isString } from '@0x-jerry/utils'
-import { type ComponentNode, createComponentNode } from './ComponentNode'
 import type { FunctionalComponent } from './defineComponent'
-import { createNativeElement } from './node'
+import { createComponentNode } from './nodes/ComponentNode'
+import { createNativeNode } from './nodes/NativeNode'
+import type { NodeElement } from './nodes/shared'
 import type { AnyProps } from './props'
 
 export function h(
   type: string | FunctionalComponent,
   props?: AnyProps,
   ...children: unknown[]
-): ChildNode | ComponentNode {
+): NodeElement {
   if (isString(type)) {
-    return createNativeElement(type, props, children)
+    return createNativeNode(type, props, children)
   }
 
   return createComponentNode(type, props, children)

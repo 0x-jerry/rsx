@@ -10,9 +10,9 @@ import {
   useContext,
   useRawChildren,
 } from '.'
-import { type ComponentNode, isComponentNode } from './ComponentNode'
 import type { DNodeContext } from './context'
 import type { FunctionalComponent } from './defineComponent'
+import { type ComponentNode, isComponentNode } from './nodes/ComponentNode'
 import { defineComponentName } from './test'
 
 export type Slot = FunctionalComponent
@@ -38,7 +38,7 @@ function useRawChildrenBySlot(SlotComponent: Slot) {
 
   const Contents = remove(
     children,
-    (child) => isComponentNode(child) && child.type === SlotComponent,
+    (child) => isComponentNode(child) && child.tag === SlotComponent,
   )
 
   return Contents as ComponentNode[]
@@ -84,7 +84,7 @@ function defineSlotProps<T extends AnyProps>(Slot: Slot) {
     let ctx: DNodeContext | undefined | null = useContext()
 
     while (ctx) {
-      if (ctx._node?.type === ProxiedSlot) {
+      if (ctx._node?.tag === ProxiedSlot) {
         return ctx
       }
       ctx = ctx.parent

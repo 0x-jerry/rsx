@@ -10,3 +10,7 @@ export function composeEventListeners<T extends Fn>(
     listeners.forEach((event) => unref(event)?.(...args))
   }
 }
+
+export function warn(...msgs: unknown[]) {
+  console.warn(msgs)
+}

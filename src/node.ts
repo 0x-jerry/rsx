@@ -1,37 +1,12 @@
 import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import { type ClassValue, clsx } from 'clsx'
-import { isComponentNode } from './ComponentNode'
 import { onUnmounted } from './hook'
-import { moveChildren, updateEl } from './nodeOp'
-import { type AnyProps, normalizeProps } from './props'
+import { updateEl } from './nodeOp'
+import { isComponentNode } from './nodes/ComponentNode'
+import type { AnyProps } from './props'
 import { effect, isRef, unref } from './reactivity'
 
-export function createNativeElement(
-  type: string,
-  props?: AnyProps,
-  children?: unknown[],
-) {
-  const el = document.createElement(type)
-
-  const { ref, ...otherProps } = props || {}
-
-  const cleanup = bindingProperties(el, normalizeProps(type, otherProps))
-
-  if (cleanup) {
-    onUnmounted(cleanup)
-  }
-
-  // Respect `ref` prop
-  if (isRef(ref)) {
-    ref.value = el
-  }
-
-  moveChildren(el, children)
-
-  return el
-}
-
-function bindingProperties(el: HTMLElement, props: AnyProps) {
+export function bindingProperties(el: HTMLElement, props: AnyProps) {
   const effects: ReactiveEffectRunner[] = []
   const previousProps = new Map()
 
