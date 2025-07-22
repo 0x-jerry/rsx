@@ -3,23 +3,17 @@
 import { dc } from './defineComponent'
 import { useWatch } from './hook'
 import { h } from './jsx'
-import { isComponentNode } from './nodes/ComponentNode'
+import { ComponentNode } from './nodes/ComponentNode'
 import { $, nextTick, ref } from './reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from './test'
 
 describe('jsx', () => {
-  it('dom element', () => {
-    const el = h('div')
-
-    expect(el).instanceof(HTMLDivElement)
-  })
-
   it('component node', () => {
     const Comp = () => h('div', { class: 'test' })
 
     const node = h(Comp)
 
-    expect(isComponentNode(node)).toBe(true)
+    expect(ComponentNode.is(node)).toBe(true)
   })
 
   it('should set props when create', () => {
@@ -107,22 +101,6 @@ describe('jsx', () => {
       el.dispatchEvent(new Event('change'))
       expect(v.value).toBe('2')
     })
-  })
-
-  it('should work without context when render with non-reactive props', () => {
-    const el = h('div', { class: 'test' }) as HTMLDivElement
-
-    expect(el.classList.contains('test')).toBe(true)
-  })
-
-  it('should only work with context when render with reactive props', () => {
-    const fn = () => {
-      const cls = ref('test')
-
-      h('div', { class: cls })
-    }
-
-    expect(fn).throw('This should only used inside functional component')
   })
 
   it('should render as text node', async () => {
@@ -249,16 +227,12 @@ describe('jsx context tree', () => {
 
     expect(root).toMatchSnapshot('html')
 
-    const ctxTree = contextToJson(root._)
+    const ctxTree = contextToJson(root._.context)
 
     expect(ctxTree).toMatchSnapshot('ctx tree')
   })
 
-  /**
-   * TODO: need a solution, this will break context tree,
-   * maybe this can not be resolved.
-   */
-  it.skip('instance Component inside Component', () => {
+  it('instance Component inside Component', () => {
     const A = dc((_, children) => (
       <div class="A">
         <span>a</span>
@@ -298,7 +272,7 @@ describe('jsx context tree', () => {
 
     expect(root).toMatchSnapshot('html')
 
-    const ctxTree = contextToJson(root._)
+    const ctxTree = contextToJson(root._.context)
 
     expect(ctxTree).toMatchSnapshot('ctx tree')
   })

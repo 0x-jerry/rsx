@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted } from '@/hook'
-import { $, defineComponent, useExpose } from '@/index'
+import { $, defineComponent, ref, useExpose } from '@/index'
 import { defineNamedSlot, useSlot } from '@/Slot'
 import { useClickOutside } from '../hooks/useClickOutside'
 import { useTimeout } from '../hooks/useTimeout'
@@ -25,6 +25,8 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
   const ContentChildren = useSlot(Tooltip.Content)
 
   const fui = new FloatingUI()
+  const referenceEl = ref<HTMLElement>()
+  const contentEl = ref<HTMLElement>()
 
   fui.onClasses = [styles.show]
   fui.option = {
@@ -39,7 +41,8 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
   useExpose(fui)
 
   onMounted(async () => {
-    fui.init(Reference, TooltipContent)
+    // biome-ignore lint/style/noNonNullAssertion: confirm it exists
+    fui.init(referenceEl.value!, contentEl.value!)
   })
 
   onUnmounted(() => {
@@ -48,6 +51,7 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
 
   const Reference = (
     <div
+      ref={referenceEl}
       class={styles.reference}
       aria-describedby="tooltip"
       onClick={toggleTooltip}
@@ -60,6 +64,7 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
 
   const TooltipContent = (
     <div
+      ref={contentEl}
       class={styles.tooltip}
       role="tooltip"
       onMouseenter={showTooltip}
@@ -69,7 +74,7 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
     </div>
   )
 
-  useClickOutside([TooltipContent, Reference], () => {
+  useClickOutside([referenceEl, contentEl], () => {
     fui.hide()
   })
 

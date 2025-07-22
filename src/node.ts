@@ -2,7 +2,7 @@ import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import { type ClassValue, clsx } from 'clsx'
 import { onUnmounted } from './hook'
 import { updateEl } from './nodeOp'
-import { isComponentNode } from './nodes/ComponentNode'
+import { ComponentNode } from './nodes/ComponentNode'
 import type { AnyProps } from './props'
 import { effect, isRef, unref } from './reactivity'
 
@@ -72,12 +72,12 @@ export function normalizeNode(node: unknown): ChildNode | null | undefined {
     return rawValue as ChildNode
   }
 
-  if (isComponentNode(node)) {
-    if (!node.instance) {
+  if (ComponentNode.is(node)) {
+    if (!node.context) {
       node.initialize()
     }
 
-    return node.instance.el
+    return node.el
   }
 
   return createTextElement(node)

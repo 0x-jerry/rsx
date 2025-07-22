@@ -12,8 +12,9 @@ exports[`Slot > get slot content > html 1`] = `
         class="title"
       >
         title
-        <!--fragment-->
-        <!--fragment-->
+        <!--Fragment-->
+        <!--Fragment-->
+        <!--Fragment-->
       </div>
       <span>
         -
@@ -22,8 +23,9 @@ exports[`Slot > get slot content > html 1`] = `
         class="content"
       >
         content
-        <!--fragment-->
-        <!--fragment-->
+        <!--Fragment-->
+        <!--Fragment-->
+        <!--Fragment-->
       </div>
       <span>
         1
@@ -34,6 +36,7 @@ exports[`Slot > get slot content > html 1`] = `
       <span>
         3
       </span>
+      <!--Fragment-->
     </div>
   </div>
 </div>

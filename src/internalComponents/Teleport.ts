@@ -1,8 +1,9 @@
 import { runWithContext } from '@/context'
+import { moveTo } from '@/nodeOp'
+import { normalizeNodes } from '@/nodes/shared'
 import { defineComponentName } from '@/test'
 import { defineComponent } from '../defineComponent'
 import { onBeforeMount, useContext, useWatch } from '../hook'
-import { moveChildren } from '../nodeOp'
 
 export interface TeleportProps {
   to?: string
@@ -10,6 +11,12 @@ export interface TeleportProps {
 
 export const Teleport = defineComponent<TeleportProps>((props, children) => {
   const ctx = useContext()
+
+  if (ctx._node) {
+    ctx._node.children = normalizeNodes(children || [])
+  }
+
+  let initialized = false
 
   const _update = () => runWithContext(update, ctx)
 
@@ -19,12 +26,28 @@ export const Teleport = defineComponent<TeleportProps>((props, children) => {
   const nonExistsContainer = document.createDocumentFragment()
 
   function update() {
-    const root = props.to
+    const container = props.to
       ? document.querySelector(props.to) || nonExistsContainer
       : nonExistsContainer
 
-    moveChildren(root, children)
+    if (!initialized) {
+      for (const child of ctx._node?.children || []) {
+        child.initialize()
+        if (child.el) {
+          moveTo(container, child.el)
+        }
+      }
+      initialized = true
+    } else {
+      for (const child of ctx._node?.children || []) {
+        if (child.el) {
+          moveTo(container, child.el)
+        }
+      }
+    }
   }
+
+  return null
 })
 
 defineComponentName(Teleport, 'Teleport')

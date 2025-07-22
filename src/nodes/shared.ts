@@ -1,24 +1,9 @@
 import { isArray } from '@0x-jerry/utils'
+import type { Ref } from '@vue/reactivity'
 import { AnchorNode, createFragment } from './AnchorNode'
 import { ComponentNode } from './ComponentNode'
 import { NativeNode } from './NativeNode'
 import { createTextNode, TextNode } from './TextNode'
-
-export abstract class BaseNode {
-  abstract readonly type: NodeType
-
-  children?: NodeElement[]
-
-  /**
-   * This function will:
-   *
-   * 1. Binding properties
-   * 2. Generate context
-   * 3. Create DOM element
-   *
-   */
-  abstract initialize(): void
-}
 
 export enum NodeType {
   Component = 0,
@@ -66,3 +51,5 @@ export function normalizeNodes(nodes: unknown[]): NodeElement[] {
 
   return result
 }
+
+export type NodeRef<T = any> = Ref<T> | ((element: T) => void)

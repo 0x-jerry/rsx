@@ -1223,7 +1223,7 @@ describe('map context tree', () => {
 
     expect(root).toMatchSnapshot('html')
 
-    const ctxTree = contextToJson(root._)
+    const ctxTree = contextToJson(root._.context)
 
     expect(ctxTree).toMatchSnapshot('ctx tree')
   })
@@ -1268,7 +1268,7 @@ describe('map context tree', () => {
 
     expect(root).toMatchSnapshot('html')
 
-    const ctxTree = contextToJson(root._)
+    const ctxTree = contextToJson(root._.context)
 
     expect(ctxTree).toMatchSnapshot('ctx tree')
   })

@@ -1,15 +1,11 @@
 import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
+import { createAnchorNode } from '@/nodes/AnchorNode'
+import { mount, unmount } from '@/nodes/lifeCycle'
 import { asyncWatcherScheduler } from '@/reactivity/scheduler'
 import { defineComponentName } from '@/test'
-import {
-  createAnchorNode,
-  dispatchAnchorMovedEvent,
-  listenAnchorMoveEvent,
-  setAnchorNodeFirstChildren,
-} from '../anchorNode'
 import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
-import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
+import { onBeforeMount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
 import { type ComponentNode, createComponentNode } from '../nodes/ComponentNode'
 import { normalizeProps } from '../props'
@@ -48,7 +44,8 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
     return props.cases?.[String(props.condition)]
   })
 
-  let renderedCtxNode: Optional<ComponentNode> = null
+  let renderedNode: Optional<ComponentNode>
+  let initialized = false
 
   const rebuildChildren = () => runWithContext(updateCase, ctx)
 
@@ -56,28 +53,20 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
     scheduler: asyncWatcherScheduler,
   })
 
-  onBeforeMount(rebuildChildren)
-
-  listenAnchorMoveEvent(anchorNode, () => {
-    const childEl = renderedCtxNode?.context.el
-
-    if (childEl) {
-      insertBefore(anchorNode, childEl)
-      dispatchAnchorMovedEvent(childEl)
-    }
+  onBeforeMount(() => {
+    rebuildChildren()
+    initialized = true
   })
 
   return anchorNode
 
   function updateCase() {
-    if (renderedCtxNode) {
-      unmount(renderedCtxNode.context)
-      renderedCtxNode = null
+    if (renderedNode) {
+      unmount(renderedNode)
+      renderedNode = null
     }
 
-    renderedCtxNode = rebuildChild()
-
-    setAnchorNodeFirstChildren(anchorNode, renderedCtxNode?.context.el)
+    renderedNode = rebuildChild()
   }
 
   function rebuildChild() {
@@ -87,23 +76,25 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
       return
     }
 
-    const node = createComponentNode(
+    const childNode = createComponentNode(
       Component,
       { value: $(() => props.condition) },
       [],
     )
 
-    node.initialize()
+    childNode.initialize()
 
-    if (node.context.el) {
-      insertBefore(anchorNode, node.context.el)
+    if (childNode.el) {
+      insertBefore(anchorNode.el!, childNode.el)
     }
 
-    if (ctx._mounted) {
-      mount(node.context)
+    if (initialized) {
+      mount(childNode)
     }
 
-    return node
+    anchorNode.children = [childNode]
+
+    return childNode
   }
 })
 

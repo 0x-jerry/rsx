@@ -1,15 +1,12 @@
-import {
-  isRef,
-  type ReactiveEffectRunner,
-  type Ref,
-  stop,
-} from '@vue/reactivity'
+import { isFn } from '@0x-jerry/utils'
+import { isRef, type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import clsx, { type ClassValue } from 'clsx'
-import { updateEl } from '@/nodeOp'
+import { moveTo, updateEl } from '@/nodeOp'
 import { effect } from '@/reactivity'
 import { warn } from '@/utils'
-import type { AnyProps } from '../props'
-import { BaseNode, NodeType, normalizeNodes } from './shared'
+import { type AnyProps, normalizeProps } from '../props'
+import { BaseNode } from './BaseNode'
+import { type NodeRef, NodeType, normalizeNodes } from './shared'
 
 export class NativeNode extends BaseNode {
   static is(o: unknown): o is NativeNode {
@@ -20,7 +17,7 @@ export class NativeNode extends BaseNode {
 
   tag: string
 
-  ref?: Ref
+  ref?: NodeRef
 
   /**
    * raw props
@@ -41,18 +38,26 @@ export class NativeNode extends BaseNode {
   initialize(): void {
     this.el = document.createElement(this.tag)
 
+    if (isFn(this.ref)) {
+      this.ref(this.el)
+    } else if (isRef(this.ref)) {
+      this.ref.value = this.el
+    }
+
     this.cleanup = bindingProperties(this)
 
-    if (this.children) {
-      for (const child of this.children) {
-        child.initialize()
+    for (const child of this.children || []) {
+      child.initialize()
+
+      if (child.el) {
+        moveTo(this.el, child.el)
       }
     }
   }
 }
 
 function bindingProperties(node: NativeNode) {
-  const props = node.props
+  const props = normalizeProps(node.tag, node.props)
   const el = node.el!
 
   const effects: ReactiveEffectRunner[] = []
@@ -60,7 +65,8 @@ function bindingProperties(node: NativeNode) {
 
   for (const key in props) {
     const runner = effect(() => {
-      const value = convertAttrValue(key, props[key])
+      let value = props[key]
+      value = convertAttrValue(key, value)
 
       const old = previousProps.get(key)
 
@@ -94,11 +100,11 @@ function convertAttrValue(attr: string, value: unknown) {
 }
 
 export function createNativeNode(
-  type: string,
+  tag: string,
   props?: AnyProps,
   children?: unknown[],
 ) {
-  const node = new NativeNode(type)
+  const node = new NativeNode(tag)
 
   if (children?.length) {
     node.children = normalizeNodes(children)
@@ -109,7 +115,7 @@ export function createNativeNode(
   node.props = otherProps
 
   if (ref != null) {
-    if (isRef(ref)) {
+    if (isRef(ref) || isFn(ref)) {
       node.ref = ref
     } else {
       warn(`ref prop is not reactive!`)

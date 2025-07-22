@@ -4,4 +4,5 @@ import 'uno.css'
 
 import { mountApp } from '@/index'
 
-mountApp(App, '#app')
+const app = mountApp(App, '#app')
+console.log(app)

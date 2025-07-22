@@ -1,5 +1,4 @@
-import { normalizeNode } from './node'
-import type { NativeNode } from './nodes/NativeNode'
+import { isAnchorElement } from './nodes/AnchorNode'
 
 export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
   if (!(node instanceof Node)) {
@@ -19,6 +18,10 @@ export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
   } else {
     parent.appendChild(node)
   }
+
+  if (isAnchorElement(node)) {
+    node.__node.moveChildren()
+  }
 }
 
 export function insertBefore(anchor: Node, node: Node) {
@@ -27,43 +30,6 @@ export function insertBefore(anchor: Node, node: Node) {
   } else {
     console.error('Anchor is not attached into DOM')
     // throw new Error('Anchor is not attached into DOM')
-  }
-}
-
-export function moveChildren(
-  parent: ParentNode,
-  children?: unknown[],
-  anchor?: Node,
-) {
-  processRawChildren(children || [], (childEl) => {
-    moveTo(parent, childEl, anchor)
-  })
-}
-
-/**
- * Flat and normalize children items
- *
- * @param children
- * @param cb
- */
-export function processRawChildren(
-  children: unknown[],
-  cb: (childEl: ChildNode) => void,
-) {
-  const stack = children.slice()
-
-  while (stack.length) {
-    const child = stack.shift()
-    if (Array.isArray(child)) {
-      stack.push(...child)
-      continue
-    }
-
-    const childEl = normalizeNode(child)
-
-    if (childEl != null) {
-      cb(childEl)
-    }
   }
 }
 
@@ -97,10 +63,4 @@ export function updateEl(
       el.setAttribute(key, value)
     }
   }
-}
-
-export function mount(node: NativeNode) {
-  processRawChildren(node.children || [], (node) => {
-    // todo
-  })
 }

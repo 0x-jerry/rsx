@@ -1,10 +1,10 @@
 import { isString } from '@0x-jerry/utils'
 import { disableSSR, enableSSR } from './config'
 import type { FunctionalComponent } from './defineComponent'
-import { mount, unmount } from './hook'
 import { h } from './jsx'
 import { moveTo } from './nodeOp'
 import type { ComponentNode } from './nodes/ComponentNode'
+import { mount, unmount } from './nodes/lifeCycle'
 
 export function mountApp(
   App: FunctionalComponent,
@@ -18,17 +18,17 @@ export function mountApp(
     throw new Error(`Can't find container`)
   }
 
-  const rootEl = h(App) as ComponentNode
+  const appNode = h(App) as ComponentNode
 
-  rootEl.initialize()
+  appNode.initialize()
 
-  if (rootEl.el) {
-    moveTo(container, rootEl.el)
+  if (appNode.el) {
+    moveTo(container, appNode.el)
   }
 
-  mount(rootEl.context)
+  mount(appNode)
 
-  return rootEl
+  return appNode
 }
 
 export function unmountApp(app: ComponentNode) {
@@ -36,7 +36,7 @@ export function unmountApp(app: ComponentNode) {
     return
   }
 
-  unmount(app.context)
+  unmount(app)
 }
 
 export function renderToString(Comp: FunctionalComponent) {

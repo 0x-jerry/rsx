@@ -18,7 +18,7 @@ exports[`case context tree > reactive value > ctx tree 1`] = `
       "name": "VCase",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
@@ -33,6 +33,7 @@ exports[`case context tree > reactive value > html 1`] = `
       b
     </span>
     1
+    <!--Fragment-->
   </div>
   <!--case-->
 </div>
@@ -56,7 +57,7 @@ exports[`case context tree > static value > ctx tree 1`] = `
       "name": "VCase",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
@@ -71,6 +72,7 @@ exports[`case context tree > static value > html 1`] = `
       a
     </span>
     0
+    <!--Fragment-->
   </div>
   <!--case-->
 </div>

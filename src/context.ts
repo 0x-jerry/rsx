@@ -36,10 +36,6 @@ export class DNodeContext extends EventEmitter<DNodeEventMap> {
   name?: string
   children?: Set<DNodeContext>
 
-  /**
-   * @deprecated Use `this._node.el` instead of.
-   */
-  el?: ChildNode
   parent?: DNodeContext | null
 
   /**

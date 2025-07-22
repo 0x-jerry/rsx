@@ -22,7 +22,7 @@ exports[`jsx context tree > context tree > ctx tree 1`] = `
       "name": "A",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
@@ -55,6 +55,7 @@ exports[`jsx context tree > context tree > html 1`] = `
           a
         </span>
       </div>
+      <!--Fragment-->
     </div>
     <div
       class="A"
@@ -66,6 +67,7 @@ exports[`jsx context tree > context tree > html 1`] = `
     <span>
       3
     </span>
+    <!--Fragment-->
   </div>
 </div>
 `;
@@ -78,13 +80,8 @@ exports[`jsx context tree > instance Component inside Component > ctx tree 1`] =
         {
           "children": [
             {
-              "children": [
-                {
-                  "children": [],
-                  "name": "A",
-                },
-              ],
-              "name": "InstanceA",
+              "children": [],
+              "name": "A",
             },
           ],
           "name": "B",
@@ -97,7 +94,7 @@ exports[`jsx context tree > instance Component inside Component > ctx tree 1`] =
       "name": "A",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
@@ -126,6 +123,7 @@ exports[`jsx context tree > instance Component inside Component > html 1`] = `
           </span>
         </div>
       </div>
+      <!--Fragment-->
     </div>
     <div
       class="A"
@@ -134,6 +132,7 @@ exports[`jsx context tree > instance Component inside Component > html 1`] = `
         a
       </span>
     </div>
+    <!--Fragment-->
   </div>
 </div>
 `;

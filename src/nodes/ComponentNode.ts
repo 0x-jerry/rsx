@@ -7,7 +7,8 @@ import {
 } from '@/context'
 import type { FunctionalComponent } from '../defineComponent'
 import { type AnyProps, normalizeProps } from '../props'
-import { BaseNode, NodeType, normalizeNodes } from './shared'
+import { BaseNode } from './BaseNode'
+import { type NodeElement, NodeType, normalizeNodes } from './shared'
 
 let componentId = 0
 
@@ -31,7 +32,9 @@ export class ComponentNode extends BaseNode {
   /**
    * Host element
    */
-  el?: any
+  el?: HTMLElement
+
+  root?: NodeElement | null
 
   constructor(
     type: FunctionalComponent,
@@ -48,7 +51,7 @@ export class ComponentNode extends BaseNode {
   }
 
   initialize() {
-    if (!this.context) {
+    if (this.context) {
       console.error('[ComponentNode] ComponentNode has been initialized')
       return
     }
@@ -64,28 +67,23 @@ export class ComponentNode extends BaseNode {
     const proxiedProps = normalizeProps(this.tag, this.props)
 
     const rootEl = this.tag(proxiedProps, this.children)
+    this.root = rootEl
 
     if (rootEl != null) {
       rootEl.initialize()
-      this.el = rootEl.el
+      this.el = rootEl.el as HTMLElement
     }
 
     popCurrentContext()
-
-    if (this.children) {
-      for (const child of this.children) {
-        child.initialize()
-      }
-    }
   }
 }
 
 export function createComponentNode(
-  type: FunctionalComponent,
+  tag: FunctionalComponent,
   props: AnyProps | undefined,
   children?: unknown[],
 ) {
-  const node = new ComponentNode(type, props, children)
+  const node = new ComponentNode(tag, props, children)
 
   return node
 }

@@ -36,6 +36,11 @@ export class BindingRef {
 
     return unref(v)
   }
+
+  clone() {
+    // @ts-ignore
+    return $(this.objOrFn, this.key)
+  }
 }
 
 /**

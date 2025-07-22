@@ -1,7 +1,8 @@
 import { isRef, type ReactiveEffectRunner, stop, unref } from '@vue/reactivity'
 import { effect } from '@/reactivity'
 import { warn } from '@/utils'
-import { BaseNode, NodeType } from './shared'
+import { BaseNode } from './BaseNode'
+import { NodeType } from './shared'
 
 export class TextNode extends BaseNode {
   static is(o: unknown): o is TextNode {
@@ -42,7 +43,7 @@ export class TextNode extends BaseNode {
   }
 
   /**
-   * todo, this must be called
+   * Must be called when unmount
    */
   cleanup() {
     if (this.effects) {

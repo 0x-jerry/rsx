@@ -13,26 +13,6 @@ import {
 } from './context'
 import { isRef, type WatchHandle, type WatchOptions, watch } from './reactivity'
 
-export function unmount(ctx: DNodeContext) {
-  ctx.emit(DNodeContextEventName.beforeUnmount)
-
-  ctx.el?.remove()
-
-  ctx.children?.forEach((child) => unmount(child))
-
-  ctx._unmounted = true
-  ctx.emit(DNodeContextEventName.unmounted)
-}
-
-export function mount(ctx: DNodeContext) {
-  ctx.emit(DNodeContextEventName.beforeMount)
-
-  ctx.children?.forEach((item) => mount(item))
-
-  ctx._mounted = true
-  ctx.emit(DNodeContextEventName.mounted)
-}
-
 export function useContext() {
   const ctx = getCurrentContext()
 
@@ -73,10 +53,10 @@ export function useWatch(
   return stopHandle
 }
 
-export type InjectKey<T> = (string | symbol) & { _: T }
+export type InjectionKey<T> = (string | symbol) & { _: T }
 
 export function provide<T = unknown>(
-  key: string | symbol | InjectKey<T>,
+  key: string | symbol | InjectionKey<T>,
   value: T,
 ) {
   const ctx = useContext()
@@ -84,7 +64,9 @@ export function provide<T = unknown>(
   ctx.ex[key] = value
 }
 
-export function inject<T>(key: string | symbol | InjectKey<T>): T | undefined {
+export function inject<T>(
+  key: string | symbol | InjectionKey<T>,
+): T | undefined {
   const ctx = useContext()
 
   let node = ctx.parent

@@ -18,7 +18,7 @@ exports[`Teleport > container node is not exists > html 1`] = `
       id="tp2"
     />
   </div>
-  <!--fragment-->
+  <!--Fragment-->
 </div>
 `;
 
@@ -41,7 +41,7 @@ exports[`Teleport > non-reactivity data > html 1`] = `
       </span>
     </div>
   </div>
-  <!--fragment-->
+  <!--Fragment-->
 </div>
 `;
 
@@ -67,6 +67,6 @@ exports[`Teleport > reactivity data > html 1`] = `
       </span>
     </div>
   </div>
-  <!--fragment-->
+  <!--Fragment-->
 </div>
 `;

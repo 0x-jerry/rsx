@@ -4,16 +4,11 @@ exports[`fragment context tree > static value > ctx tree 1`] = `
 {
   "children": [
     {
-      "children": [
-        {
-          "children": [],
-          "name": "A",
-        },
-      ],
-      "name": "Fragment",
+      "children": [],
+      "name": "A",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
@@ -30,6 +25,6 @@ exports[`fragment context tree > static value > html 1`] = `
     </span>
   </div>
   2
-  <!--fragment-->
+  <!--Fragment-->
 </div>
 `;

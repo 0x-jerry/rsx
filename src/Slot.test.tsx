@@ -182,7 +182,7 @@ describe('Slot', () => {
     expect(text).eql(['title 1', 'title 2'])
   })
 
-  it.skip('multiple slot instance', async () => {
+  it('multiple slot instance', async () => {
     const AImpl = defineComponent<{ count: number }>((props, children) => {
       const Title = useSlot(A.Title)
 

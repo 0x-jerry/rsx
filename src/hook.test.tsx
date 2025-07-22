@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: test */
 import {
   dc,
-  type InjectKey as InjectionKey,
+  type InjectionKey,
   inject,
   nextTick,
   onBeforeMount,
@@ -111,6 +111,8 @@ describe('hook', () => {
     const A = () => {
       onMounted(mountedFn)
       onBeforeMount(beforeMountFn)
+
+      return null
     }
 
     const App = dc(() => {
