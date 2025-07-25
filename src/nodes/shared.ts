@@ -23,7 +23,7 @@ export function isNodeElement(o: unknown): o is NodeElement {
   )
 }
 
-function normalizeNode(data: unknown): NodeElement | null {
+export function normalizeNode(data: unknown): NodeElement | null {
   if (isNodeElement(data)) {
     return data
   }

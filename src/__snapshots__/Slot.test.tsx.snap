@@ -13,8 +13,6 @@ exports[`Slot > get slot content > html 1`] = `
       >
         title
         <!--Fragment-->
-        <!--Fragment-->
-        <!--Fragment-->
       </div>
       <span>
         -
@@ -23,8 +21,6 @@ exports[`Slot > get slot content > html 1`] = `
         class="content"
       >
         content
-        <!--Fragment-->
-        <!--Fragment-->
         <!--Fragment-->
       </div>
       <span>

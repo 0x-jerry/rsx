@@ -8,7 +8,12 @@ import {
 import type { FunctionalComponent } from '../defineComponent'
 import { type AnyProps, normalizeProps } from '../props'
 import { BaseNode } from './BaseNode'
-import { type NodeElement, NodeType, normalizeNodes } from './shared'
+import {
+  type NodeElement,
+  NodeType,
+  normalizeNode,
+  normalizeNodes,
+} from './shared'
 
 let componentId = 0
 
@@ -66,7 +71,8 @@ export class ComponentNode extends BaseNode {
 
     const proxiedProps = normalizeProps(this.tag, this.props)
 
-    const rootEl = this.tag(proxiedProps, this.children)
+    let rootEl = this.tag(proxiedProps, this.children)
+    rootEl = normalizeNode(rootEl)
     this.root = rootEl
 
     if (rootEl != null) {

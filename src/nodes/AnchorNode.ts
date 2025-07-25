@@ -40,12 +40,27 @@ export class AnchorNode extends BaseNode {
   }
 }
 
+/**
+ * Do not use this function, if you want to create a anchor node,
+ * please use {@link createAnchorNode} instead of.
+ *
+ * @internal
+ * @param children
+ * @returns
+ */
 export function createFragment(children?: unknown[]) {
-  const node = new AnchorNode()
-  node.name = 'Fragment'
+  const node = createAnchorNode('Fragment')
 
   if (children?.length) {
     node.children = normalizeNodes(children)
+
+    // Simplify nested fragments
+    if (node.children.length === 1) {
+      const first = node.children[0]
+      if (AnchorNode.is(first)) {
+        return first
+      }
+    }
   }
 
   return node
@@ -69,5 +84,5 @@ export function getAnchorFirstChildElement(
 
   return isAnchorElement(firstEl)
     ? getAnchorFirstChildElement(firstEl)
-    : (firstEl as any)
+    : (firstEl as HTMLElement)
 }

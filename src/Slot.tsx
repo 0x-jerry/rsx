@@ -1,186 +1,90 @@
-import { isObject, type Optional, remove } from '@0x-jerry/utils'
-import type { Ref } from '@vue/reactivity'
-import {
-  $,
-  type AnyProps,
-  defineComponent,
-  provide,
-  toBindingRefs,
-  useContext,
-  useRawChildren,
-} from '.'
-import type { DNodeContext } from './context'
-import type { FunctionalComponent } from './defineComponent'
-import { createFragment } from './nodes/AnchorNode'
-import { ComponentNode, createComponentNode } from './nodes/ComponentNode'
-import { createNativeNode } from './nodes/NativeNode'
-import { type NodeElement, NodeType } from './nodes/shared'
-import { createTextNode } from './nodes/TextNode'
+import { isFn, remove } from '@0x-jerry/utils'
+import { type AnyProps, useRawChildren } from '.'
+import type {
+  ExposedFunctionalComponent,
+  FunctionalComponent,
+} from './defineComponent'
+import { ComponentNode } from './nodes/ComponentNode'
+import type { NodeElement } from './nodes/shared'
+import { TextNode } from './nodes/TextNode'
 import { defineComponentName } from './test'
 
-export type Slot = FunctionalComponent
+export type Slot<T extends AnyProps = AnyProps> =
+  ExposedFunctionalComponent<T> & {
+    __slot: true
+    name: string
+  }
 
-interface SlotProp {
-  _slot_prop: true
-  key: string
-  slot: Slot
+function isSlot(o: unknown): o is Slot {
+  return isFn(o) && '__slot' in o
 }
-
-const SlotDataKey = '__slot_data'
-
-const SlotImpl = defineComponent((props, children) => {
-  provide(SlotDataKey, props)
-
-  return createFragment(children)
-})
 
 /**
  * Filter and remove raw children by Component
  *
  * @private
  *
- * @param SlotComponent
+ * @param factory
  * @returns
  */
-function useRawChildrenBySlot(SlotComponent: Slot) {
+export function useSlot<T extends AnyProps>(factory: SlotFactory<T>) {
   const children = useRawChildren()
 
-  const Contents = remove(
-    children,
-    (child) => ComponentNode.is(child) && child.tag === SlotComponent,
-  )
+  let dynamicSlot: unknown
+  const staticSlotContents: NodeElement[][] = []
 
-  return Contents as ComponentNode[]
-}
+  const _ = remove(children, (child) => {
+    const isStaticSlot = ComponentNode.is(child) && child.tag === factory
 
-export function defineNamedSlot<T extends AnyProps = AnyProps>(name?: string) {
-  const Component = SlotImpl.bind({})
+    if (isStaticSlot && child.children) {
+      staticSlotContents.push(child.children)
+      return true
+    }
 
-  if (name) {
-    defineComponentName(Component, name)
-  }
+    const isDynamicSlot =
+      TextNode.is(child) &&
+      isSlot(child.content) &&
+      child.content.name === factory.__slot_factory.name
 
-  const SlotComponent = defineSlotProps<T>(Component)
+    if (isDynamicSlot) {
+      if (!dynamicSlot) dynamicSlot = child.content
+      return true
+    }
 
-  return SlotComponent
-}
-
-type SlotWithData<T extends AnyProps> = Slot & { [key in keyof T]: Ref<T[key]> }
-
-function defineSlotProps<T extends AnyProps>(Slot: Slot) {
-  const ProxiedSlot = new Proxy(Slot, {
-    get(_target, p, _receiver) {
-      const key = p as string
-
-      if (key === 'name') {
-        return _target[key]
-      }
-
-      return createSlotProp(key)
-    },
+    return false
   })
 
-  return ProxiedSlot as SlotWithData<T>
+  const slot = dynamicSlot ?? (() => <>{staticSlotContents}</>)
 
-  function createSlotProp(key: string): SlotProp {
-    return {
-      _slot_prop: true,
-      key,
-      slot: ProxiedSlot,
-    }
+  return slot as Slot<T>
+}
+
+interface SlotFactory<T extends AnyProps = AnyProps>
+  extends FunctionalComponent {
+  (props: FunctionalComponent<T>): Slot<T>
+  __slot_factory: {
+    name: string
   }
 }
 
-export function useSlot<T extends AnyProps>(SlotComponent: SlotWithData<T>) {
-  const rawChildren = useRawChildrenBySlot(SlotComponent)
-
-  const Slot = defineComponent<T>((props) => {
-    const clonedChildren = rawChildren.map((child) => {
-      const newNode = cloneSlotContentNode(child)
-
-      Object.assign(newNode.props, toBindingRefs(props))
-
-      return newNode
-    })
-
-    return <>{clonedChildren}</>
-  })
-
-  return Slot
+function isSlotFactory(o: unknown): o is SlotFactory {
+  return isFn(o) && '__slot_factory' in o
 }
 
-function cloneSlotContentNode<T extends NodeElement>(node: T): T {
-  switch (node.type) {
-    case NodeType.Component: {
-      return createComponentNode(
-        node.tag,
-        cloneSlotContentProps(node.props),
-        cloneSlotContentNodes(node.children),
-      ) as T
-    }
+export function defineNamedSlot<T extends AnyProps = AnyProps>(
+  slotName: string,
+) {
+  const factory = ((slot) => {
+    const SlotComponent = slot as Slot
 
-    case NodeType.Anchor: {
-      return createFragment(cloneSlotContentNodes(node.children)) as T
-    }
+    SlotComponent.__slot = true
 
-    case NodeType.Native: {
-      return createNativeNode(
-        node.tag,
-        cloneSlotContentProps(node.props || {}),
-        cloneSlotContentNodes(node.children),
-      ) as T
-    }
+    defineComponentName(SlotComponent, slotName)
 
-    case NodeType.Text: {
-      return createTextNode(cloneSlotProp(node.content)) as T
-    }
+    return SlotComponent
+  }) as SlotFactory<T>
 
-    default:
-      throw new Error(`invalid node type`)
-  }
-}
+  factory.__slot_factory = { name: slotName }
 
-function cloneSlotContentNodes(nodes?: NodeElement[]) {
-  return nodes?.map((node) => cloneSlotContentNode(node))
-}
-
-function cloneSlotContentProps(props: AnyProps) {
-  return Object.fromEntries(
-    Object.entries(props).map(([key, value]) => {
-      return [key, cloneSlotProp(value)]
-    }),
-  )
-}
-
-function cloneSlotProp(value: unknown) {
-  return isSlotRef(value) ? createSlotPropRef(value) : value
-}
-
-function isSlotRef(o: unknown): o is SlotProp {
-  return isObject(o) && '_slot_prop' in o
-}
-
-function createSlotPropRef(prop: SlotProp) {
-  let ctx: Optional<DNodeContext>
-  return $(() => {
-    if (!ctx) {
-      ctx = resolveContext(prop)
-    }
-
-    const data = (ctx.ex?.[SlotDataKey] as any)?.[prop.key]
-    return data
-  })
-}
-
-function resolveContext(prop: SlotProp) {
-  let ctx: DNodeContext | undefined | null = useContext()
-
-  while (ctx) {
-    if (ctx._node?.tag === prop.slot) {
-      return ctx
-    }
-    ctx = ctx.parent
-  }
-
-  throw Error(`Slot data should only used inside the corelative Slot instance.`)
+  return factory
 }

@@ -1,10 +1,11 @@
 import { defineComponent } from '@/defineComponent'
-import { ref } from '@/reactivity'
+import { $, ref } from '@/reactivity'
 import { defineNamedSlot, useSlot } from '@/Slot'
 import { useInterval } from '../hooks/useInterval'
 
 const AImpl = defineComponent((_, children) => {
   const Title = useSlot(A.Title)
+  const _Content = useSlot(A.Content)
 
   const titleCount = ref(0)
 
@@ -33,10 +34,9 @@ export const TestSlotApp = () => {
     <div>
       <A>
         <span>1</span>
-        <A.Title>
-          title count:
-          {A.Title.count}
-        </A.Title>
+        {A.Title((props) => (
+          <>title count: {$(() => props.count)}</>
+        ))}
         <span>2</span>
         <A.Content>content</A.Content>
         <span>3</span>

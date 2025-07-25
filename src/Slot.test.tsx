@@ -72,7 +72,9 @@ describe('Slot', () => {
         <div>
           <A>
             <span>1</span>
-            <A.Title>title {A.Title.count}</A.Title>
+            {A.Title((props) => (
+              <>title {$(() => props.count)}</>
+            ))}
           </A>
         </div>
       )
@@ -113,11 +115,15 @@ describe('Slot', () => {
         <div>
           <A count={1}>
             <span>1</span>
-            <A.Title>title {A.Title.count}</A.Title>
+            {A.Title((props) => (
+              <>title {$(() => props.count)}</>
+            ))}
           </A>
           <A count={2}>
             <span>1</span>
-            <A.Title>title {A.Title.count}</A.Title>
+            {A.Title((props) => (
+              <>title {$(() => props.count)}</>
+            ))}
           </A>
         </div>
       )
@@ -160,13 +166,15 @@ describe('Slot', () => {
         <div>
           <A count={1}>
             <span>1</span>
-            <A.Title>
-              <B>title {A.Title.count}</B>
-            </A.Title>
+            {A.Title((props) => (
+              <B>title {$(() => props.count)}</B>
+            ))}
           </A>
           <A count={2}>
             <span>1</span>
-            <A.Title>title {A.Title.count}</A.Title>
+            {A.Title((props) => (
+              <>title {$(() => props.count)}</>
+            ))}
           </A>
         </div>
       )
@@ -212,9 +220,9 @@ describe('Slot', () => {
         <div>
           <A count={1}>
             <span>1</span>
-            <A.Title>
-              <B>title {A.Title.count}</B>
-            </A.Title>
+            {A.Title((props) => (
+              <B>title {$(() => props.count)}</B>
+            ))}
           </A>
         </div>
       )

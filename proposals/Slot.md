@@ -99,3 +99,133 @@ const App = () => {
 ### 延后初始化的过程
 
 这个方案需要重写渲染过程，具体实现还需要思考。
+
+**另一个坑**：在用虚拟 DOM 重写之后，基础的多实例用法可以支持，但是仅支持传递给组件，无法支持如下写法：
+
+```tsx
+<A>
+  <A.Default>
+    <B counter={$(A.Default.data, "count")} />
+  </A.Default>
+</A>
+```
+
+上述例子中的 `A.Default.data` 无法通过运行时进行检测到，因此无法复制。之前的写法：
+
+```tsx
+<A>
+  <A.Default>
+    <B counter={A.Default.count} />
+  </A.Default>
+</A>
+```
+
+因为是挂在组件上的 Prop， 因此可以由框架检测并修改复制。
+
+看来复制 Slot 还需要再多多考虑一下。
+
+**另一种方案**：现在尝试修改 jsx 编译器，尝试把 Function Component 下的 children 编译成函数，示例如下：
+
+```tsx
+<A>
+  <A.Default>
+    <div>
+      <button onClick={() => console.log($A_Default.cont)} />
+    </div>
+  </A.Default>
+</A>
+```
+
+编译成；
+
+```ts
+h(A, null, () => [
+  h(A.Default, null, ($A_Default) =>
+    h(
+      "div",
+      null,
+      h(button, {
+        onClick: () => console.log($A_Default.count),
+      })
+    )
+  ),
+]);
+```
+
+只要是大写开头的 JSX name 就认为是 Functional Component。
+
+不过这样会引发一个 Typescript 类型的问题，`$A_Default` 会提示未定义，但实际在运行时的时候，会定义
+成参数。这样的话，还需要写一个 TypeScript 插件，注入运行时的参数定义，TypeScript 这一步可以后面再
+处理，先验证编译 jsx 是否可行。
+
+**又一种方案**，在实现上述方案的过程中，我准备参考 vue-jsx 的实现，发现其实现 slot 是通过运行时来的，
+写法如下：
+
+```tsx
+// default
+const A = () => <MyComponent>{() => "hello"}</MyComponent>;
+
+// named
+const B = () => (
+  <MyComponent>
+    {{
+      default: () => "default slot",
+      foo: () => <div>foo</div>,
+      bar: () => [<span>one</span>, <span>two</span>],
+    }}
+  </MyComponent>
+);
+```
+
+因此，我准备也通过运行时支持，但是修改其写法，优化的写法提案如下：
+
+```tsx
+// default
+const A = () => <MyComponent>{MyComponent.default(() => "hello")}</MyComponent>;
+
+// named
+const B = () => (
+  <MyComponent>
+    {MyComponent.default(() => "default slot")}
+    {MyComponent.foo(() => (
+      <div>foo</div>
+    ))}
+    {MyComponent.bar(() => [<span>one</span>, <span>two</span>])}
+  </MyComponent>
+);
+```
+
+这种写法的好处是直接提供了 Slot 的类型，但是需要额外的组件定义申明。
+
+## 最终实现方案
+
+目前，RSX 支持两种 Slot 写法，分别为静态 Slot 和 动态 Slot。
+
+### 静态(Static) Slot
+
+这种写法不支持参数，因此写法和普通 JSX 差不多，示例：
+
+```tsx
+<A>
+  <A.Default>slot content</A.Default>
+</A>
+```
+
+### 动态(Dynamic) Slot
+
+此种写法是为了支持 Slot 参数，示例：
+
+```tsx
+<A>
+  {A.Default((props) => (
+    <>content {$(() => props.count)}</>
+  ))}
+</A>
+```
+
+如果同时存在静态 Slot 和动态 Slot，会优先用动态 Slot，忽略静态 Slot。
+静态 Slot 支持多次声明，会自动按照顺序合并。动态 Slot 仅支持第一次声明。
+
+## 再次思考虚拟 DOM
+
+通过最终方案来看，其实现方案从逻辑上来讲，不需要虚拟 DOM，后续可尝试在去虚拟 DOM 的框架上再实现一遍。
