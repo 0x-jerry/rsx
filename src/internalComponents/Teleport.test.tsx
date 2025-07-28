@@ -1,7 +1,7 @@
 import { onMounted } from '@/hook'
 import { nextTick, ref } from '@/reactivity'
 import { dc } from '../defineComponent'
-import { mountTestApp } from '../test'
+import { mountTestApp } from '../helper'
 import { Teleport } from './Teleport'
 
 describe('Teleport', () => {

@@ -1,7 +1,7 @@
 import { runWithContext } from '@/context'
+import { defineComponentName } from '@/helper'
 import { moveTo } from '@/nodeOp'
 import { normalizeNodes } from '@/nodes/shared'
-import { defineComponentName } from '@/test'
 import { defineComponent } from '../defineComponent'
 import { onBeforeMount, useContext, useWatch } from '../hook'
 

@@ -71,8 +71,8 @@ export class ComponentNode extends BaseNode {
 
     const proxiedProps = normalizeProps(this.tag, this.props)
 
-    let rootEl = this.tag(proxiedProps, this.children)
-    rootEl = normalizeNode(rootEl)
+    const _rootEL = this.tag(proxiedProps, this.children)
+    const rootEl = normalizeNode(_rootEL)
     this.root = rootEl
 
     if (rootEl != null) {

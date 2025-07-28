@@ -1,11 +1,11 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: test case */
 
 import { dc } from './defineComponent'
+import { contextToJson, defineComponentName, mountTestApp } from './helper'
 import { useWatch } from './hook'
 import { h } from './jsx'
 import { ComponentNode } from './nodes/ComponentNode'
 import { $, nextTick, ref } from './reactivity'
-import { contextToJson, defineComponentName, mountTestApp } from './test'
 
 describe('jsx', () => {
   it('component node', () => {

@@ -1,7 +1,7 @@
 import { defineComponent } from './defineComponent'
+import { mountTestApp } from './helper'
 import { $, nextTick, ref } from './reactivity'
 import { defineNamedSlot, useSlot } from './Slot'
-import { mountTestApp } from './test'
 
 describe('Slot', () => {
   it('get slot content', () => {

@@ -1,4 +1,4 @@
-import { defineComponentName } from '@/test'
+import { defineComponentName } from '@/helper'
 import type { FunctionalComponent } from '../defineComponent'
 
 export const Fragment: FunctionalComponent = () => null

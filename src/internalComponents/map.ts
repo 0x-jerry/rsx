@@ -1,4 +1,5 @@
 import { type Ref, shallowRef } from '@vue/reactivity'
+import { defineComponentName } from '@/helper'
 import {
   createAnchorNode,
   getAnchorFirstChildElement,
@@ -6,7 +7,6 @@ import {
 } from '@/nodes/AnchorNode'
 import { mount, unmount } from '@/nodes/lifeCycle'
 import { asyncWatcherScheduler } from '@/reactivity/scheduler'
-import { defineComponentName } from '@/test'
 import { runWithContext } from '../context'
 import {
   defineComponent,

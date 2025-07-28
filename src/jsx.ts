@@ -4,14 +4,13 @@ import { Fragment } from './internalComponents'
 import { createFragment } from './nodes/AnchorNode'
 import { createComponentNode } from './nodes/ComponentNode'
 import { createNativeNode } from './nodes/NativeNode'
-import type { NodeElement } from './nodes/shared'
 import type { AnyProps } from './props'
 
 export function h(
   type: string | FunctionalComponent,
   props?: AnyProps,
   ...children: unknown[]
-): NodeElement {
+) {
   if (isString(type)) {
     return createNativeNode(type, props, children)
   }

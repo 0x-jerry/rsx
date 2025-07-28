@@ -1,6 +1,6 @@
+import { mountTestApp } from '../helper'
 import { useExpose } from '../hook'
 import { nextTick, ref } from '../reactivity'
-import { mountTestApp } from '../test'
 
 describe('ComponentNode', () => {
   it('ref prop on a Component instance', async () => {

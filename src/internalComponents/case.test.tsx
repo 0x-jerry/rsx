@@ -1,7 +1,7 @@
 import { dc } from '../defineComponent'
+import { contextToJson, defineComponentName, mountTestApp } from '../helper'
 import { onBeforeMount, onMounted, onUnmounted } from '../hook'
 import { $, nextTick, ref } from '../reactivity'
-import { contextToJson, defineComponentName, mountTestApp } from '../test'
 import { VCase, VIf } from './case'
 
 describe('VCase', () => {

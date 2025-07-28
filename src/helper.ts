@@ -2,8 +2,8 @@ import type { Fn } from '@0x-jerry/utils'
 import type { DNodeContext } from '@/context'
 import type { ComponentNode } from '@/nodes/ComponentNode'
 import { def } from '@/utils'
-import type { FunctionalComponent } from '../defineComponent'
-import { mountApp } from '../op'
+import type { FunctionalComponent } from './defineComponent'
+import { mountApp } from './op'
 
 export interface RootNode extends HTMLElement {
   _: ComponentNode

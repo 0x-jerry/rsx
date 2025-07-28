@@ -49,17 +49,19 @@ export class AnchorNode extends BaseNode {
  * @returns
  */
 export function createFragment(children?: unknown[]) {
+  if (!children?.length) {
+    return null
+  }
+
   const node = createAnchorNode('Fragment')
 
-  if (children?.length) {
-    node.children = normalizeNodes(children)
+  node.children = normalizeNodes(children)
 
-    // Simplify nested fragments
-    if (node.children.length === 1) {
-      const first = node.children[0]
-      if (AnchorNode.is(first)) {
-        return first
-      }
+  // Simplify nested fragments
+  if (node.children.length === 1) {
+    const first = node.children[0]
+    if (AnchorNode.is(first)) {
+      return first
     }
   }
 

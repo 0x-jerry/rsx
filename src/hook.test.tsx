@@ -13,7 +13,7 @@ import {
   unmountApp,
   VIf,
 } from '.'
-import { mountTestApp } from './test'
+import { mountTestApp } from './helper'
 
 describe('hook', () => {
   it('provide/inject', () => {

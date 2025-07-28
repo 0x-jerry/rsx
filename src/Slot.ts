@@ -4,10 +4,10 @@ import type {
   ExposedFunctionalComponent,
   FunctionalComponent,
 } from './defineComponent'
+import { defineComponentName } from './helper'
 import { ComponentNode } from './nodes/ComponentNode'
 import type { NodeElement } from './nodes/shared'
 import { TextNode } from './nodes/TextNode'
-import { defineComponentName } from './test'
 
 export type Slot<T extends AnyProps = AnyProps> =
   ExposedFunctionalComponent<T> & {
@@ -54,7 +54,7 @@ export function useSlot<T extends AnyProps>(factory: SlotFactory<T>) {
     return false
   })
 
-  const slot = dynamicSlot ?? (() => <>{staticSlotContents}</>)
+  const slot = dynamicSlot ?? (() => staticSlotContents)
 
   return slot as Slot<T>
 }
@@ -67,7 +67,7 @@ interface SlotFactory<T extends AnyProps = AnyProps>
   }
 }
 
-function isSlotFactory(o: unknown): o is SlotFactory {
+function _isSlotFactory(o: unknown): o is SlotFactory {
   return isFn(o) && '__slot_factory' in o
 }
 

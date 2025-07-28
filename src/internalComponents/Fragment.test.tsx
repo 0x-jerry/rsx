@@ -1,6 +1,6 @@
 import { onBeforeMount, onMounted, onUnmounted } from '@/hook'
 import { dc } from '../defineComponent'
-import { contextToJson, defineComponentName, mountTestApp } from '../test'
+import { contextToJson, defineComponentName, mountTestApp } from '../helper'
 
 describe('Fragment', () => {
   it('non-reactivity data', async () => {

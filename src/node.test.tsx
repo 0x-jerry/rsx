@@ -1,5 +1,5 @@
+import { mountTestApp } from './helper'
 import { ref } from './reactivity'
-import { mountTestApp } from './test'
 
 describe('node', () => {
   it('ref prop on native node', () => {
