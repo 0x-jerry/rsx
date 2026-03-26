@@ -19,7 +19,7 @@
       ]
     },
     "types": [
-      "vitest/globals"
+      "vitest/globals",
     ]
   },
   "include": [

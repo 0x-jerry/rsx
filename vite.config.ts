@@ -1,18 +1,19 @@
-/// <reference types="vitest" />
+/// <reference types="vitest/config" />
 
 import path from 'path'
 import uno from 'unocss/vite'
 import { defineConfig } from 'vite'
-import inspect from 'vite-plugin-inspect'
 
 export default defineConfig({
-  esbuild: {
-    jsx: 'transform',
-    jsxFactory: 'h',
-    jsxFragment: 'Fragment',
+  oxc: {
+    jsx: {
+      runtime: 'classic',
+      pragma: 'h',
+      pragmaFrag: 'Fragment',
+    },
     jsxInject: `import { h, Fragment } from '@/index'`,
   },
-  plugins: [inspect(), uno()],
+  plugins: [uno()],
   resolve: {
     alias: {
       '@/': `${path.resolve('src')}/`,
