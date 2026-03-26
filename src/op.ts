@@ -13,13 +13,8 @@ import { mount, unmount } from './hook'
 import { isHTMLNode } from './node'
 import { moveTo } from './nodeOp'
 
-export function mountApp(
-  App: FunctionalComponent,
-  selector: string | HTMLElement,
-) {
-  const container = isString(selector)
-    ? document.querySelector(selector)
-    : selector
+export function mountApp(App: FunctionalComponent, selector: string | HTMLElement) {
+  const container = isString(selector) ? document.querySelector(selector) : selector
 
   if (!container) {
     throw new Error(`Can't find container`)

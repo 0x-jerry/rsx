@@ -25,9 +25,7 @@ export interface MapItemProps<Item> {
   index: number
 }
 
-export type MapItemComponent<Item> = ExposedFunctionalComponent<
-  MapItemProps<Item>
->
+export type MapItemComponent<Item> = ExposedFunctionalComponent<MapItemProps<Item>>
 
 export interface MapComponentProps<T> {
   list: T[]
@@ -55,9 +53,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
   let dataContextMap = new Map<unknown, ChildContext[]>()
 
-  const childrenKeys = computed(() =>
-    props.list.map((item, idx) => getItemKey(item, idx)),
-  )
+  const childrenKeys = computed(() => props.list.map((item, idx) => getItemKey(item, idx)))
 
   useWatch(
     childrenKeys,
@@ -162,9 +158,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
       let anchorPreviousNode =
         c1[i - 1]?.instance.el ||
-        (c1[0]
-          ? getFirstChildOfNode(c1[0]?.instance)?.previousSibling
-          : anchorNode.previousSibling)
+        (c1[0] ? getFirstChildOfNode(c1[0]?.instance)?.previousSibling : anchorNode.previousSibling)
 
       for (i = s2; i <= e2; i++) {
         const n2 = c2[i]
@@ -241,11 +235,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
         index: shallowRef(idx),
       }
 
-      const newCtx = createComponentNode(
-        props.render,
-        childProps,
-        [],
-      ) as ChildContext
+      const newCtx = createComponentNode(props.render, childProps, []) as ChildContext
 
       newCtx._props = childProps
 

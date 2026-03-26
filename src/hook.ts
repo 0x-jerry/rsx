@@ -1,10 +1,5 @@
 import { type EmptyObject, type Fn, remove } from '@0x-jerry/utils'
-import {
-  readonly,
-  type WatchCallback,
-  type WatchEffect,
-  type WatchSource,
-} from '@vue/reactivity'
+import { readonly, type WatchCallback, type WatchEffect, type WatchSource } from '@vue/reactivity'
 import type { FunctionalComponent } from '.'
 import { isComponentNode } from './ComponentNode'
 import {
@@ -53,14 +48,10 @@ function createContextHook(name: keyof DNodeEventMap) {
   }
 }
 
-export const onBeforeMount = createContextHook(
-  DNodeContextEventName.beforeMount,
-)
+export const onBeforeMount = createContextHook(DNodeContextEventName.beforeMount)
 export const onMounted = createContextHook(DNodeContextEventName.mounted)
 
-export const onBeforeUnmount = createContextHook(
-  DNodeContextEventName.beforeUnmount,
-)
+export const onBeforeUnmount = createContextHook(DNodeContextEventName.beforeUnmount)
 export const onUnmounted = createContextHook(DNodeContextEventName.unmounted)
 
 export function useWatch(
@@ -77,10 +68,7 @@ export function useWatch(
 
 export type InjectKey<T> = (string | symbol) & { _: T }
 
-export function provide<T = unknown>(
-  key: string | symbol | InjectKey<T>,
-  value: T,
-) {
+export function provide<T = unknown>(key: string | symbol | InjectKey<T>, value: T) {
   const ctx = useContext()
   ctx.ex ||= {}
   ctx.ex[key] = value

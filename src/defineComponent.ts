@@ -8,23 +8,19 @@ type ToPropRefs<T extends {}> = {
   /**
    * Start with capitalized letter means this prop is not used as reactive prop
    */
-  [key in keyof T]: key extends IsStartWithCapitalizedLetter<key>
-    ? T[key]
-    : MaybeRef<T[key]>
+  [key in keyof T]: key extends IsStartWithCapitalizedLetter<key> ? T[key] : MaybeRef<T[key]>
 }
 
 /**
  * @private
  */
-export type FunctionalComponent<P extends PropsType = any> = (
-  props: P,
-  children?: any[],
-) => any
+export type FunctionalComponent<P extends PropsType = any> = (props: P, children?: any[]) => any
 
 type _NoInferProps<P extends EmptyObject> = DefineProps<P> & Record<string, any>
 
-export type ExposedFunctionalComponent<P extends PropsType = any> =
-  FunctionalComponent<ToPropRefs<P>>
+export type ExposedFunctionalComponent<P extends PropsType = any> = FunctionalComponent<
+  ToPropRefs<P>
+>
 
 /**
  * Auto calculate props from generic type P

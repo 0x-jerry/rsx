@@ -1,19 +1,10 @@
-import {
-  camelCase,
-  type EmptyObject,
-  isString,
-  PascalCase,
-} from '@0x-jerry/utils'
+import { camelCase, type EmptyObject, isString, PascalCase } from '@0x-jerry/utils'
 import type { Merge, UnionToIntersection } from 'type-fest'
 import type { FunctionalComponent } from '.'
 import { isRef, unref } from './reactivity'
 import { composeEventListeners } from './utils'
 
-type Compose<
-  Key extends string,
-  Value,
-  Required extends boolean,
-> = Required extends true
+type Compose<Key extends string, Value, Required extends boolean> = Required extends true
   ? {
       [key in Key]: Value
     }
@@ -26,18 +17,13 @@ type Prop<
   Value = unknown,
   Required extends boolean = false,
 > = Key extends `$${infer U}`
-  ? Merge<
-      Compose<U, Value, false>,
-      Compose<`onUpdate${Capitalize<U>}`, (v: Value) => void, false>
-    >
+  ? Merge<Compose<U, Value, false>, Compose<`onUpdate${Capitalize<U>}`, (v: Value) => void, false>>
   : Compose<Key, Value, Required>
 
 type CalcProps<T extends {}> = Omit<T, FilterPrefix<keyof T, '$'>> &
   UnionToIntersection<MapProp<T, FilterPrefix<keyof T, '$'> | EmptyObject>>
 
-type FilterPrefix<T, Prefix extends string> = T extends `${Prefix}${infer _}`
-  ? T
-  : never
+type FilterPrefix<T, Prefix extends string> = T extends `${Prefix}${infer _}` ? T : never
 
 type MapProp<O extends {}, T> = T extends keyof O
   ? T extends FilterPrefix<T, '$'>
@@ -45,22 +31,20 @@ type MapProp<O extends {}, T> = T extends keyof O
     : EmptyObject
   : EmptyObject
 
-export type DefineProps<T extends {}> = Merge<
-  CalcProps<T>,
-  { [key in string]: any }
->
+export type DefineProps<T extends {}> = Merge<CalcProps<T>, { [key in string]: any }>
 
 export type AnyProps = Record<string, any>
 
-export function normalizeProps(
-  type: string | FunctionalComponent,
-  props?: AnyProps,
-): AnyProps {
+export function normalizeProps(type: string | FunctionalComponent, props?: AnyProps): AnyProps {
   const _raw: AnyProps = {}
 
   if (!props) return _raw
 
   for (const key in props) {
+    if (key.startsWith('__')) {
+      continue
+    }
+
     const value = props[key]
     if (!key.startsWith('$')) {
       // Prevent change props directly.
@@ -73,9 +57,7 @@ export function normalizeProps(
     }
 
     if (key === '$') {
-      const newProps = isString(type)
-        ? transformNativeBindingRef(type, value, props)
-        : {}
+      const newProps = isString(type) ? transformNativeBindingRef(type, value, props) : {}
 
       // todo, warning when key is duplicated
       Object.assign(_raw, newProps)
@@ -119,11 +101,7 @@ export function normalizeProps(
  * @param allProps
  * @returns
  */
-function transformNativeBindingRef(
-  type: string,
-  value: unknown,
-  allProps: AnyProps,
-) {
+function transformNativeBindingRef(type: string, value: unknown, allProps: AnyProps) {
   const props: AnyProps = {}
 
   if (type === 'input') {

@@ -42,10 +42,7 @@ export function dispatchAnchorMovedEvent(el: Node) {
   }
 }
 
-export function setAnchorNodeFirstChildren(
-  anchorNode: AnchorNode,
-  childEl?: ChildNode | null,
-) {
+export function setAnchorNodeFirstChildren(anchorNode: AnchorNode, childEl?: ChildNode | null) {
   anchorNode.__dyn.firstChild = childEl
 }
 

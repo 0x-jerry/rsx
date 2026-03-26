@@ -10,10 +10,7 @@ describe('map component', () => {
       const list = [1, 2, 3]
       return (
         <div>
-          <VMap
-            list={list}
-            render={({ item }) => <div class="item">{item}</div>}
-          />
+          <VMap list={list} render={({ item }) => <div class="item">{item}</div>} />
         </div>
       )
     })
@@ -35,10 +32,7 @@ describe('map component', () => {
 
       return (
         <div>
-          <VMap
-            list={list}
-            render={({ item }) => <div class="item">{item}</div>}
-          />
+          <VMap list={list} render={({ item }) => <div class="item">{item}</div>} />
         </div>
       )
     })
@@ -51,11 +45,7 @@ describe('map component', () => {
       .map((item) => item.textContent)
       .toArray()
 
-    expect(contents).eql([
-      '[object Object]',
-      '[object Object]',
-      '[object Object]',
-    ])
+    expect(contents).eql(['[object Object]', '[object Object]', '[object Object]'])
   })
 
   it('reactivity data', async () => {
@@ -68,10 +58,7 @@ describe('map component', () => {
 
       return (
         <div>
-          <VMap
-            list={list}
-            render={(props) => <div class="item">{props.item}</div>}
-          />
+          <VMap list={list} render={(props) => <div class="item">{props.item}</div>} />
         </div>
       )
     })
@@ -203,10 +190,7 @@ describe('map component', () => {
 
       return (
         <div>
-          <VMap
-            list={list}
-            render={({ item }) => <div class="item">{item}</div>}
-          />
+          <VMap list={list} render={({ item }) => <div class="item">{item}</div>} />
         </div>
       )
     })
@@ -234,10 +218,7 @@ describe('map component', () => {
 
       return (
         <div>
-          <VMap
-            list={list}
-            render={({ item }) => <div class="item">{item}</div>}
-          />
+          <VMap list={list} render={({ item }) => <div class="item">{item}</div>} />
         </div>
       )
     })
@@ -265,10 +246,7 @@ describe('map component', () => {
 
       return (
         <div>
-          <VMap
-            list={list}
-            render={({ item }) => <div class="item">{item}</div>}
-          />
+          <VMap list={list} render={({ item }) => <div class="item">{item}</div>} />
         </div>
       )
     })
@@ -296,10 +274,7 @@ describe('map component', () => {
 
       return (
         <div>
-          <VMap
-            list={list}
-            render={({ item }) => <div class="item">{item}</div>}
-          />
+          <VMap list={list} render={({ item }) => <div class="item">{item}</div>} />
         </div>
       )
     })
@@ -327,10 +302,7 @@ describe('map component', () => {
 
       return (
         <div>
-          <VMap
-            list={list}
-            render={({ item }) => <div class="item">{item}</div>}
-          />
+          <VMap list={list} render={({ item }) => <div class="item">{item}</div>} />
         </div>
       )
     })
@@ -358,10 +330,7 @@ describe('map component', () => {
 
       return (
         <div>
-          <VMap
-            list={list}
-            render={({ item }) => <div class="item">{item}</div>}
-          />
+          <VMap list={list} render={({ item }) => <div class="item">{item}</div>} />
         </div>
       )
     })
@@ -389,10 +358,7 @@ describe('map component', () => {
 
       return (
         <div>
-          <VMap
-            list={list}
-            render={({ item }) => <div class="item">{item}</div>}
-          />
+          <VMap list={list} render={({ item }) => <div class="item">{item}</div>} />
         </div>
       )
     })
@@ -547,16 +513,7 @@ describe('map component with fragment', () => {
       .map((item) => item.textContent)
       .toArray()
 
-    expect(contents).eql([
-      '4-0',
-      '4-1',
-      '2-0',
-      '2-1',
-      '3-0',
-      '3-1',
-      '1-0',
-      '1-1',
-    ])
+    expect(contents).eql(['4-0', '4-1', '2-0', '2-1', '3-0', '3-1', '1-0', '1-1'])
   })
 
   it('reuse node 1', async () => {
@@ -595,16 +552,7 @@ describe('map component with fragment', () => {
       .map((item) => item.textContent)
       .toArray()
 
-    expect(contents).eql([
-      '4-0',
-      '4-1',
-      '2-0',
-      '2-1',
-      '3-0',
-      '3-1',
-      '1-0',
-      '1-1',
-    ])
+    expect(contents).eql(['4-0', '4-1', '2-0', '2-1', '3-0', '3-1', '1-0', '1-1'])
   })
 
   it('add item to list', async () => {
@@ -640,16 +588,7 @@ describe('map component with fragment', () => {
       .map((item) => item.textContent)
       .toArray()
 
-    expect(contents).eql([
-      '1-0',
-      '1-1',
-      '4-0',
-      '4-1',
-      '2-0',
-      '2-1',
-      '3-0',
-      '3-1',
-    ])
+    expect(contents).eql(['1-0', '1-1', '4-0', '4-1', '2-0', '2-1', '3-0', '3-1'])
   })
 
   it('add item from start', async () => {
@@ -685,16 +624,7 @@ describe('map component with fragment', () => {
       .map((item) => item.textContent)
       .toArray()
 
-    expect(contents).eql([
-      '4-0',
-      '4-1',
-      '1-0',
-      '1-1',
-      '2-0',
-      '2-1',
-      '3-0',
-      '3-1',
-    ])
+    expect(contents).eql(['4-0', '4-1', '1-0', '1-1', '2-0', '2-1', '3-0', '3-1'])
   })
 
   it('add item to the end', async () => {
@@ -730,16 +660,7 @@ describe('map component with fragment', () => {
       .map((item) => item.textContent)
       .toArray()
 
-    expect(contents).eql([
-      '1-0',
-      '1-1',
-      '2-0',
-      '2-1',
-      '3-0',
-      '3-1',
-      '4-0',
-      '4-1',
-    ])
+    expect(contents).eql(['1-0', '1-1', '2-0', '2-1', '3-0', '3-1', '4-0', '4-1'])
   })
 
   it('delete item to list', async () => {
@@ -864,12 +785,8 @@ describe('map with map', () => {
                 list={[1, 2]}
                 render={(props1) => (
                   <>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-0`)}
-                    </div>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-1`)}
-                    </div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-0`)}</div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-1`)}</div>
                   </>
                 )}
               />
@@ -920,12 +837,8 @@ describe('map with map', () => {
                 list={[1, 2]}
                 render={(props1) => (
                   <>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-0`)}
-                    </div>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-1`)}
-                    </div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-0`)}</div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-1`)}</div>
                   </>
                 )}
               />
@@ -978,12 +891,8 @@ describe('map with map', () => {
                 list={[1, 2]}
                 render={(props1) => (
                   <>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-0`)}
-                    </div>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-1`)}
-                    </div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-0`)}</div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-1`)}</div>
                   </>
                 )}
               />
@@ -1040,12 +949,8 @@ describe('map with map', () => {
                 list={[1, 2]}
                 render={(props1) => (
                   <>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-0`)}
-                    </div>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-1`)}
-                    </div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-0`)}</div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-1`)}</div>
                   </>
                 )}
               />
@@ -1102,12 +1007,8 @@ describe('map with map', () => {
                 list={[1, 2]}
                 render={(props1) => (
                   <>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-0`)}
-                    </div>
-                    <div class="item">
-                      {$(() => `${props.item}-${props1.item}-1`)}
-                    </div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-0`)}</div>
+                    <div class="item">{$(() => `${props.item}-${props1.item}-1`)}</div>
                   </>
                 )}
               />
@@ -1177,17 +1078,7 @@ describe('map with map', () => {
     mountTestApp(App)
     await nextTick()
 
-    expect(lifecycle).eql([
-      'bm-1',
-      'm-1',
-      'bm-2',
-      'm-2',
-      'bm-3',
-      'm-3',
-      'um-2',
-      'bm-4',
-      'm-4',
-    ])
+    expect(lifecycle).eql(['bm-1', 'm-1', 'bm-2', 'm-2', 'bm-3', 'm-3', 'um-2', 'bm-4', 'm-4'])
   })
 })
 

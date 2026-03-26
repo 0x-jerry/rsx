@@ -1,8 +1,6 @@
 export type { MaybeRef } from './reactivity'
 
-export type IsStartWith<T, U extends string> = T extends `${U}${infer _}`
-  ? T
-  : never
+export type IsStartWith<T, U extends string> = T extends `${U}${infer _}` ? T : never
 
 export type IsStartWithCapitalizedLetter<T> = IsStartWith<
   T,

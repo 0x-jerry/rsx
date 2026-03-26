@@ -6,11 +6,7 @@ import { moveChildren, updateEl } from './nodeOp'
 import { type AnyProps, normalizeProps } from './props'
 import { effect, isRef, unref } from './reactivity'
 
-export function createNativeElement(
-  type: string,
-  props?: AnyProps,
-  children?: unknown[],
-) {
+export function createNativeElement(type: string, props?: AnyProps, children?: unknown[]) {
   const el = document.createElement(type)
 
   const { ref, ...otherProps } = props || {}

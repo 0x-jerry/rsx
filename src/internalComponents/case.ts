@@ -19,9 +19,7 @@ export interface CaseItemComponentProps<T> {
   value: T
 }
 
-export type CaseItemComponent<T> = FunctionalComponent<
-  CaseItemComponentProps<T>
->
+export type CaseItemComponent<T> = FunctionalComponent<CaseItemComponentProps<T>>
 
 export interface CaseItem<T> {
   where: (value: T) => boolean
@@ -30,9 +28,7 @@ export interface CaseItem<T> {
 
 export interface CaseComponentProps<T = unknown> {
   condition: T
-  cases?:
-    | Record<string, Optional<CaseItemComponent<NoInfer<T>>>>
-    | CaseItem<NoInfer<T>>[]
+  cases?: Record<string, Optional<CaseItemComponent<NoInfer<T>>>> | CaseItem<NoInfer<T>>[]
 }
 
 export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
@@ -87,11 +83,7 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
       return
     }
 
-    const node = createComponentNode(
-      Component,
-      { value: $(() => props.condition) },
-      [],
-    )
+    const node = createComponentNode(Component, { value: $(() => props.condition) }, [])
 
     node.initialize()
 

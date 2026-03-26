@@ -29,11 +29,7 @@ export function insertBefore(anchor: Node, node: Node) {
   }
 }
 
-export function moveChildren(
-  parent: ParentNode,
-  children?: unknown[],
-  anchor?: Node,
-) {
+export function moveChildren(parent: ParentNode, children?: unknown[], anchor?: Node) {
   processRawChildren(children || [], (childEl) => {
     moveTo(parent, childEl, anchor)
   })
@@ -45,10 +41,7 @@ export function moveChildren(
  * @param children
  * @param cb
  */
-export function processRawChildren(
-  children: unknown[],
-  cb: (childEl: ChildNode) => void,
-) {
+export function processRawChildren(children: unknown[], cb: (childEl: ChildNode) => void) {
   const stack = children.slice()
 
   while (stack.length) {
@@ -66,12 +59,7 @@ export function processRawChildren(
   }
 }
 
-export function updateEl(
-  el: HTMLElement,
-  key: string,
-  value: any,
-  oldValue?: any,
-) {
+export function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
   if (/^on/.test(key)) {
     const eventName = key.slice(2).toLowerCase()
 
@@ -83,8 +71,7 @@ export function updateEl(
     return
   }
 
-  const isValueKey =
-    el.tagName === 'INPUT' && ['value', 'checked'].includes(key)
+  const isValueKey = el.tagName === 'INPUT' && ['value', 'checked'].includes(key)
 
   if (isValueKey) {
     // @ts-ignore

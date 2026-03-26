@@ -32,11 +32,7 @@ export class ComponentNode {
 
   _initialized = false
 
-  constructor(
-    type: FunctionalComponent,
-    props: AnyProps | undefined,
-    children: unknown[],
-  ) {
+  constructor(type: FunctionalComponent, props: AnyProps | undefined, children: unknown[]) {
     this.type = type
     this.props = Object.assign({}, props)
     this.children = children

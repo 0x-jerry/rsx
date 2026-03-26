@@ -90,9 +90,7 @@ function defineSlotProps<T extends AnyProps>(Slot: Slot) {
       ctx = ctx.parent
     }
 
-    throw Error(
-      `Slot data should only used inside the corelative Slot instance.`,
-    )
+    throw Error(`Slot data should only used inside the corelative Slot instance.`)
   }
 }
 
