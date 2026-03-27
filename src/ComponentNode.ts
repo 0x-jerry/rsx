@@ -1,81 +1,28 @@
 import { isObject } from '@0x-jerry/utils'
+import type { FunctionalComponent } from './defineComponent'
+import { normalizeProps, type AnyProps } from './props'
+import { mount } from './mount'
 import {
-  appendToCurrentContext,
+  ComponentContext,
   createNodeContext,
-  type DNodeContext,
   popCurrentContext,
   setCurrentContext,
 } from './context'
-import type { FunctionalComponent } from './defineComponent'
-import { isHTMLNode } from './node'
-import { type AnyProps, normalizeProps } from './props'
+import { appendToCurrentContext } from './context'
 
 let componentId = 0
 
-export class ComponentNode {
-  readonly __cf = true
+const ComponentNodeSymbol = Symbol('ComponentNode')
+type ComponentNodeSymbol = typeof ComponentNodeSymbol
 
-  id = componentId++
+export interface ComponentNode {
+  [ComponentNodeSymbol]: true
   type: FunctionalComponent
-
-  /**
-   * Original props, not normalized
-   */
-  props: AnyProps
-
-  /**
-   * Original children, not normalized
-   */
-  children: unknown[]
-
-  instance!: DNodeContext
-
-  _initialized = false
-
-  constructor(type: FunctionalComponent, props: AnyProps | undefined, children: unknown[]) {
-    this.type = type
-    this.props = Object.assign({}, props)
-    this.children = children
-  }
-
-  initialize() {
-    if (this._initialized) {
-      console.error('[ComponentNode] ComponentNode has been initialized')
-      return
-    }
-
-    this.instance = this._createComponentInstance()
-    this._initialized = true
-  }
-
-  _createComponentInstance() {
-    const ctx = createNodeContext(this.type.name)
-    ctx._node = this
-
-    appendToCurrentContext(ctx)
-
-    setCurrentContext(ctx)
-
-    const proxiedProps = normalizeProps(this.type, this.props)
-
-    const rootEl = this.type(proxiedProps, this.children)
-
-    if (rootEl != null) {
-      if (isComponentNode(rootEl)) {
-        rootEl.initialize()
-
-        ctx.el = rootEl.instance.el
-      } else if (isHTMLNode(rootEl)) {
-        ctx.el = rootEl as ChildNode
-      } else {
-        console.warn('[ComponentNode] Invalid component node', rootEl)
-      }
-    }
-
-    popCurrentContext()
-
-    return ctx
-  }
+  id: number
+  props?: AnyProps
+  children?: unknown[]
+  mounted?: boolean
+  context?: ComponentContext
 }
 
 export function createComponentNode(
@@ -83,11 +30,45 @@ export function createComponentNode(
   props: AnyProps | undefined,
   children: unknown[],
 ) {
-  const node = new ComponentNode(type, props, children)
+  const node: ComponentNode = {
+    [ComponentNodeSymbol]: true,
+    type,
+    id: componentId++,
+    props,
+    children,
+    mounted: false,
+  }
 
   return node
 }
 
 export function isComponentNode(o: unknown): o is ComponentNode {
-  return isObject(o) && '__cf' in o && o.__cf === true
+  return isObject(o) && ComponentNodeSymbol in o
+}
+
+export function mountComponentNode(node: ComponentNode): HTMLElement | undefined {
+  if (node.mounted) {
+    console.warn('component node mounted mounted')
+    return
+  }
+
+  const ctx = createNodeContext(node.type.name)
+  node.context = ctx
+
+  appendToCurrentContext(ctx)
+
+  setCurrentContext(ctx)
+
+  const proxiedProps = normalizeProps(node.type, node.props)
+  ctx.props = proxiedProps
+
+  const componentRoot = node.type(proxiedProps, node.children)
+
+  const rootEl = mount(componentRoot)
+
+  popCurrentContext()
+
+  node.mounted = true
+
+  return rootEl
 }

@@ -85,7 +85,7 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
 
     const node = createComponentNode(Component, { value: $(() => props.condition) }, [])
 
-    node.initialize()
+    node.mount()
 
     if (node.instance.el) {
       insertBefore(anchorNode, node.instance.el)

@@ -1,6 +1,5 @@
 import { isString } from '@0x-jerry/utils'
 import { isComponentNode } from './ComponentNode'
-import { disableSSR, enableSSR } from './config'
 import {
   appendToCurrentContext,
   createNodeContext,
@@ -29,7 +28,7 @@ export function mountApp(App: FunctionalComponent, selector: string | HTMLElemen
   const rootEl = App({}, [])
 
   if (isComponentNode(rootEl)) {
-    rootEl.initialize()
+    rootEl.mount()
 
     ctx.el = rootEl.instance.el
   } else if (isHTMLNode(rootEl)) {

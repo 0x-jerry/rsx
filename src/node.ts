@@ -1,30 +1,26 @@
 import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import { type ClassValue, clsx } from 'clsx'
-import { isComponentNode } from './ComponentNode'
 import { onUnmounted } from './hook'
-import { moveChildren, updateEl } from './nodeOp'
+import { updateEl } from './nodeOp'
 import { type AnyProps, normalizeProps } from './props'
 import { effect, isRef, unref } from './reactivity'
 
-export function createNativeElement(type: string, props?: AnyProps, children?: unknown[]) {
+export function createNativeElement(type: string, props?: AnyProps) {
   const el = document.createElement(type)
 
   const { ref, ...otherProps } = props || {}
 
   const cleanup = bindingProperties(el, normalizeProps(type, otherProps))
 
-  if (cleanup) {
-    onUnmounted(cleanup)
-  }
-
   // Respect `ref` prop
   if (isRef(ref)) {
     ref.value = el
   }
 
-  moveChildren(el, children)
-
-  return el
+  return {
+    el,
+    cleanup,
+  }
 }
 
 function bindingProperties(el: HTMLElement, props: AnyProps) {
@@ -74,34 +70,13 @@ export function createTextElement(content: unknown) {
       el.textContent = String(unref(content) ?? '')
     })
 
-    onUnmounted(() => stop(runner))
+    // TODO, clear runner
+    // onUnmounted(() => stop(runner))
   } else {
     el.textContent = String(content ?? '')
   }
 
   return el
-}
-
-export function normalizeNode(node: unknown): ChildNode | null | undefined {
-  const rawValue = unref(node)
-
-  if (rawValue == null) {
-    return null
-  }
-
-  if (isHTMLNode(rawValue)) {
-    return rawValue as ChildNode
-  }
-
-  if (isComponentNode(node)) {
-    if (!node.instance) {
-      node.initialize()
-    }
-
-    return node.instance.el
-  }
-
-  return createTextElement(node)
 }
 
 export function isHTMLNode(o: unknown): o is ChildNode {

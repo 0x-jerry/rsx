@@ -2,14 +2,15 @@ import { isComponentNode } from './ComponentNode'
 import { dc } from './defineComponent'
 import { useWatch } from './hook'
 import { h } from './jsx'
+import { isNativeNode } from './NativeNode'
 import { $, nextTick, ref } from './reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from './test'
 
 describe('jsx', () => {
-  it('dom element', () => {
+  it('jsx element', () => {
     const el = h('div')
 
-    expect(el).instanceof(HTMLDivElement)
+    expect(isNativeNode(el)).toBe(true)
   })
 
   it('component node', () => {
@@ -51,7 +52,7 @@ describe('jsx', () => {
 
     el?.dispatchEvent(new Event('click'))
     el?.dispatchEvent(new Event('click'))
-    expect(fn).toBeCalledTimes(2)
+    expect(fn).toHaveBeenCalledTimes(2)
   })
 
   describe('handle $ binding prop', () => {
@@ -105,22 +106,6 @@ describe('jsx', () => {
       el.dispatchEvent(new Event('change'))
       expect(v.value).toBe('2')
     })
-  })
-
-  it('should work without context when render with non-reactive props', () => {
-    const el = h('div', { class: 'test' }) as HTMLDivElement
-
-    expect(el.classList.contains('test')).toBe(true)
-  })
-
-  it('should only work with context when render with reactive props', () => {
-    const fn = () => {
-      const cls = ref('test')
-
-      h('div', { class: cls })
-    }
-
-    expect(fn).throw('This should only used inside functional component')
   })
 
   it('should render as text node', async () => {
@@ -272,7 +257,7 @@ describe('jsx context tree', () => {
     defineComponentName(B, 'B')
 
     const App = dc(() => {
-      const InstanceA = () => (
+      const InstanceA = (
         <div>
           <A></A>
         </div>
@@ -280,9 +265,7 @@ describe('jsx context tree', () => {
 
       return (
         <A>
-          <B>
-            <InstanceA />
-          </B>
+          <B>{InstanceA}</B>
           <A></A>
         </A>
       )

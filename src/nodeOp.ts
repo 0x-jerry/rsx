@@ -47,7 +47,7 @@ export function processRawChildren(children: unknown[], cb: (childEl: ChildNode)
   while (stack.length) {
     const child = stack.shift()
     if (Array.isArray(child)) {
-      stack.push(...child)
+      stack.unshift(...child)
       continue
     }
 

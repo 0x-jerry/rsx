@@ -1,7 +1,8 @@
 import { EventEmitter } from '@0x-jerry/utils'
 import type { ComponentNode } from './ComponentNode'
+import { AnyProps } from './props'
 
-export const DNodeContextEventName = {
+export const ComponentContextEventNameMap = {
   beforeMount: 'bm',
   mounted: 'm',
 
@@ -9,7 +10,7 @@ export const DNodeContextEventName = {
   unmounted: 'um',
 } as const
 
-export type DNodeEventMap = {
+export type ComponentEvents = {
   /**
    * before mount
    */
@@ -29,37 +30,41 @@ export type DNodeEventMap = {
   um: []
 }
 
-let contextId = 1
-
-export class DNodeContext extends EventEmitter<DNodeEventMap> {
-  readonly id = contextId++
+export interface ComponentContext {
+  emitter: EventEmitter<ComponentEvents>
+  id: number
   name?: string
-  children?: Set<DNodeContext>
-  el?: ChildNode
-  parent?: DNodeContext | null
+  children?: Set<ComponentContext>
+  el?: Node
+  parent?: ComponentContext | null
+  node?: ComponentNode
 
   /**
-   * Extra Data
+   * Normalized proxy props
+   */
+  props?: AnyProps
+
+  /**
+   * Provide extra data
    */
   ex?: Record<string | symbol, unknown>
-
-  _node?: ComponentNode
-
-  _mounted?: boolean
-  _unmounted?: boolean
 }
+
+let contextId = 1
 
 export const {
   push: setCurrentContext,
   pop: popCurrentContext,
   current: getCurrentContext,
   runWith: runWithContext,
-} = defineContext<DNodeContext>()
+} = defineContext<ComponentContext>()
 
 export function createNodeContext(name?: string) {
-  const ctx = new DNodeContext()
-
-  ctx.name = name
+  const ctx: ComponentContext = {
+    emitter: new EventEmitter<ComponentEvents>(),
+    id: contextId++,
+    name,
+  }
 
   return ctx
 }
@@ -93,14 +98,14 @@ function defineContext<T>() {
   return actions
 }
 
-export function appendToCurrentContext(ctx: DNodeContext) {
+export function appendToCurrentContext(ctx: ComponentContext) {
   const parentCtx = getCurrentContext()
 
   if (!parentCtx) {
     return
   }
 
-  ctx.on(DNodeContextEventName.unmounted, () => {
+  ctx.emitter.on(ComponentContextEventNameMap.unmounted, () => {
     // remove it self
     parentCtx.children?.delete(ctx)
     ctx.parent = null

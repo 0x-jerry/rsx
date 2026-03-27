@@ -1,19 +1,20 @@
 import type { Fn } from '@0x-jerry/utils'
-import type { DNodeContext } from '@/context'
-import { def } from '@/utils'
 import type { FunctionalComponent } from '../defineComponent'
-import { mountApp } from '../op'
+import { mountApp } from '../mount'
+import { def } from '../utils'
+import { ComponentContext } from '../context'
 
 export interface RootNode extends HTMLElement {
-  _: DNodeContext
+  _: ComponentContext
 }
 
 export function mountTestApp(App: FunctionalComponent) {
-  const doc = document.createElement('div') as unknown as RootNode
-  document.body.append(doc)
-  doc.id = 'app'
+  const doc = document.createElement('div') as any as RootNode
+  doc.id = 'App'
 
-  doc._ = mountApp(App, doc)
+  const node = mountApp(App, doc)
+
+  doc._ = node.context!
 
   return doc
 }
@@ -23,7 +24,7 @@ export interface ContextJson {
   children: ContextJson[]
 }
 
-export function contextToJson(context: DNodeContext): ContextJson {
+export function contextToJson(context: ComponentContext): ContextJson {
   return {
     name: context.name,
     children: [...(context.children || [])].map((n) => contextToJson(n)),

@@ -239,7 +239,7 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
       newCtx._props = childProps
 
-      newCtx.initialize()
+      newCtx.mount()
       newCtx.instance.name = 'VMap.item'
 
       appendItemToMap(newDataContextMap, dataKey, newCtx)

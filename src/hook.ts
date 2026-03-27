@@ -1,34 +1,12 @@
-import { type EmptyObject, type Fn, remove } from '@0x-jerry/utils'
+import { type EmptyObject, type Fn } from '@0x-jerry/utils'
 import { readonly, type WatchCallback, type WatchEffect, type WatchSource } from '@vue/reactivity'
-import type { FunctionalComponent } from '.'
-import { isComponentNode } from './ComponentNode'
 import {
-  type DNodeContext,
-  DNodeContextEventName,
-  type DNodeEventMap,
+  type ComponentContext,
+  ComponentContextEventNameMap,
+  type ComponentEvents,
   getCurrentContext,
 } from './context'
 import { isRef, type WatchHandle, type WatchOptions, watch } from './reactivity'
-
-export function unmount(ctx: DNodeContext) {
-  ctx.emit(DNodeContextEventName.beforeUnmount)
-
-  ctx.el?.remove()
-
-  ctx.children?.forEach((child) => unmount(child))
-
-  ctx._unmounted = true
-  ctx.emit(DNodeContextEventName.unmounted)
-}
-
-export function mount(ctx: DNodeContext) {
-  ctx.emit(DNodeContextEventName.beforeMount)
-
-  ctx.children?.forEach((item) => mount(item))
-
-  ctx._mounted = true
-  ctx.emit(DNodeContextEventName.mounted)
-}
 
 export function useContext() {
   const ctx = getCurrentContext()
@@ -40,19 +18,19 @@ export function useContext() {
   return ctx
 }
 
-function createContextHook(name: keyof DNodeEventMap) {
-  return (fn: Fn, ctx?: DNodeContext) => {
+function createContextHook(name: keyof ComponentEvents) {
+  return (fn: Fn, ctx?: ComponentContext) => {
     ctx ||= useContext()
 
-    ctx.on(name, fn)
+    ctx.emitter.on(name, fn)
   }
 }
 
-export const onBeforeMount = createContextHook(DNodeContextEventName.beforeMount)
-export const onMounted = createContextHook(DNodeContextEventName.mounted)
+export const onBeforeMount = createContextHook(ComponentContextEventNameMap.beforeMount)
+export const onMounted = createContextHook(ComponentContextEventNameMap.mounted)
 
-export const onBeforeUnmount = createContextHook(DNodeContextEventName.beforeUnmount)
-export const onUnmounted = createContextHook(DNodeContextEventName.unmounted)
+export const onBeforeUnmount = createContextHook(ComponentContextEventNameMap.beforeUnmount)
+export const onUnmounted = createContextHook(ComponentContextEventNameMap.unmounted)
 
 export function useWatch(
   getter: WatchSource | WatchSource[] | WatchEffect,
@@ -91,7 +69,7 @@ export function inject<T>(key: string | symbol | InjectKey<T>): T | undefined {
 export function useRawProps() {
   const ctx = useContext()
 
-  return ctx._node?.props || {}
+  return ctx.node?.props || {}
 }
 
 export function useExpose<T extends EmptyObject>(exposed: T) {
@@ -103,5 +81,5 @@ export function useExpose<T extends EmptyObject>(exposed: T) {
 }
 
 export function useRawChildren() {
-  return useContext()._node?.children || []
+  return useContext().node?.children || []
 }

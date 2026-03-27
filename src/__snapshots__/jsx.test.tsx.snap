@@ -22,13 +22,13 @@ exports[`jsx context tree > context tree > ctx tree 1`] = `
       "name": "A",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
 exports[`jsx context tree > context tree > html 1`] = `
 <div
-  id="app"
+  id="App"
 >
   <div
     class="A"
@@ -78,13 +78,8 @@ exports[`jsx context tree > instance Component inside Component > ctx tree 1`] =
         {
           "children": [
             {
-              "children": [
-                {
-                  "children": [],
-                  "name": "A",
-                },
-              ],
-              "name": "InstanceA",
+              "children": [],
+              "name": "A",
             },
           ],
           "name": "B",
@@ -97,13 +92,13 @@ exports[`jsx context tree > instance Component inside Component > ctx tree 1`] =
       "name": "A",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
 exports[`jsx context tree > instance Component inside Component > html 1`] = `
 <div
-  id="app"
+  id="App"
 >
   <div
     class="A"
