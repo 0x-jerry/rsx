@@ -9,9 +9,9 @@ import {
   onUnmounted,
   provide,
   ref,
-  unmountApp,
   VIf,
 } from '.'
+import { unmount } from './ops'
 import { mountTestApp } from './test'
 
 describe('hook', () => {
@@ -96,11 +96,11 @@ describe('hook', () => {
 
     mountTestApp(App)
 
-    expect(fn).toBeCalledTimes(0)
+    expect(fn).toHaveBeenCalledTimes(0)
 
     showA.value = false
     await nextTick()
-    expect(fn).toBeCalledTimes(1)
+    expect(fn).toHaveBeenCalledTimes(1)
   })
 
   it('lifecycle hooks', () => {
@@ -120,12 +120,12 @@ describe('hook', () => {
       )
     })
 
-    expect(beforeMountFn).toBeCalledTimes(0)
-    expect(mountedFn).toBeCalledTimes(0)
+    expect(beforeMountFn).toHaveBeenCalledTimes(0)
+    expect(mountedFn).toHaveBeenCalledTimes(0)
     mountTestApp(App)
 
-    expect(beforeMountFn).toBeCalledTimes(1)
-    expect(mountedFn).toBeCalledTimes(1)
+    expect(beforeMountFn).toHaveBeenCalledTimes(1)
+    expect(mountedFn).toHaveBeenCalledTimes(1)
   })
 
   it('lifecycle order', () => {
@@ -190,40 +190,24 @@ describe('hook', () => {
       'm:3',
     ])
 
-    unmountApp(app._)
+    lifecycle.splice(0)
+    unmount(app._.node)
 
     expect(lifecycle).eql([
-      'bm:1',
-      'bm:4',
-      'm:4',
-      'bm:5',
-      'm:5',
-      'm:1',
-      'bm:2',
-      'bm:6',
-      'm:6',
-      'bm:7',
-      'bm:8',
-      'm:8',
-      'm:7',
-      'm:2',
-      'bm:3',
-      'm:3',
-
       // unmounted order
-      'bum:1',
       'bum:4',
       'um:4',
       'bum:5',
       'um:5',
+      'bum:1',
       'um:1',
-      'bum:2',
       'bum:6',
       'um:6',
-      'bum:7',
       'bum:8',
       'um:8',
+      'bum:7',
       'um:7',
+      'bum:2',
       'um:2',
       'bum:3',
       'um:3',
@@ -292,7 +276,7 @@ describe('hook', () => {
       'm:3',
     ])
 
-    unmountApp(app._)
+    unmount(app._)
 
     expect(lifecycle).eql([
       'bm:1',

@@ -305,33 +305,33 @@ describe('case context tree', () => {
       )
     })
 
-    expect(mountedFnA).toBeCalledTimes(0)
-    expect(beforeMountFnA).toBeCalledTimes(0)
-    expect(unmountedFnA).toBeCalledTimes(0)
+    expect(mountedFnA).toHaveBeenCalledTimes(0)
+    expect(beforeMountFnA).toHaveBeenCalledTimes(0)
+    expect(unmountedFnA).toHaveBeenCalledTimes(0)
 
-    expect(mountedFnB).toBeCalledTimes(0)
-    expect(beforeMountFnB).toBeCalledTimes(0)
-    expect(unmountedFnB).toBeCalledTimes(0)
+    expect(mountedFnB).toHaveBeenCalledTimes(0)
+    expect(beforeMountFnB).toHaveBeenCalledTimes(0)
+    expect(unmountedFnB).toHaveBeenCalledTimes(0)
 
     mountTestApp(App)
 
-    expect(mountedFnA).toBeCalledTimes(1)
-    expect(beforeMountFnA).toBeCalledTimes(1)
-    expect(unmountedFnA).toBeCalledTimes(0)
+    expect(mountedFnA).toHaveBeenCalledTimes(1)
+    expect(beforeMountFnA).toHaveBeenCalledTimes(1)
+    expect(unmountedFnA).toHaveBeenCalledTimes(0)
 
-    expect(mountedFnB).toBeCalledTimes(0)
-    expect(beforeMountFnB).toBeCalledTimes(0)
-    expect(unmountedFnB).toBeCalledTimes(0)
+    expect(mountedFnB).toHaveBeenCalledTimes(0)
+    expect(beforeMountFnB).toHaveBeenCalledTimes(0)
+    expect(unmountedFnB).toHaveBeenCalledTimes(0)
 
     value.value = 1
     await nextTick()
 
-    expect(mountedFnA).toBeCalledTimes(1)
-    expect(beforeMountFnA).toBeCalledTimes(1)
-    expect(unmountedFnA).toBeCalledTimes(1)
+    expect(mountedFnA).toHaveBeenCalledTimes(1)
+    expect(beforeMountFnA).toHaveBeenCalledTimes(1)
+    expect(unmountedFnA).toHaveBeenCalledTimes(1)
 
-    expect(mountedFnB).toBeCalledTimes(1)
-    expect(beforeMountFnB).toBeCalledTimes(1)
-    expect(unmountedFnB).toBeCalledTimes(0)
+    expect(mountedFnB).toHaveBeenCalledTimes(1)
+    expect(beforeMountFnB).toHaveBeenCalledTimes(1)
+    expect(unmountedFnB).toHaveBeenCalledTimes(0)
   })
 })

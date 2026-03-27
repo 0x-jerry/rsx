@@ -40,6 +40,11 @@ export interface ComponentContext {
   node?: ComponentNode
 
   /**
+   * Component root node
+   */
+  root?: unknown
+
+  /**
    * Normalized proxy props
    */
   props?: AnyProps
@@ -59,11 +64,12 @@ export const {
   runWith: runWithContext,
 } = defineContext<ComponentContext>()
 
-export function createNodeContext(name?: string) {
+export function createNodeContext(node: ComponentNode) {
   const ctx: ComponentContext = {
     emitter: new EventEmitter<ComponentEvents>(),
     id: contextId++,
-    name,
+    name: node.type.name,
+    node,
   }
 
   return ctx

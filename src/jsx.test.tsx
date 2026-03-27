@@ -186,11 +186,11 @@ describe('jsx', () => {
     mountTestApp(() => h(Comp, props))
 
     await nextTick()
-    expect(fn).toBeCalledTimes(0)
+    expect(fn).toHaveBeenCalledTimes(0)
 
     props.v.value++
     await nextTick()
-    expect(fn).toBeCalledTimes(1)
+    expect(fn).toHaveBeenCalledTimes(1)
   })
 })
 

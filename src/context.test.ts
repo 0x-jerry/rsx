@@ -1,16 +1,24 @@
+import { EventEmitter } from '@0x-jerry/utils'
 import {
   appendToCurrentContext,
-  createNodeContext,
+  ComponentContext,
   getCurrentContext,
   popCurrentContext,
   runWithContext,
   setCurrentContext,
 } from './context'
 
+function createFakeContext(name: string) {
+  return {
+    name,
+    emitter: new EventEmitter(),
+  } as ComponentContext
+}
+
 describe('context', () => {
   it('should working like a queue', () => {
-    const c1 = createNodeContext('c1')
-    const c2 = createNodeContext('c2')
+    const c1 = createFakeContext('c1')
+    const c2 = createFakeContext('c2')
 
     setCurrentContext(c1)
     setCurrentContext(c2)
@@ -25,7 +33,7 @@ describe('context', () => {
   })
 
   it('should get current context when run with context', () => {
-    const c1 = createNodeContext('c1')
+    const c1 = createFakeContext('c1')
 
     expect(getCurrentContext()).toBe(undefined)
 
@@ -36,13 +44,13 @@ describe('context', () => {
 
     const r = runWithContext(fn, c1)
 
-    expect(fn).toBeCalledTimes(1)
+    expect(fn).toHaveBeenCalledTimes(1)
     expect(r).toBe(1)
     expect(getCurrentContext()).toBe(undefined)
   })
 
   it('should pop context when throw an error', () => {
-    const c1 = createNodeContext('c1')
+    const c1 = createFakeContext('c1')
 
     const hasError = vi.fn()
     try {
@@ -54,17 +62,17 @@ describe('context', () => {
       hasError()
       expect(error).toBe(1)
     }
-    expect(hasError).toBeCalledTimes(1)
+    expect(hasError).toHaveBeenCalledTimes(1)
 
     expect(getCurrentContext()).toBe(undefined)
   })
 
   it("should append to current context's children", () => {
-    const c1 = createNodeContext('c1')
+    const c1 = createFakeContext('c1')
 
     expect(c1.children).toBe(undefined)
 
-    const c2 = createNodeContext('c2')
+    const c2 = createFakeContext('c2')
 
     runWithContext(() => {
       appendToCurrentContext(c2)

@@ -8,7 +8,7 @@ import {
   isAnchorNode,
   listenAnchorMoveEvent,
   setAnchorNodeFirstChildren,
-} from '../anchorNode'
+} from '../AnchorNode'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { type DNodeContext, runWithContext } from '../context'
 import {

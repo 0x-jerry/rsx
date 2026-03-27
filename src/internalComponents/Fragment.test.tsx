@@ -1,4 +1,4 @@
-import { onBeforeMount, onMounted, onUnmounted } from '@/hook'
+import { onBeforeMount, onMounted, onUnmounted } from '../hook'
 import { dc } from '../defineComponent'
 import { contextToJson, defineComponentName, mountTestApp } from '../test'
 
@@ -52,15 +52,15 @@ describe('Fragment', () => {
       )
     })
 
-    expect(mountedFnA).toBeCalledTimes(0)
-    expect(beforeMountFnA).toBeCalledTimes(0)
-    expect(unmountedFnA).toBeCalledTimes(0)
+    expect(mountedFnA).toHaveBeenCalledTimes(0)
+    expect(beforeMountFnA).toHaveBeenCalledTimes(0)
+    expect(unmountedFnA).toHaveBeenCalledTimes(0)
 
     mountTestApp(App)
 
-    expect(mountedFnA).toBeCalledTimes(1)
-    expect(beforeMountFnA).toBeCalledTimes(1)
-    expect(unmountedFnA).toBeCalledTimes(0)
+    expect(mountedFnA).toHaveBeenCalledTimes(1)
+    expect(beforeMountFnA).toHaveBeenCalledTimes(1)
+    expect(unmountedFnA).toHaveBeenCalledTimes(0)
   })
 })
 

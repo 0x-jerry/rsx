@@ -1,14 +1,15 @@
 import { isObject } from '@0x-jerry/utils'
-import type { FunctionalComponent } from './defineComponent'
-import { normalizeProps, type AnyProps } from './props'
-import { mount } from './mount'
+import type { FunctionalComponent } from '../defineComponent'
+import { normalizeProps, type AnyProps } from '../props'
+import { mount } from '../ops'
 import {
   ComponentContext,
+  ComponentContextEventNameMap,
   createNodeContext,
   popCurrentContext,
   setCurrentContext,
-} from './context'
-import { appendToCurrentContext } from './context'
+  appendToCurrentContext,
+} from '../context'
 
 let componentId = 0
 
@@ -22,6 +23,7 @@ export interface ComponentNode {
   props?: AnyProps
   children?: unknown[]
   mounted?: boolean
+  unmounted?: boolean
   context?: ComponentContext
 }
 
@@ -52,7 +54,7 @@ export function mountComponentNode(node: ComponentNode): HTMLElement | undefined
     return
   }
 
-  const ctx = createNodeContext(node.type.name)
+  const ctx = createNodeContext(node)
   node.context = ctx
 
   appendToCurrentContext(ctx)
@@ -63,12 +65,30 @@ export function mountComponentNode(node: ComponentNode): HTMLElement | undefined
   ctx.props = proxiedProps
 
   const componentRoot = node.type(proxiedProps, node.children)
+  ctx.root = componentRoot
+
+  ctx.emitter.emit(ComponentContextEventNameMap.beforeMount)
 
   const rootEl = mount(componentRoot)
+  ctx.el = rootEl
 
   popCurrentContext()
 
   node.mounted = true
 
+  ctx.emitter.emit(ComponentContextEventNameMap.mounted)
+
   return rootEl
+}
+
+export function unmountComponentNode(node: ComponentNode) {
+  if (!node.mounted) {
+    console.warn('component node not mounted')
+    return
+  }
+
+  node.context!.emitter.emit(ComponentContextEventNameMap.beforeUnmount)
+
+  node.unmounted = true
+  node.context!.emitter.emit(ComponentContextEventNameMap.unmounted)
 }

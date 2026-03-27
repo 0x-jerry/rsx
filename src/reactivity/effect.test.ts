@@ -8,7 +8,7 @@ describe('scheduler', () => {
 
     effect(fn)
 
-    expect(fn).toBeCalledTimes(1)
+    expect(fn).toHaveBeenCalledTimes(1)
   })
 
   it('should only run once when there are multiple assignment', async () => {
@@ -20,7 +20,7 @@ describe('scheduler', () => {
 
     effect(fn)
     await nextTick()
-    expect(fn).toBeCalledTimes(1)
+    expect(fn).toHaveBeenCalledTimes(1)
 
     v.value++
     v.value++
@@ -28,8 +28,8 @@ describe('scheduler', () => {
     v.value++
     v.value++
 
-    expect(fn).toBeCalledTimes(1)
+    expect(fn).toHaveBeenCalledTimes(1)
     await nextTick()
-    expect(fn).toBeCalledTimes(2)
+    expect(fn).toHaveBeenCalledTimes(2)
   })
 })

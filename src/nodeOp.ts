@@ -1,5 +1,3 @@
-import { normalizeNode } from './node'
-
 export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
   if (!(node instanceof Node)) {
     throw new Error('node is not a node')
@@ -30,33 +28,7 @@ export function insertBefore(anchor: Node, node: Node) {
 }
 
 export function moveChildren(parent: ParentNode, children?: unknown[], anchor?: Node) {
-  processRawChildren(children || [], (childEl) => {
-    moveTo(parent, childEl, anchor)
-  })
-}
-
-/**
- * Flat and normalize children items
- *
- * @param children
- * @param cb
- */
-export function processRawChildren(children: unknown[], cb: (childEl: ChildNode) => void) {
-  const stack = children.slice()
-
-  while (stack.length) {
-    const child = stack.shift()
-    if (Array.isArray(child)) {
-      stack.unshift(...child)
-      continue
-    }
-
-    const childEl = normalizeNode(child)
-
-    if (childEl != null) {
-      cb(childEl)
-    }
-  }
+  throw new Error('moveChildren is not implemented')
 }
 
 export function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {

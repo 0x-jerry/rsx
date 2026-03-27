@@ -1,6 +1,6 @@
 import type { Fn } from '@0x-jerry/utils'
 import type { FunctionalComponent } from '../defineComponent'
-import { mountApp } from '../mount'
+import { mountApp } from '../ops/mount'
 import { def } from '../utils'
 import { ComponentContext } from '../context'
 

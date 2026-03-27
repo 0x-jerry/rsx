@@ -1,19 +1,20 @@
 import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
-import { asyncWatcherScheduler } from '@/reactivity/scheduler'
-import { defineComponentName } from '@/test'
+import { asyncWatcherScheduler } from '../reactivity/scheduler'
+import { defineComponentName } from '../test'
 import {
   createAnchorNode,
   dispatchAnchorMovedEvent,
   listenAnchorMoveEvent,
   setAnchorNodeFirstChildren,
-} from '../anchorNode'
+} from '../AnchorNode'
 import { type ComponentNode, createComponentNode } from '../ComponentNode'
 import { runWithContext } from '../context'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
-import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
+import { onBeforeMount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
 import { normalizeProps } from '../props'
 import { $, computed } from '../reactivity'
+import { mount, unmount } from '../ops'
 
 export interface CaseItemComponentProps<T> {
   value: T
@@ -55,7 +56,7 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
   onBeforeMount(rebuildChildren)
 
   listenAnchorMoveEvent(anchorNode, () => {
-    const childEl = renderedCtxNode?.instance.el
+    const childEl = renderedCtxNode?.context?.el
 
     if (childEl) {
       insertBefore(anchorNode, childEl)
@@ -67,13 +68,13 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
 
   function updateCase() {
     if (renderedCtxNode) {
-      unmount(renderedCtxNode.instance)
+      unmount(renderedCtxNode)
       renderedCtxNode = null
     }
 
     renderedCtxNode = rebuildChild()
 
-    setAnchorNodeFirstChildren(anchorNode, renderedCtxNode?.instance.el)
+    setAnchorNodeFirstChildren(anchorNode, renderedCtxNode?.context?.el as ChildNode)
   }
 
   function rebuildChild() {
@@ -85,14 +86,10 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
 
     const node = createComponentNode(Component, { value: $(() => props.condition) }, [])
 
-    node.mount()
+    mount(node)
 
-    if (node.instance.el) {
-      insertBefore(anchorNode, node.instance.el)
-    }
-
-    if (ctx._mounted) {
-      mount(node.instance)
+    if (node.context?.el) {
+      insertBefore(anchorNode, node.context.el)
     }
 
     return node

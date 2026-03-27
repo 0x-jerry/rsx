@@ -1,7 +1,6 @@
-import { isArray, isObject } from '@0x-jerry/utils'
-import { AnyProps } from './props'
-import { createNativeElement, createTextElement } from './node'
-import { isComponentNode, mountComponentNode } from './ComponentNode'
+import { isObject } from '@0x-jerry/utils'
+import { AnyProps } from '../props'
+import { createNativeElement } from '../node'
 
 const NativeNodeSymbol = Symbol('NativeNode')
 type NativeNodeSymbol = typeof NativeNodeSymbol
@@ -12,6 +11,8 @@ export interface NativeNode {
   props?: AnyProps
   children?: unknown[]
   mounted?: boolean
+  unmounted?: boolean
+  cleanup?: () => void
 }
 
 export function createNativeNode(type: string, props?: AnyProps, children?: unknown[]): NativeNode {
@@ -35,39 +36,19 @@ export function mountNativeNode(node: NativeNode): HTMLElement | undefined {
   }
 
   const { el, cleanup } = createNativeElement(node.type, node.props)
-  // TODO: call cleanup
 
-  const stack = node.children?.slice() || []
-
-  while (stack.length) {
-    const child = stack.shift()
-
-    if (isArray(child)) {
-      stack.unshift(...child)
-      continue
-    }
-
-    if (isNativeNode(child)) {
-      const childEl = mountNativeNode(child)
-      if (childEl) {
-        el.appendChild(childEl)
-      }
-      continue
-    }
-
-    if (isComponentNode(child)) {
-      const childEl = mountComponentNode(child)
-
-      if (childEl) {
-        el.appendChild(childEl)
-      }
-      continue
-    }
-
-    el.appendChild(createTextElement(child))
-  }
+  node.cleanup = cleanup
 
   node.mounted = true
 
   return el
+}
+
+export function unmountNativeNode(node: NativeNode) {
+  if (!node.mounted) {
+    console.warn('native node not mounted')
+    return
+  }
+
+  node.cleanup?.()
 }
