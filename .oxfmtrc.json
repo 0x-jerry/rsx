@@ -7,5 +7,6 @@
   "arrowParens": "always",
   "bracketSameLine": false,
   "bracketSpacing": true,
-  "ignorePatterns": []
+  "ignorePatterns": [],
+  "insertFinalNewline": true
 }

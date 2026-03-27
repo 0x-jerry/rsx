@@ -279,9 +279,7 @@ function appendItemToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
 }
 
 function popItemFromMap<K, V>(map: Map<K, V[]>, key: K) {
-  // biome-ignore lint/style/noNonNullAssertion: already checked before use it
   const collection = map.get(key)!
-  // biome-ignore lint/style/noNonNullAssertion: already checked before use it
   const item = collection.shift()!
 
   if (!collection.length) {
@@ -295,7 +293,6 @@ function popItemFromMap<K, V>(map: Map<K, V[]>, key: K) {
 function getSequence(arr: number[]): number[] {
   const p = arr.slice()
   const result = [0]
-  // biome-ignore lint/suspicious/noImplicitAnyLet: just ignore this
   let i, j, u, v, c
   const len = arr.length
   for (i = 0; i < len; i++) {

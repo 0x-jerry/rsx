@@ -34,25 +34,25 @@ react 中的解决方案是把组件当作 prop 传递进去。
 例如：
 
 ```tsx
-const DefaultSlot = defineSlot(); // Pseudo Code
+const DefaultSlot = defineSlot() // Pseudo Code
 
 const Counter = () => {
-  const Default = useSlot(DefaultSlot);
+  const Default = useSlot(DefaultSlot)
 
   return (
     <div>
       <Default count={1} />
     </div>
-  );
-};
+  )
+}
 
 const App = () => {
   return (
     <Counter>
       <DefaultSlot>{DefaultSlot.count}</DefaultSlot>
     </Counter>
-  );
-};
+  )
+}
 ```
 
 如果能实现通过某种方式，让 `DefaultSlot.count` 直接代理实例 `DefaultSlot` 的 `count` 值，
@@ -64,26 +64,26 @@ const App = () => {
 上下文，因此很容易就可以获取的对应实例的 Props，但是目前有一个限制，就是无法用多实例的 slot，例如：
 
 ```tsx
-const DefaultSlot = defineSlot(); // Pseudo Code
+const DefaultSlot = defineSlot() // Pseudo Code
 
 const Counter = () => {
-  const Default = useSlot(DefaultSlot);
+  const Default = useSlot(DefaultSlot)
 
   return (
     <div>
       <Default count={1} />
       <Default count={2} /> {/* 多实例 */}
     </div>
-  );
-};
+  )
+}
 
 const App = () => {
   return (
     <Counter>
       <DefaultSlot>{DefaultSlot.count}</DefaultSlot>
     </Counter>
-  );
-};
+  )
+}
 ```
 
 也是由于 `RSX` 的渲染机制，其 dom 节点只会在申明的时候创建一次，如果负责 dom 节点的话，

@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/style/noNonNullAssertion: test */
 import {
   dc,
   type InjectKey as InjectionKey,

@@ -531,7 +531,6 @@ describe('map component with fragment', () => {
             render={({ item }) => (
               <>
                 <div class="item">{item}-0</div>
-                {/** biome-ignore lint/complexity/noUselessFragments: test purpose */}
                 <>
                   <div class="item">{item}-1</div>
                 </>

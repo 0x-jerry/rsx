@@ -9,24 +9,24 @@
 
 ```ts
 type CaseComponent = FunctionalComponent<{
-  condition: JsonPrimitive;
-  cases?: Record<string, FunctionalComponent>;
-}>;
+  condition: JsonPrimitive
+  cases?: Record<string, FunctionalComponent>
+}>
 ```
 
 ## Map 组件
 
 ```ts
 type MapComponent<T> = FunctionalComponent<{
-  list: T[];
-  render: FunctionalComponent<{ item: T; index: number }>;
-}>;
+  list: T[]
+  render: FunctionalComponent<{ item: T; index: number }>
+}>
 ```
 
 ## Teleport 组件
 
 ```ts
 type MapComponent<T> = FunctionalComponent<{
-  to: string | HTMLElement;
-}>;
+  to: string | HTMLElement
+}>
 ```

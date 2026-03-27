@@ -25,7 +25,7 @@ describe('Slot', () => {
 
     const A = Object.assign(AImpl, {
       Title: defineNamedSlot('A.Title'),
-      Content: defineNamedSlot('A.Title'),
+      Content: defineNamedSlot('A.Content'),
     })
 
     const App = () => {

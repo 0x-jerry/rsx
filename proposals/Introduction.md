@@ -5,35 +5,26 @@
 其逻辑是将
 
 ```jsx
-const Comp = () => <div />;
+const Comp = () => <div />
 
 const el = (
   <div class="text-red">
     <Comp>child</Comp>
     <span> some text </span>
   </div>
-);
+)
 ```
 
 这样一段 jsx 代码转换成这样一段 js 代码
 
 ```js
-const el = h(
-  "div",
-  { class: "text-red" },
-  h(Comp, null, "child"),
-  h("span", null, "some text")
-);
+const el = h('div', { class: 'text-red' }, h(Comp, null, 'child'), h('span', null, 'some text'))
 ```
 
 其中 `h` 函数的签名为
 
 ```ts
-function h(
-  type: string | Component,
-  props?: Record<string, any>,
-  ...children: any[]
-): JSX.Element;
+function h(type: string | Component, props?: Record<string, any>, ...children: any[]): JSX.Element
 ```
 
 目前（2023.04.21），利用 jsx 语法的库/框架，都是生成一颗虚拟 dom，然后通过 diff 去操作真实的 dom。
@@ -83,16 +74,16 @@ Vue/Rect/Svelte 都各自使用了 diff 算法来更新列表（仅限带有 key
 
 ```jsx
 const Counter = () => {
-  const count = ref(0);
+  const count = ref(0)
 
   const el = (
     <button onClick={() => count.value++} data-count={count}>
       count: {count}
     </button>
-  );
+  )
 
-  return el;
-};
+  return el
+}
 ```
 
 其中
@@ -102,7 +93,7 @@ const el = (
   <button onClick={() => count.value++} data-count={count}>
     count: {count}
   </button>
-);
+)
 
 // el instanceof HTMLElement === true
 ```
@@ -112,12 +103,12 @@ const el = (
 其中 `data-count={count}`，则会生成一个依赖函数，每当 `count` 变化，则会直接触发更新 dom 操作，大致逻辑如下：
 
 ```jsx
-const $btn = document.createElement("button"); // create button element
+const $btn = document.createElement('button') // create button element
 
 // auto update attribute
 effect(() => {
-  $btn.setAttribute("data-count", unref(count));
-});
+  $btn.setAttribute('data-count', unref(count))
+})
 ```
 
 以同样的方式处理 `count: {count}` 文本。

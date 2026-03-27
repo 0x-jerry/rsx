@@ -1,5 +1,3 @@
-/** biome-ignore-all lint/style/noNonNullAssertion: test case */
-
 import { isComponentNode } from './ComponentNode'
 import { dc } from './defineComponent'
 import { useWatch } from './hook'
@@ -254,11 +252,7 @@ describe('jsx context tree', () => {
     expect(ctxTree).toMatchSnapshot('ctx tree')
   })
 
-  /**
-   * TODO: need a solution, this will break context tree,
-   * maybe this can not be resolved.
-   */
-  it.skip('instance Component inside Component', () => {
+  it('instance Component inside Component', () => {
     const A = dc((_, children) => (
       <div class="A">
         <span>a</span>
@@ -278,7 +272,7 @@ describe('jsx context tree', () => {
     defineComponentName(B, 'B')
 
     const App = dc(() => {
-      const InstanceA = (
+      const InstanceA = () => (
         <div>
           <A></A>
         </div>
@@ -286,7 +280,9 @@ describe('jsx context tree', () => {
 
       return (
         <A>
-          <B>{InstanceA}</B>
+          <B>
+            <InstanceA />
+          </B>
           <A></A>
         </A>
       )

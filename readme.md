@@ -12,13 +12,11 @@ import { ref, mountApp } from './core'
 const Counter = () => {
   const count = ref(0)
 
-  const el = (
+  return (
     <button onClick={() => count.value++} data-count={count}>
       count: {count}
     </button>
   )
-
-  return el
 }
 
 const app = <Counter />
