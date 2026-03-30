@@ -11,7 +11,11 @@ export enum AnyNodeType {
 
 export interface AnyNode {
   [AnyNodeSymbol]: AnyNodeType
+  /**
+   * Raw props
+   */
   props?: AnyProps
+
   children?: AnyNode[]
 }
 

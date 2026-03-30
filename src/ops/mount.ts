@@ -10,7 +10,7 @@ import {
 } from '../nodes'
 import { ComponentContextEventNameMap, triggerEvent } from '../nodes/ComponentContext'
 
-export function mount(node: ComponentNode, parentEl?: HTMLElement): undefined {
+export function mount(node: ComponentNode, parentEl?: ParentNode): undefined {
   connect(node, parentEl)
 
   if (!node.context) {
@@ -20,7 +20,7 @@ export function mount(node: ComponentNode, parentEl?: HTMLElement): undefined {
   triggerEvent(ComponentContextEventNameMap.mounted, node.context)
 }
 
-export function connect(node: AnyNode, parentEl?: HTMLElement) {
+export function connect(node: AnyNode, parentEl?: ParentNode) {
   if (isNativeNode(node)) {
     const el = connectNativeNode(node, parentEl)
 

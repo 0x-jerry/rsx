@@ -3,11 +3,12 @@ import { asyncWatcherScheduler } from '../reactivity/scheduler'
 import { defineComponentName } from '../test'
 import { runWithContext } from '../nodes/ComponentContext'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
-import { onBeforeMount, useContext, useWatch } from '../hook'
-import { insertBefore } from '../nodeOp'
-import { normalizeProps } from '../props'
+import { useWatch } from '../hook'
 import { $, computed } from '../reactivity'
-import { mount, unmount } from '../ops'
+import { connect, mount, unmount } from '../ops'
+import { h } from '../jsx'
+import { ComponentNode } from '../nodes'
+import { moveTo } from '../nodeOp'
 
 export interface CaseItemComponentProps<T> {
   value: T
@@ -25,10 +26,20 @@ export interface CaseComponentProps<T = unknown> {
   cases?: Record<string, Optional<CaseItemComponent<NoInfer<T>>>> | CaseItem<NoInfer<T>>[]
 }
 
-export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
-  const ctx = useContext()
+export const VCase = defineComponent(<T>(_props: CaseComponentProps<T>) => {})
 
-  const anchorNode = createAnchorNode('case')
+export function isCaseComponent(c: FunctionalComponent) {
+  return c === VCase
+}
+
+export function connectCaseComponent(node: ComponentNode, parentEl?: ParentNode) {
+  const ctx = node.context!
+  const props = (ctx.props || {}) as CaseComponentProps<any>
+
+  ctx.el = document.createComment('Case') as any as HTMLElement
+  parentEl?.appendChild(ctx.el)
+
+  let currentChild: ComponentNode | null = null
 
   const ChildComponent = computed(() => {
     if (Array.isArray(props.cases)) {
@@ -38,56 +49,43 @@ export const VCase = defineComponent(<T>(props: CaseComponentProps<T>) => {
     return props.cases?.[String(props.condition)]
   })
 
-  let renderedCtxNode: Optional<ComponentNode> = null
+  rebuildChild(true)
 
-  const rebuildChildren = () => runWithContext(updateCase, ctx)
-
-  useWatch(ChildComponent, rebuildChildren, {
+  useWatch(ChildComponent, () => rebuildChild(), {
+    immediate: false,
     scheduler: asyncWatcherScheduler,
   })
 
-  onBeforeMount(rebuildChildren)
-
-  listenAnchorMoveEvent(anchorNode, () => {
-    const childEl = renderedCtxNode?.context?.el
-
-    if (childEl) {
-      insertBefore(anchorNode, childEl)
-      dispatchAnchorMovedEvent(childEl)
-    }
-  })
-
-  return anchorNode
-
-  function updateCase() {
-    if (renderedCtxNode) {
-      unmount(renderedCtxNode)
-      renderedCtxNode = null
-    }
-
-    renderedCtxNode = rebuildChild()
-
-    setAnchorNodeFirstChildren(anchorNode, renderedCtxNode?.context?.el as ChildNode)
-  }
-
-  function rebuildChild() {
+  function rebuildChild(firstTime = false) {
     const Component = ChildComponent.value
+
+    if (currentChild) {
+      unmount(currentChild)
+      currentChild = null
+    }
 
     if (!Component) {
       return
     }
 
-    const node = createComponentNode(Component, { value: $(() => props.condition) }, [])
+    runWithContext(() => {
+      const _props = { value: $(() => props.condition) }
+      const node = h(Component, _props) as ComponentNode
+      const pEl = document.createDocumentFragment()
 
-    mount(node)
+      if (firstTime) {
+        connect(node, pEl)
+      } else {
+        mount(node, pEl)
+      }
 
-    if (node.context?.el) {
-      insertBefore(anchorNode, node.context.el)
-    }
-
-    return node
+      if (parentEl) {
+        moveTo(parentEl, pEl, ctx.el)
+      }
+      currentChild = node
+    }, ctx)
   }
-})
+}
 
 defineComponentName(VCase, 'VCase')
 
@@ -98,15 +96,15 @@ export interface IfComponentProps {
 }
 
 export const VIf = defineComponent<IfComponentProps>((props) => {
-  const _props = normalizeProps(VIf, {
+  const _props = {
     condition: $(() => !!props.condition),
     cases: {
       true: props.truthy,
       false: props.falsy,
     },
-  })
+  }
 
-  return VCase(_props as CaseComponentProps)
+  return h(VCase, _props)
 })
 
 defineComponentName(VIf, 'VIf')

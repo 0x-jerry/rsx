@@ -263,6 +263,7 @@ describe('case context tree', () => {
 
     const A = () => {
       onUnmounted(fn)
+      return <></>
     }
 
     const showA = ref(true)

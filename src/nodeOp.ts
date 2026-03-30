@@ -1,4 +1,4 @@
-export function moveTo(parent: ParentNode, node: Node, anchor?: Node) {
+export function moveTo(parent: ParentNode, node: Node, anchor?: Node | null) {
   if (!(node instanceof Node)) {
     throw new Error('node is not a node')
   }

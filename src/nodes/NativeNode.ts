@@ -38,7 +38,7 @@ export function isNativeNode(o: unknown): o is NativeNode {
 
 export function connectNativeNode(
   node: NativeNode,
-  parentEl?: HTMLElement,
+  parentEl?: ParentNode,
 ): HTMLElement | undefined {
   const { el, cleanup } =
     node.type === TEXT_NODE_TYPE
