@@ -1,54 +1,61 @@
-import { isObject } from '@0x-jerry/utils'
 import { AnyProps } from '../props'
-import { createNativeElement } from '../node'
+import { createNativeElement, createTextElement } from '../node'
+import { AnyNode, AnyNodeSymbol, AnyNodeType, isAnyNode } from './node'
 
-const NativeNodeSymbol = Symbol('NativeNode')
-type NativeNodeSymbol = typeof NativeNodeSymbol
-
-export interface NativeNode {
-  [NativeNodeSymbol]: true
-  type: string
-  props?: AnyProps
-  children?: unknown[]
-  mounted?: boolean
-  unmounted?: boolean
+export interface NativeNodeContext {
+  el: HTMLElement
   cleanup?: () => void
 }
 
-export function createNativeNode(type: string, props?: AnyProps, children?: unknown[]): NativeNode {
-  return {
-    [NativeNodeSymbol]: true,
+const TEXT_NODE_TYPE = '__text__'
+
+export interface NativeNode extends AnyNode {
+  [AnyNodeSymbol]: AnyNodeType.Native
+  type: string
+  context?: NativeNodeContext
+}
+
+export function createNativeNode(type: string, props?: AnyProps, children?: AnyNode[]): NativeNode {
+  const o: NativeNode = {
+    [AnyNodeSymbol]: AnyNodeType.Native,
     type: type,
     props,
     children,
-    mounted: false,
   }
+
+  return o
+}
+
+export function createNativeTextNode(content: unknown) {
+  const node = createNativeNode(TEXT_NODE_TYPE, { textContent: content })
+
+  return node
 }
 
 export function isNativeNode(o: unknown): o is NativeNode {
-  return isObject(o) && NativeNodeSymbol in o
+  return isAnyNode(o) && o[AnyNodeSymbol] === AnyNodeType.Native
 }
 
-export function mountNativeNode(node: NativeNode): HTMLElement | undefined {
-  if (node.mounted) {
-    console.warn('native node mounted mounted')
-    return
+export function connectNativeNode(
+  node: NativeNode,
+  parentEl?: HTMLElement,
+): HTMLElement | undefined {
+  const { el, cleanup } =
+    node.type === TEXT_NODE_TYPE
+      ? createTextElement(node.props?.textContent)
+      : createNativeElement(node.type, node.props)
+
+  node.context = {
+    el,
+    cleanup,
   }
 
-  const { el, cleanup } = createNativeElement(node.type, node.props)
-
-  node.cleanup = cleanup
-
-  node.mounted = true
+  parentEl?.appendChild(el)
 
   return el
 }
 
-export function unmountNativeNode(node: NativeNode) {
-  if (!node.mounted) {
-    console.warn('native node not mounted')
-    return
-  }
-
-  node.cleanup?.()
+export function disconnectNativeNode(node: NativeNode) {
+  node.context?.el.remove()
+  node.context?.cleanup?.()
 }

@@ -1,5 +1,5 @@
 import { dc } from '../defineComponent'
-import { onBeforeMount, onMounted, onUnmounted } from '../hook'
+import { onMounted, onUnmounted } from '../hook'
 import { $, nextTick, ref } from '../reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from '../test'
 import { VCase, VIf } from './case'
@@ -258,13 +258,36 @@ describe('case context tree', () => {
     expect(ctxTree).toMatchSnapshot('ctx tree')
   })
 
+  it('should unmount', async () => {
+    const fn = vi.fn()
+
+    const A = () => {
+      onUnmounted(fn)
+    }
+
+    const showA = ref(true)
+    const App = dc(() => {
+      return (
+        <div>
+          <VIf condition={showA} truthy={A} />
+        </div>
+      )
+    })
+
+    mountTestApp(App)
+
+    expect(fn).toHaveBeenCalledTimes(0)
+
+    showA.value = false
+    await nextTick()
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
   it('lifecycle hook', async () => {
     const mountedFnA = vi.fn()
-    const beforeMountFnA = vi.fn()
     const unmountedFnA = vi.fn()
 
     const A = () => {
-      onBeforeMount(beforeMountFnA)
       onMounted(mountedFnA)
       onUnmounted(unmountedFnA)
 
@@ -276,11 +299,9 @@ describe('case context tree', () => {
     }
 
     const mountedFnB = vi.fn()
-    const beforeMountFnB = vi.fn()
     const unmountedFnB = vi.fn()
 
     const B = () => {
-      onBeforeMount(beforeMountFnB)
       onMounted(mountedFnB)
       onUnmounted(unmountedFnB)
 
@@ -306,32 +327,26 @@ describe('case context tree', () => {
     })
 
     expect(mountedFnA).toHaveBeenCalledTimes(0)
-    expect(beforeMountFnA).toHaveBeenCalledTimes(0)
     expect(unmountedFnA).toHaveBeenCalledTimes(0)
 
     expect(mountedFnB).toHaveBeenCalledTimes(0)
-    expect(beforeMountFnB).toHaveBeenCalledTimes(0)
     expect(unmountedFnB).toHaveBeenCalledTimes(0)
 
     mountTestApp(App)
 
     expect(mountedFnA).toHaveBeenCalledTimes(1)
-    expect(beforeMountFnA).toHaveBeenCalledTimes(1)
     expect(unmountedFnA).toHaveBeenCalledTimes(0)
 
     expect(mountedFnB).toHaveBeenCalledTimes(0)
-    expect(beforeMountFnB).toHaveBeenCalledTimes(0)
     expect(unmountedFnB).toHaveBeenCalledTimes(0)
 
     value.value = 1
     await nextTick()
 
     expect(mountedFnA).toHaveBeenCalledTimes(1)
-    expect(beforeMountFnA).toHaveBeenCalledTimes(1)
     expect(unmountedFnA).toHaveBeenCalledTimes(1)
 
     expect(mountedFnB).toHaveBeenCalledTimes(1)
-    expect(beforeMountFnB).toHaveBeenCalledTimes(1)
     expect(unmountedFnB).toHaveBeenCalledTimes(0)
   })
 })

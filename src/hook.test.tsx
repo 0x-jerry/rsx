@@ -3,8 +3,6 @@ import {
   type InjectKey as InjectionKey,
   inject,
   nextTick,
-  onBeforeMount,
-  onBeforeUnmount,
   onMounted,
   onUnmounted,
   provide,
@@ -78,38 +76,13 @@ describe('hook', () => {
     expect(root.querySelector('.B')?.textContent).toBe('223')
   })
 
-  it('should unmount', async () => {
-    const fn = vi.fn()
-
-    const A = () => {
-      onUnmounted(fn)
-    }
-
-    const showA = ref(true)
-    const App = dc(() => {
-      return (
-        <div>
-          <VIf condition={showA} truthy={A} />
-        </div>
-      )
-    })
-
-    mountTestApp(App)
-
-    expect(fn).toHaveBeenCalledTimes(0)
-
-    showA.value = false
-    await nextTick()
-    expect(fn).toHaveBeenCalledTimes(1)
-  })
-
   it('lifecycle hooks', () => {
-    const beforeMountFn = vi.fn()
     const mountedFn = vi.fn()
 
     const A = () => {
       onMounted(mountedFn)
-      onBeforeMount(beforeMountFn)
+
+      return <></>
     }
 
     const App = dc(() => {
@@ -120,11 +93,9 @@ describe('hook', () => {
       )
     })
 
-    expect(beforeMountFn).toHaveBeenCalledTimes(0)
     expect(mountedFn).toHaveBeenCalledTimes(0)
     mountTestApp(App)
 
-    expect(beforeMountFn).toHaveBeenCalledTimes(1)
     expect(mountedFn).toHaveBeenCalledTimes(1)
   })
 
@@ -134,14 +105,6 @@ describe('hook', () => {
     const A = dc<{ id: string }>((props, children) => {
       onMounted(() => {
         lifecycle.push(`m:${props.id}`)
-      })
-
-      onBeforeMount(() => {
-        lifecycle.push(`bm:${props.id}`)
-      })
-
-      onBeforeUnmount(() => {
-        lifecycle.push(`bum:${props.id}`)
       })
 
       onUnmounted(() => {
@@ -171,148 +134,11 @@ describe('hook', () => {
 
     const app = mountTestApp(App)
 
-    expect(lifecycle).eql([
-      'bm:1',
-      'bm:4',
-      'm:4',
-      'bm:5',
-      'm:5',
-      'm:1',
-      'bm:2',
-      'bm:6',
-      'm:6',
-      'bm:7',
-      'bm:8',
-      'm:8',
-      'm:7',
-      'm:2',
-      'bm:3',
-      'm:3',
-    ])
+    expect(lifecycle).eql(['m:1', 'm:4', 'm:5', 'm:2', 'm:6', 'm:7', 'm:8', 'm:3'])
 
     lifecycle.splice(0)
-    unmount(app._.node)
+    unmount(app._.node!)
 
-    expect(lifecycle).eql([
-      // unmounted order
-      'bum:4',
-      'um:4',
-      'bum:5',
-      'um:5',
-      'bum:1',
-      'um:1',
-      'bum:6',
-      'um:6',
-      'bum:8',
-      'um:8',
-      'bum:7',
-      'um:7',
-      'bum:2',
-      'um:2',
-      'bum:3',
-      'um:3',
-    ])
-  })
-
-  it('lifecycle order with fragment', () => {
-    const lifecycle: string[] = []
-
-    const A = dc<{ id: string }>((props, children) => {
-      onMounted(() => {
-        lifecycle.push(`m:${props.id}`)
-      })
-
-      onBeforeMount(() => {
-        lifecycle.push(`bm:${props.id}`)
-      })
-
-      onBeforeUnmount(() => {
-        lifecycle.push(`bum:${props.id}`)
-      })
-
-      onUnmounted(() => {
-        lifecycle.push(`um:${props.id}`)
-      })
-
-      return <>{children}</>
-    })
-
-    const App = dc(() => {
-      return (
-        <div>
-          <A id="1">
-            <A id="4"></A>
-            <A id="5"></A>
-          </A>
-          <A id="2">
-            <A id="6"></A>
-            <A id="7">
-              <A id="8"></A>
-            </A>
-          </A>
-          <A id="3"></A>
-        </div>
-      )
-    })
-
-    const app = mountTestApp(App)
-
-    expect(lifecycle).eql([
-      'bm:1',
-      'bm:4',
-      'm:4',
-      'bm:5',
-      'm:5',
-      'm:1',
-      'bm:2',
-      'bm:6',
-      'm:6',
-      'bm:7',
-      'bm:8',
-      'm:8',
-      'm:7',
-      'm:2',
-      'bm:3',
-      'm:3',
-    ])
-
-    unmount(app._)
-
-    expect(lifecycle).eql([
-      'bm:1',
-      'bm:4',
-      'm:4',
-      'bm:5',
-      'm:5',
-      'm:1',
-      'bm:2',
-      'bm:6',
-      'm:6',
-      'bm:7',
-      'bm:8',
-      'm:8',
-      'm:7',
-      'm:2',
-      'bm:3',
-      'm:3',
-
-      // unmounted order
-      'bum:1',
-      'bum:4',
-      'um:4',
-      'bum:5',
-      'um:5',
-      'um:1',
-      'bum:2',
-      'bum:6',
-      'um:6',
-      'bum:7',
-      'bum:8',
-      'um:8',
-      'um:7',
-      'um:2',
-      'bum:3',
-      'um:3',
-    ])
+    expect(lifecycle).eql(['um:4', 'um:5', 'um:1', 'um:6', 'um:8', 'um:7', 'um:2', 'um:3'])
   })
 })

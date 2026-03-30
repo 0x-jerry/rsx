@@ -1,22 +1,11 @@
 import { type Ref, shallowRef } from '@vue/reactivity'
-import { asyncWatcherScheduler } from '@/reactivity/scheduler'
-import { defineComponentName } from '@/test'
-import {
-  createAnchorNode,
-  dispatchAnchorMovedEvent,
-  getAnchorFirstChildNode,
-  isAnchorNode,
-  listenAnchorMoveEvent,
-  setAnchorNodeFirstChildren,
-} from '../AnchorNode'
-import { type ComponentNode, createComponentNode } from '../ComponentNode'
-import { type DNodeContext, runWithContext } from '../context'
+import { asyncWatcherScheduler } from '../reactivity/scheduler'
+import { defineComponentName } from '../test'
 import {
   defineComponent,
   type ExposedFunctionalComponent,
   type FunctionalComponent,
 } from '../defineComponent'
-import { mount, onBeforeMount, unmount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'
 import { computed } from '../reactivity'
 

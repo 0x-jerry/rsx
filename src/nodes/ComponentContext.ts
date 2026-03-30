@@ -1,48 +1,39 @@
 import { EventEmitter } from '@0x-jerry/utils'
-import type { ComponentNode } from './ComponentNode'
-import { AnyProps } from './props'
+import type { AnyNode, ComponentNode } from '.'
+import { AnyProps } from '../props'
 
 export const ComponentContextEventNameMap = {
-  beforeMount: 'bm',
   mounted: 'm',
-
-  beforeUnmount: 'bum',
   unmounted: 'um',
 } as const
 
 export type ComponentEvents = {
-  /**
-   * before mount
-   */
-  bm: []
   /**
    * mounted
    */
   m: []
 
   /**
-   * before unmount
-   */
-  bum: []
-  /**
    * unmounted
    */
   um: []
 }
 
-export interface ComponentContext {
-  emitter: EventEmitter<ComponentEvents>
+export type ComponentEventsName = keyof ComponentEvents
+
+export interface ComponentContext<Events extends {} = {}> {
+  emitter: EventEmitter<ComponentEvents & Events>
   id: number
   name?: string
   children?: Set<ComponentContext>
-  el?: Node
+  el?: HTMLElement
   parent?: ComponentContext | null
   node?: ComponentNode
 
   /**
    * Component root node
    */
-  root?: unknown
+  root?: AnyNode
 
   /**
    * Normalized proxy props
@@ -111,13 +102,30 @@ export function appendToCurrentContext(ctx: ComponentContext) {
     return
   }
 
-  ctx.emitter.on(ComponentContextEventNameMap.unmounted, () => {
-    // remove it self
-    parentCtx.children?.delete(ctx)
-    ctx.parent = null
-  })
-
   parentCtx.children ||= new Set()
   parentCtx.children.add(ctx)
   ctx.parent = parentCtx
+}
+
+export enum TriggerEventOrder {
+  Preface = 1,
+  Postscript = 2,
+}
+
+export function triggerEvent(
+  event: ComponentEventsName,
+  ctx: ComponentContext,
+  order: TriggerEventOrder = TriggerEventOrder.Preface,
+) {
+  if (order === TriggerEventOrder.Preface) {
+    ctx.emitter.emit(event)
+  }
+
+  for (const child of ctx?.children || []) {
+    triggerEvent(event, child, order)
+  }
+
+  if (order === TriggerEventOrder.Postscript) {
+    ctx.emitter.emit(event)
+  }
 }

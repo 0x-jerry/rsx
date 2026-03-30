@@ -1,6 +1,7 @@
-import { onBeforeMount, onMounted, onUnmounted } from '../hook'
+import { onMounted, onUnmounted } from '../hook'
 import { dc } from '../defineComponent'
 import { contextToJson, defineComponentName, mountTestApp } from '../test'
+import { unmount } from '../ops'
 
 describe('Fragment', () => {
   it('non-reactivity data', async () => {
@@ -26,11 +27,9 @@ describe('Fragment', () => {
 
   it('lifecycle hook', async () => {
     const mountedFnA = vi.fn()
-    const beforeMountFnA = vi.fn()
     const unmountedFnA = vi.fn()
 
     const A = () => {
-      onBeforeMount(beforeMountFnA)
       onMounted(mountedFnA)
       onUnmounted(unmountedFnA)
 
@@ -41,7 +40,7 @@ describe('Fragment', () => {
       )
     }
 
-    const B = () => null
+    const B = () => <span></span>
 
     const App = dc(() => {
       return (
@@ -53,14 +52,55 @@ describe('Fragment', () => {
     })
 
     expect(mountedFnA).toHaveBeenCalledTimes(0)
-    expect(beforeMountFnA).toHaveBeenCalledTimes(0)
     expect(unmountedFnA).toHaveBeenCalledTimes(0)
 
     mountTestApp(App)
 
     expect(mountedFnA).toHaveBeenCalledTimes(1)
-    expect(beforeMountFnA).toHaveBeenCalledTimes(1)
     expect(unmountedFnA).toHaveBeenCalledTimes(0)
+  })
+
+  it('lifecycle order with fragment', () => {
+    const lifecycle: string[] = []
+
+    const A = dc<{ id: string }>((props, children) => {
+      onMounted(() => {
+        lifecycle.push(`m:${props.id}`)
+      })
+
+      onUnmounted(() => {
+        lifecycle.push(`um:${props.id}`)
+      })
+
+      return <>{children}</>
+    })
+
+    const App = dc(() => {
+      return (
+        <div>
+          <A id="1">
+            <A id="4"></A>
+            <A id="5"></A>
+          </A>
+          <A id="2">
+            <A id="6"></A>
+            <A id="7">
+              <A id="8"></A>
+            </A>
+          </A>
+          <A id="3"></A>
+        </div>
+      )
+    })
+
+    const app = mountTestApp(App)
+
+    expect(lifecycle).eql(['m:1', 'm:4', 'm:5', 'm:2', 'm:6', 'm:7', 'm:8', 'm:3'])
+    lifecycle.splice(0)
+
+    unmount(app._.node!)
+
+    expect(lifecycle).eql(['um:4', 'um:5', 'um:1', 'um:6', 'um:8', 'um:7', 'um:2', 'um:3'])
   })
 })
 

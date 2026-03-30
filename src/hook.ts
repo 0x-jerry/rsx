@@ -5,7 +5,7 @@ import {
   ComponentContextEventNameMap,
   type ComponentEvents,
   getCurrentContext,
-} from './context'
+} from './nodes/ComponentContext'
 import { isRef, type WatchHandle, type WatchOptions, watch } from './reactivity'
 
 export function useContext() {
@@ -26,10 +26,7 @@ function createContextHook(name: keyof ComponentEvents) {
   }
 }
 
-export const onBeforeMount = createContextHook(ComponentContextEventNameMap.beforeMount)
 export const onMounted = createContextHook(ComponentContextEventNameMap.mounted)
-
-export const onBeforeUnmount = createContextHook(ComponentContextEventNameMap.beforeUnmount)
 export const onUnmounted = createContextHook(ComponentContextEventNameMap.unmounted)
 
 export function useWatch(

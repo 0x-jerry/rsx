@@ -1,8 +1,7 @@
-import { isComponentNode } from './ComponentNode'
 import { dc } from './defineComponent'
 import { useWatch } from './hook'
 import { h } from './jsx'
-import { isNativeNode } from './NativeNode'
+import { isNativeNode, isComponentNode } from './nodes'
 import { $, nextTick, ref } from './reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from './test'
 

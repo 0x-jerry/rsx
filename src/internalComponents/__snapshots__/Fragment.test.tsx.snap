@@ -13,13 +13,13 @@ exports[`fragment context tree > static value > ctx tree 1`] = `
       "name": "Fragment",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
 exports[`fragment context tree > static value > html 1`] = `
 <div
-  id="app"
+  id="App"
 >
   1
   <div

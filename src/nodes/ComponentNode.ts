@@ -1,59 +1,47 @@
-import { isObject } from '@0x-jerry/utils'
 import type { FunctionalComponent } from '../defineComponent'
 import { normalizeProps, type AnyProps } from '../props'
-import { mount } from '../ops'
+import { connect } from '../ops'
 import {
   ComponentContext,
-  ComponentContextEventNameMap,
   createNodeContext,
   popCurrentContext,
   setCurrentContext,
   appendToCurrentContext,
-} from '../context'
+} from './ComponentContext'
+import { AnyNode, AnyNodeSymbol, AnyNodeType, isAnyNode } from './node'
+import { Fragment } from '../internalComponents'
+import { getNodeElement } from './utils'
 
-let componentId = 0
-
-const ComponentNodeSymbol = Symbol('ComponentNode')
-type ComponentNodeSymbol = typeof ComponentNodeSymbol
-
-export interface ComponentNode {
-  [ComponentNodeSymbol]: true
+export interface ComponentNode extends AnyNode {
+  [AnyNodeSymbol]: AnyNodeType.Component
   type: FunctionalComponent
-  id: number
-  props?: AnyProps
-  children?: unknown[]
-  mounted?: boolean
-  unmounted?: boolean
   context?: ComponentContext
 }
 
 export function createComponentNode(
   type: FunctionalComponent,
   props: AnyProps | undefined,
-  children: unknown[],
+  children: AnyNode[],
 ) {
   const node: ComponentNode = {
-    [ComponentNodeSymbol]: true,
+    [AnyNodeSymbol]: AnyNodeType.Component,
     type,
-    id: componentId++,
     props,
     children,
-    mounted: false,
   }
 
   return node
 }
 
 export function isComponentNode(o: unknown): o is ComponentNode {
-  return isObject(o) && ComponentNodeSymbol in o
+  return isAnyNode(o) && o[AnyNodeSymbol] === AnyNodeType.Component
 }
 
-export function mountComponentNode(node: ComponentNode): HTMLElement | undefined {
-  if (node.mounted) {
-    console.warn('component node mounted mounted')
-    return
-  }
+export function isFragmentNode(o: unknown): boolean {
+  return isComponentNode(o) && o.type === Fragment
+}
 
+export function connectComponentNode(node: ComponentNode, parentEl?: HTMLElement) {
   const ctx = createNodeContext(node)
   node.context = ctx
 
@@ -64,31 +52,41 @@ export function mountComponentNode(node: ComponentNode): HTMLElement | undefined
   const proxiedProps = normalizeProps(node.type, node.props)
   ctx.props = proxiedProps
 
-  const componentRoot = node.type(proxiedProps, node.children)
-  ctx.root = componentRoot
+  if (isFragmentNode(node)) {
+    ctx.el = document.createComment('fragment') as any as HTMLElement
+    parentEl?.appendChild(ctx.el)
 
-  ctx.emitter.emit(ComponentContextEventNameMap.beforeMount)
+    for (const child of node.children || []) {
+      connect(child, parentEl)
+    }
+  } else {
+    const componentRoot = node.type(proxiedProps, node.children)
 
-  const rootEl = mount(componentRoot)
-  ctx.el = rootEl
+    if (!isAnyNode(componentRoot)) {
+      throw new Error(`mount failed!`)
+    }
+
+    ctx.root = componentRoot
+
+    connect(componentRoot, parentEl)
+
+    const rootEl: HTMLElement | undefined = getNodeElement(componentRoot)
+
+    if (rootEl) {
+      ctx.el = rootEl
+      parentEl?.appendChild(rootEl)
+    }
+  }
 
   popCurrentContext()
 
-  node.mounted = true
-
-  ctx.emitter.emit(ComponentContextEventNameMap.mounted)
-
-  return rootEl
+  return ctx.el
 }
 
-export function unmountComponentNode(node: ComponentNode) {
-  if (!node.mounted) {
-    console.warn('component node not mounted')
-    return
+export function disconnectComponentNode(node: ComponentNode) {
+  if (!node.context) {
+    throw new Error(`disconnect component node failed!`)
   }
 
-  node.context!.emitter.emit(ComponentContextEventNameMap.beforeUnmount)
-
-  node.unmounted = true
-  node.context!.emitter.emit(ComponentContextEventNameMap.unmounted)
+  node.context.parent?.children?.delete(node.context)
 }

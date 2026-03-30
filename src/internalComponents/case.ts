@@ -1,14 +1,7 @@
 import type { JsonPrimitive, Optional } from '@0x-jerry/utils'
 import { asyncWatcherScheduler } from '../reactivity/scheduler'
 import { defineComponentName } from '../test'
-import {
-  createAnchorNode,
-  dispatchAnchorMovedEvent,
-  listenAnchorMoveEvent,
-  setAnchorNodeFirstChildren,
-} from '../AnchorNode'
-import { type ComponentNode, createComponentNode } from '../ComponentNode'
-import { runWithContext } from '../context'
+import { runWithContext } from '../nodes/ComponentContext'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
 import { onBeforeMount, useContext, useWatch } from '../hook'
 import { insertBefore } from '../nodeOp'

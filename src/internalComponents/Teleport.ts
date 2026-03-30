@@ -1,8 +1,8 @@
-import { runWithContext } from '@/context'
-import { defineComponentName } from '@/test'
+import { defineComponentName } from '../test'
 import { defineComponent } from '../defineComponent'
 import { onBeforeMount, useContext, useWatch } from '../hook'
 import { moveChildren } from '../nodeOp'
+import { runWithContext } from '../nodes'
 
 export interface TeleportProps {
   to?: string

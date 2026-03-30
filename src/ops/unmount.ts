@@ -1,30 +1,37 @@
-import { normalizeChildren } from '../utils'
 import {
-  isNativeNode,
-  unmountNativeNode,
+  AnyNode,
+  ComponentNode,
+  disconnectComponentNode,
+  disconnectNativeNode,
   isComponentNode,
-  unmountComponentNode,
-  NativeNode,
+  isNativeNode,
 } from '../nodes'
+import {
+  ComponentContextEventNameMap,
+  triggerEvent,
+  TriggerEventOrder,
+} from '../nodes/ComponentContext'
 
-export function unmount(node: unknown) {
+export function unmount(node: ComponentNode) {
+  disconnect(node)
+
+  if (!node.context) {
+    throw new Error(`Unmount node failed`)
+  }
+
+  triggerEvent(ComponentContextEventNameMap.unmounted, node.context, TriggerEventOrder.Postscript)
+}
+
+function disconnect(node: AnyNode): undefined {
   if (isNativeNode(node)) {
-    unmountChildren(node)
-
-    unmountNativeNode(node)
-    return
+    disconnectNativeNode(node)
+    for (const child of node.children || []) {
+      disconnect(child)
+      continue
+    }
   }
 
   if (isComponentNode(node)) {
-    unmount(node.context?.root)
-
-    unmountComponentNode(node)
-    return
-  }
-}
-
-function unmountChildren(node: NativeNode) {
-  for (const child of normalizeChildren(node.children)) {
-    unmount(child)
+    disconnectComponentNode(node)
   }
 }

@@ -11,7 +11,7 @@ import {
   useRawChildren,
 } from '.'
 import { type ComponentNode, isComponentNode } from './ComponentNode'
-import type { DNodeContext } from './context'
+import type { DNodeContext } from './nodes/ComponentContext'
 import type { FunctionalComponent } from './defineComponent'
 import { defineComponentName } from './test'
 

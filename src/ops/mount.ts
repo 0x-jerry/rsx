@@ -1,53 +1,45 @@
 import { FunctionalComponent } from '../defineComponent'
 import { h } from '../jsx'
-import { createTextElement } from '../node'
-import { normalizeChildren } from '../utils'
 import {
   isNativeNode,
-  mountNativeNode,
+  connectNativeNode,
   isComponentNode,
-  mountComponentNode,
-  NativeNode,
-  isAnchorNode,
+  connectComponentNode,
   ComponentNode,
+  AnyNode,
 } from '../nodes'
+import { ComponentContextEventNameMap, triggerEvent } from '../nodes/ComponentContext'
 
-export function mount(node: unknown): HTMLElement | undefined {
+export function mount(node: ComponentNode, parentEl?: HTMLElement): undefined {
+  connect(node, parentEl)
+
+  if (!node.context) {
+    throw new Error(`Mount node failed!`)
+  }
+
+  triggerEvent(ComponentContextEventNameMap.mounted, node.context)
+}
+
+export function connect(node: AnyNode, parentEl?: HTMLElement) {
   if (isNativeNode(node)) {
-    const el = mountNativeNode(node)
-    mountChildren(node, el)
+    const el = connectNativeNode(node, parentEl)
+
+    for (const child of node.children || []) {
+      connect(child, el)
+    }
+
     return el
   }
 
   if (isComponentNode(node)) {
-    return mountComponentNode(node)
-  }
-
-  return undefined
-}
-
-function mountChildren(node: NativeNode, el?: HTMLElement) {
-  for (const child of normalizeChildren(node.children)) {
-    if (isNativeNode(child) || isComponentNode(child) || isAnchorNode(child)) {
-      const childEl = mount(child)
-      if (childEl) {
-        el?.appendChild(childEl)
-      }
-      continue
-    }
-
-    el?.appendChild(createTextElement(child))
+    connectComponentNode(node, parentEl)
   }
 }
 
 export function mountApp(App: FunctionalComponent, rootEl: HTMLElement) {
   const app = h(App) as ComponentNode
 
-  const appEl = mountComponentNode(app)
-
-  if (appEl) {
-    rootEl.append(appEl)
-  }
+  mount(app, rootEl)
 
   return app
 }

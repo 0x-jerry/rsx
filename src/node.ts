@@ -1,6 +1,5 @@
 import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import { type ClassValue, clsx } from 'clsx'
-import { onUnmounted } from './hook'
 import { updateEl } from './nodeOp'
 import { type AnyProps, normalizeProps } from './props'
 import { effect, isRef, unref } from './reactivity'
@@ -63,20 +62,24 @@ function convertAttrValue(attr: string, value: unknown) {
 }
 
 export function createTextElement(content: unknown) {
-  const el = document.createTextNode('')
+  const el = document.createTextNode('') as any as HTMLElement
+
+  let cleanup
 
   if (isRef(content)) {
     const runner = effect(() => {
       el.textContent = String(unref(content) ?? '')
     })
 
-    // TODO, clear runner
-    // onUnmounted(() => stop(runner))
+    cleanup = () => stop(runner)
   } else {
     el.textContent = String(content ?? '')
   }
 
-  return el
+  return {
+    el,
+    cleanup,
+  }
 }
 
 export function isHTMLNode(o: unknown): o is ChildNode {

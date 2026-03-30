@@ -6,7 +6,7 @@ import {
   popCurrentContext,
   runWithContext,
   setCurrentContext,
-} from './context'
+} from './ComponentContext'
 
 function createFakeContext(name: string) {
   return {
