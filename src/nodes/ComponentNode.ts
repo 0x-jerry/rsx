@@ -10,11 +10,14 @@ import {
 } from './ComponentContext'
 import { AnyNode, AnyNodeSymbol, AnyNodeType, isAnyNode } from './node'
 import {
-  connectCaseComponent,
+  connectCaseNode,
   connectFragmentNode,
-  Fragment,
+  connectMapNode,
+  connectTeleportNode,
   isCaseComponent,
   isFragmentComponent,
+  isMapComponent,
+  isTeleportComponent,
 } from '../internalComponents'
 import { getNodeElement } from './utils'
 
@@ -55,7 +58,11 @@ export function connectComponentNode(node: ComponentNode, parentEl?: ParentNode)
   if (isFragmentComponent(node.type)) {
     connectFragmentNode(node, parentEl)
   } else if (isCaseComponent(node.type)) {
-    connectCaseComponent(node, parentEl)
+    connectCaseNode(node, parentEl)
+  } else if (isMapComponent(node.type)) {
+    connectMapNode(node, parentEl)
+  } else if (isTeleportComponent(node.type)) {
+    connectTeleportNode(node, parentEl)
   } else {
     _connectComponentNode(node, parentEl)
   }

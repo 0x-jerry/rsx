@@ -8,6 +8,8 @@ import {
 } from '../defineComponent'
 import { insertBefore } from '../nodeOp'
 import { computed } from '../reactivity'
+import { ComponentNode, runWithContext } from '../nodes'
+import { useWatch } from '../hook'
 
 export interface MapItemProps<Item> {
   item: Item
@@ -33,10 +35,17 @@ interface ChildContext extends ComponentNode {
   }
 }
 
-export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
-  const ctx = useContext()
+export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {})
 
-  const anchorNode = createAnchorNode('map')
+defineComponentName(VMap, 'VMap')
+
+export function isMapComponent(type: FunctionalComponent) {
+  return type === VMap
+}
+
+export function connectMapNode(node: ComponentNode, parentEl?: ParentNode) {
+  const ctx = node.context!
+  const props = (ctx.props || {}) as MapComponentProps<any>
 
   let children: ChildContext[] = []
 
@@ -44,34 +53,13 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
 
   const childrenKeys = computed(() => props.list.map((item, idx) => getItemKey(item, idx)))
 
-  useWatch(
-    childrenKeys,
-    () => {
-      runWithContext(update, ctx)
-    },
-    {
-      scheduler: asyncWatcherScheduler,
-    },
-  )
-
-  onBeforeMount(() => {
-    runWithContext(update, ctx)
+  useWatch(childrenKeys, () => update(), {
+    scheduler: asyncWatcherScheduler,
   })
 
-  listenAnchorMoveEvent(anchorNode, () => {
-    children.forEach((child) => {
-      const childEl = child.instance?.el
-      if (childEl) {
-        insertBefore(anchorNode, childEl)
+  update(true)
 
-        dispatchAnchorMovedEvent(childEl)
-      }
-    })
-  })
-
-  return anchorNode
-
-  function update() {
+  function update(firstTime = false) {
     const c1: ChildContext[] = children
     const c2: ChildContext[] = buildNewChildren()
 
@@ -250,12 +238,10 @@ export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {
     return newChildren
   }
 
-  function getItemKey(item: T, idx: number) {
+  function getItemKey<T>(item: T, idx: number) {
     return props.key ? props.key(item, idx) : item
   }
-})
-
-defineComponentName(VMap, 'VMap')
+}
 
 function appendItemToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
   let list = map.get(key)

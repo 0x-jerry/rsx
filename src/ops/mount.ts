@@ -27,8 +27,6 @@ export function connect(node: AnyNode, parentEl?: ParentNode) {
     for (const child of node.children || []) {
       connect(child, el)
     }
-
-    return el
   }
 
   if (isComponentNode(node)) {

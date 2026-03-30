@@ -32,7 +32,7 @@ export function isCaseComponent(c: FunctionalComponent) {
   return c === VCase
 }
 
-export function connectCaseComponent(node: ComponentNode, parentEl?: ParentNode) {
+export function connectCaseNode(node: ComponentNode, parentEl?: ParentNode) {
   const ctx = node.context!
   const props = (ctx.props || {}) as CaseComponentProps<any>
 

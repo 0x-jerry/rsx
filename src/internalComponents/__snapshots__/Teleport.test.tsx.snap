@@ -2,7 +2,7 @@
 
 exports[`Teleport > container node is not exists > html 1`] = `
 <div
-  id="app"
+  id="App"
 >
   <span>
     1
@@ -24,7 +24,7 @@ exports[`Teleport > container node is not exists > html 1`] = `
 
 exports[`Teleport > non-reactivity data > html 1`] = `
 <div
-  id="app"
+  id="App"
 >
   <span>
     1
@@ -47,7 +47,7 @@ exports[`Teleport > non-reactivity data > html 1`] = `
 
 exports[`Teleport > reactivity data > html 1`] = `
 <div
-  id="app"
+  id="App"
 >
   <span>
     1

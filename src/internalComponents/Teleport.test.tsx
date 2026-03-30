@@ -1,5 +1,5 @@
-import { onMounted } from '@/hook'
-import { nextTick, ref } from '@/reactivity'
+import { onMounted } from '../hook'
+import { nextTick, ref } from '../reactivity'
 import { dc } from '../defineComponent'
 import { mountTestApp } from '../test'
 import { Teleport } from './Teleport'
