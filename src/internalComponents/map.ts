@@ -40,7 +40,6 @@ interface ChildComponentNode extends ComponentNode {
    * mark this is a reuse element
    */
   _r?: boolean
-  _pEl?: DocumentFragment
   _props?: {
     item: Ref<unknown>
     index: Ref<number>
@@ -52,7 +51,7 @@ interface MapComponentNode extends ComponentNode {
   _renderedNodes?: ComponentNode[]
 }
 
-export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {})
+export const VMap = defineComponent(<T>() => {})
 
 defineComponentName(VMap, 'VMap')
 
@@ -98,6 +97,11 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
     let e1 = c1.length - 1
     let e2 = l2 - 1
 
+    /**
+     * Track the last sorted element
+     */
+    let lastFinishedAnchor: ChildNode = node._el!
+
     while (i <= e1 && i <= e2) {
       const n1 = c1[i]
       const n2 = c2[i]
@@ -107,6 +111,7 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
       }
       n1._r = false
 
+      lastFinishedAnchor = getLastElement(n2) || lastFinishedAnchor
       i++
     }
 
@@ -125,11 +130,14 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
     if (i > e1) {
       while (i <= e2) {
         const n = c2[i]
-        const anchor = node._el
 
-        if (n._pEl && anchor) {
-          insertBefore(anchor, n._pEl)
+        const anchor = lastFinishedAnchor?.nextSibling
+
+        if (node._el?.parentElement) {
+          moveNode(n, node._el.parentElement, anchor)
         }
+
+        lastFinishedAnchor = getLastElement(n) || lastFinishedAnchor
 
         if (!firstTime) {
           triggerEvent(ComponentContextEventNameMap.mounted, n.context!)
@@ -161,11 +169,8 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
 
       const increasingNewIndexSequence = getSequence(newSequence)
 
-      // todo, move component node
       for (i = s2; i <= e2; i++) {
         const n2 = c2[i]
-
-        // const anchor = getFirstChildOfNode(c2[i - 1])
 
         if (
           increasingNewIndexSequence.length &&
@@ -173,14 +178,20 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
         ) {
           n2._r = false
           increasingNewIndexSequence.shift()
-          continue
+        } else {
+          const anchor = lastFinishedAnchor?.nextSibling
+
+          if (node._el?.parentElement) {
+            moveNode(n2, node._el.parentElement, anchor)
+          }
+          if (n2._r) {
+            n2._r = false
+          } else if (!firstTime) {
+            triggerEvent(ComponentContextEventNameMap.mounted, n2.context!)
+          }
         }
 
-        if (n2._r) {
-          n2._r = false
-        } else if (!firstTime) {
-          triggerEvent(ComponentContextEventNameMap.mounted, n2.context!)
-        }
+        lastFinishedAnchor = getLastElement(n2) || lastFinishedAnchor
       }
     }
 
@@ -198,17 +209,17 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
       const dataKey = childrenKeys.value[idx]
 
       if (dataContextMap.has(dataKey)) {
-        const reuseCtx = popItemFromMap(dataContextMap, dataKey)
-        reuseCtx._r = true
+        const reuseNode = popItemFromMap(dataContextMap, dataKey)
+        reuseNode._r = true
 
-        if (reuseCtx._props) {
-          reuseCtx._props.item.value = item
-          reuseCtx._props.index.value = idx
+        if (reuseNode._props) {
+          reuseNode._props.item.value = item
+          reuseNode._props.index.value = idx
         }
 
-        appendItemToMap(newDataContextMap, dataKey, reuseCtx)
+        appendItemToMap(newDataContextMap, dataKey, reuseNode)
 
-        newChildren.push(reuseCtx)
+        newChildren.push(reuseNode)
 
         return
       }
@@ -221,7 +232,6 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
       const newCtx = h(props.render, childProps) as ChildComponentNode
 
       const pEl = document.createDocumentFragment()
-      newCtx._pEl = pEl
 
       connect(newCtx, pEl)
 
@@ -279,6 +289,18 @@ function getMapNodeElement(node: MapComponentNode): NodeElementRange {
 }
 
 // --------------
+
+function getLastElement(node: ChildComponentNode) {
+  const r = getNodeElement(node)
+
+  if (r?.end) {
+    if (!r.end.parentElement) {
+      throw new Error(`Node not attach to DOM`)
+    }
+
+    return r.end
+  }
+}
 
 function appendItemToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
   let list = map.get(key)

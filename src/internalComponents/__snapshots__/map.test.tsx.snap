@@ -14,7 +14,7 @@ exports[`map context tree > reactive value > ctx tree 1`] = `
                   "name": "B",
                 },
               ],
-              "name": "VMap.item",
+              "name": "render",
             },
             {
               "children": [
@@ -23,7 +23,7 @@ exports[`map context tree > reactive value > ctx tree 1`] = `
                   "name": "B",
                 },
               ],
-              "name": "VMap.item",
+              "name": "render",
             },
             {
               "children": [
@@ -32,7 +32,7 @@ exports[`map context tree > reactive value > ctx tree 1`] = `
                   "name": "B",
                 },
               ],
-              "name": "VMap.item",
+              "name": "render",
             },
             {
               "children": [
@@ -41,7 +41,7 @@ exports[`map context tree > reactive value > ctx tree 1`] = `
                   "name": "B",
                 },
               ],
-              "name": "VMap.item",
+              "name": "render",
             },
           ],
           "name": "VMap",
@@ -50,13 +50,13 @@ exports[`map context tree > reactive value > ctx tree 1`] = `
       "name": "A",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
 exports[`map context tree > reactive value > html 1`] = `
 <div
-  id="app"
+  id="App"
 >
   <div
     class="A"
@@ -64,6 +64,7 @@ exports[`map context tree > reactive value > html 1`] = `
     <span>
       a
     </span>
+    <!--Map-->
     <div
       class="B"
     >
@@ -96,7 +97,6 @@ exports[`map context tree > reactive value > html 1`] = `
       </span>
       3
     </div>
-    <!--map-->
   </div>
 </div>
 `;
@@ -115,7 +115,7 @@ exports[`map context tree > static value > ctx tree 1`] = `
                   "name": "B",
                 },
               ],
-              "name": "VMap.item",
+              "name": "render",
             },
             {
               "children": [
@@ -124,7 +124,7 @@ exports[`map context tree > static value > ctx tree 1`] = `
                   "name": "B",
                 },
               ],
-              "name": "VMap.item",
+              "name": "render",
             },
             {
               "children": [
@@ -133,7 +133,7 @@ exports[`map context tree > static value > ctx tree 1`] = `
                   "name": "B",
                 },
               ],
-              "name": "VMap.item",
+              "name": "render",
             },
           ],
           "name": "VMap",
@@ -142,13 +142,13 @@ exports[`map context tree > static value > ctx tree 1`] = `
       "name": "A",
     },
   ],
-  "name": "Root",
+  "name": "App",
 }
 `;
 
 exports[`map context tree > static value > html 1`] = `
 <div
-  id="app"
+  id="App"
 >
   <div
     class="A"
@@ -156,6 +156,7 @@ exports[`map context tree > static value > html 1`] = `
     <span>
       a
     </span>
+    <!--Map-->
     <div
       class="B"
     >
@@ -180,7 +181,6 @@ exports[`map context tree > static value > html 1`] = `
       </span>
       3
     </div>
-    <!--map-->
   </div>
 </div>
 `;

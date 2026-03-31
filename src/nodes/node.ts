@@ -33,7 +33,7 @@ export function isAnyNode(node: unknown): node is AnyNode {
  * @param node
  * @param anchor
  */
-export function moveNode(node: AnyNode, parentEl: ParentNode, anchor?: Node) {
+export function moveNode(node: AnyNode, parentEl: ParentNode, anchor?: Node | null) {
   if (isNativeNode(node)) {
     moveNativeNode(node, parentEl, anchor)
     return
