@@ -1,6 +1,6 @@
 import { onMounted, onUnmounted } from '../hook'
-import { dc } from '../defineComponent'
-import { contextToJson, defineComponentName, mountTestApp } from '../test'
+import { dc, defineComponentName } from '../defineComponent'
+import { contextToJson, mountTestApp } from '../test'
 import { unmount } from '../ops'
 
 describe('Fragment', () => {

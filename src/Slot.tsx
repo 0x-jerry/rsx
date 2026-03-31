@@ -1,7 +1,11 @@
-import type { Ref } from '@vue/reactivity'
-import { type AnyProps, defineComponent, toBindingRefs, useRawChildren, isComponentNode } from '.'
+import {
+  type AnyProps,
+  defineComponent,
+  useRawChildren,
+  isComponentNode,
+  defineComponentName,
+} from '.'
 import type { FunctionalComponent } from './defineComponent'
-import { defineComponentName } from './test'
 
 export type Slot = FunctionalComponent
 

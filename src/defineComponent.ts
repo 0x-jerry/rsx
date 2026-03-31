@@ -1,6 +1,7 @@
-import type { EmptyObject } from '@0x-jerry/utils'
+import type { EmptyObject, Fn } from '@0x-jerry/utils'
 import type { DefineProps } from './props'
 import type { IsStartWithCapitalizedLetter, MaybeRef } from './types'
+import { def } from './utils'
 
 export type PropsType<T = any> = Record<string, T>
 
@@ -47,3 +48,7 @@ export function defineComponent(impl?: any): any {
 }
 
 export const dc = defineComponent
+
+export function defineComponentName(fn: Fn, name: string) {
+  def(fn, 'name', { value: name })
+}

@@ -1,8 +1,7 @@
-import { defineComponentName } from '../test'
 import { onMounted, useWatch } from '../hook'
 import { connect, disconnect } from '../ops'
 import { asyncWatcherScheduler } from '../reactivity/scheduler'
-import { defineComponent, type FunctionalComponent } from '../defineComponent'
+import { defineComponent, defineComponentName, type FunctionalComponent } from '../defineComponent'
 import { moveNode, type InternalComponentOps, type NodeElementRange } from '../nodes'
 import type { ComponentNode } from './ComponentNode'
 

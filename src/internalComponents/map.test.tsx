@@ -1,7 +1,7 @@
-import { dc } from '../defineComponent'
+import { dc, defineComponentName } from '../defineComponent'
 import { onMounted, onUnmounted } from '../hook'
 import { $, nextTick, ref, toBindingRefs } from '../reactivity'
-import { contextToJson, defineComponentName, mountTestApp } from '../test'
+import { contextToJson, mountTestApp } from '../test'
 import { VMap } from './map'
 
 describe('map component', () => {

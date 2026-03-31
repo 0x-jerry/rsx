@@ -1,10 +1,10 @@
-import { dc } from './defineComponent'
+import { dc, defineComponentName } from './defineComponent'
 import { useWatch } from './hook'
 import { isComponentNode } from './internalComponents'
 import { h } from './jsx'
 import { isNativeNode } from './nodes'
 import { $, nextTick, ref } from './reactivity'
-import { contextToJson, defineComponentName, mountTestApp } from './test'
+import { contextToJson, mountTestApp } from './test'
 
 describe('jsx', () => {
   it('jsx element', () => {

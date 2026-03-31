@@ -1,5 +1,4 @@
-import { defineComponentName } from '../test'
-import type { FunctionalComponent } from '../defineComponent'
+import { defineComponentName, type FunctionalComponent } from '../defineComponent'
 import {
   getNodeElement,
   moveNode,

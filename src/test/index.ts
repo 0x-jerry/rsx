@@ -32,7 +32,3 @@ export function contextToJson(context: ComponentContext): ContextJson {
     children: [...(context.children || [])].map((n) => contextToJson(n)),
   }
 }
-
-export function defineComponentName(fn: Fn, name: string) {
-  def(fn, 'name', { value: name })
-}

@@ -1,8 +1,8 @@
 import { type Ref, shallowRef } from '@vue/reactivity'
 import { asyncWatcherScheduler } from '../reactivity/scheduler'
-import { defineComponentName } from '../test'
 import {
   defineComponent,
+  defineComponentName,
   type ExposedFunctionalComponent,
   type FunctionalComponent,
 } from '../defineComponent'
