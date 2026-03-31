@@ -1,6 +1,7 @@
 import { AnyProps } from '../props'
 import { createNativeElement, createTextElement } from '../node'
-import { AnyNode, AnyNodeSymbol, AnyNodeType, isAnyNode } from './node'
+import { AnyNode, AnyNodeSymbol, AnyNodeType, isAnyNode, NodeElementRange } from './node'
+import { moveTo } from '../nodeOp'
 
 export interface NativeNodeContext {
   el: HTMLElement
@@ -53,6 +54,23 @@ export function connectNativeNode(
   parentEl?.appendChild(el)
 
   return el
+}
+
+export function moveNativeNode(node: NativeNode, parentEl: ParentNode, anchor?: Node) {
+  const el = node.context?.el
+
+  if (!el) {
+    throw new Error(`Native node not mounted!`)
+  }
+
+  moveTo(parentEl, el, anchor)
+}
+
+export function getNativeNodeElement(node: NativeNode): NodeElementRange {
+  return {
+    start: node.context?.el,
+    end: node.context?.el,
+  }
 }
 
 export function disconnectNativeNode(node: NativeNode) {

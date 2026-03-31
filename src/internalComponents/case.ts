@@ -5,9 +5,10 @@ import { runWithContext } from '../nodes/ComponentContext'
 import { defineComponent, type FunctionalComponent } from '../defineComponent'
 import { useWatch } from '../hook'
 import { $, computed } from '../reactivity'
-import { connect, mount, unmount } from '../ops'
+import { connect, disconnect, mount, unmount } from '../ops'
 import { h } from '../jsx'
-import { ComponentNode } from '../nodes'
+import { getNodeElement, moveNode, type InternalComponentOps } from '../nodes'
+import type { ComponentNode } from './ComponentNode'
 import { moveTo } from '../nodeOp'
 
 export interface CaseItemComponentProps<T> {
@@ -27,19 +28,31 @@ export interface CaseComponentProps<T = unknown> {
 }
 
 export const VCase = defineComponent(<T>(_props: CaseComponentProps<T>) => {})
+defineComponentName(VCase, 'VCase')
 
-export function isCaseComponent(c: FunctionalComponent) {
+export const CaseOps: InternalComponentOps = {
+  is: isCaseComponent,
+  connect: connectCaseNode,
+  move: moveCaseNode,
+  getElementRange: getCaseNodeElement,
+  disconnect: disconnectCaseNode,
+}
+
+function isCaseComponent(c: FunctionalComponent) {
   return c === VCase
 }
 
-export function connectCaseNode(node: ComponentNode, parentEl?: ParentNode) {
+interface CaseComponentNode extends ComponentNode {
+  _el?: Comment
+  _renderedNode?: ComponentNode | null
+}
+
+function connectCaseNode(node: CaseComponentNode, parentEl?: ParentNode) {
   const ctx = node.context!
   const props = (ctx.props || {}) as CaseComponentProps<any>
 
-  ctx.el = document.createComment('Case') as any as HTMLElement
-  parentEl?.appendChild(ctx.el)
-
-  let currentChild: ComponentNode | null = null
+  node._el = document.createComment('Case')
+  parentEl?.appendChild(node._el)
 
   const ChildComponent = computed(() => {
     if (Array.isArray(props.cases)) {
@@ -49,19 +62,18 @@ export function connectCaseNode(node: ComponentNode, parentEl?: ParentNode) {
     return props.cases?.[String(props.condition)]
   })
 
-  rebuildChild(true)
+  update(true)
 
-  useWatch(ChildComponent, () => rebuildChild(), {
-    immediate: false,
+  useWatch(ChildComponent, () => update(), {
     scheduler: asyncWatcherScheduler,
   })
 
-  function rebuildChild(firstTime = false) {
+  function update(firstTime = false) {
     const Component = ChildComponent.value
 
-    if (currentChild) {
-      unmount(currentChild)
-      currentChild = null
+    if (node._renderedNode) {
+      unmount(node._renderedNode)
+      node._renderedNode = null
     }
 
     if (!Component) {
@@ -70,24 +82,53 @@ export function connectCaseNode(node: ComponentNode, parentEl?: ParentNode) {
 
     runWithContext(() => {
       const _props = { value: $(() => props.condition) }
-      const node = h(Component, _props) as ComponentNode
-      const pEl = document.createDocumentFragment()
+      const targetNode = h(Component, _props) as ComponentNode
+      const _pEl = document.createDocumentFragment()
 
       if (firstTime) {
-        connect(node, pEl)
+        connect(targetNode, _pEl)
       } else {
-        mount(node, pEl)
+        mount(targetNode, _pEl)
       }
 
+      const parentEl = node._el?.parentElement
+
       if (parentEl) {
-        moveTo(parentEl, pEl, ctx.el)
+        moveNode(targetNode, parentEl, node._el)
       }
-      currentChild = node
+
+      node._renderedNode = targetNode
     }, ctx)
   }
 }
 
-defineComponentName(VCase, 'VCase')
+function disconnectCaseNode(node: CaseComponentNode) {
+  if (node._renderedNode) {
+    disconnect(node._renderedNode)
+  }
+}
+
+function moveCaseNode(node: CaseComponentNode, parentEl: ParentNode, anchor?: Node) {
+  const currentAnchor = node._el
+
+  if (!currentAnchor) {
+    throw new Error(`Case component not mounted!`)
+  }
+
+  if (node._renderedNode) {
+    moveNode(node._renderedNode, parentEl, anchor)
+  }
+
+  moveTo(parentEl, currentAnchor, anchor)
+}
+
+function getCaseNodeElement(node: CaseComponentNode) {
+  if (node._renderedNode) {
+    return getNodeElement(node._renderedNode)
+  }
+}
+
+// ------------
 
 export interface IfComponentProps {
   condition: JsonPrimitive

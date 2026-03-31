@@ -6,10 +6,21 @@ import {
   type ExposedFunctionalComponent,
   type FunctionalComponent,
 } from '../defineComponent'
-import { insertBefore } from '../nodeOp'
+import { insertBefore, moveTo } from '../nodeOp'
 import { computed } from '../reactivity'
-import { ComponentNode, runWithContext } from '../nodes'
+import {
+  ComponentContextEventNameMap,
+  getNodeElement,
+  moveNode,
+  runWithContext,
+  triggerEvent,
+  type InternalComponentOps,
+  type NodeElementRange,
+} from '../nodes'
 import { useWatch } from '../hook'
+import { connect, disconnect, unmount } from '../ops'
+import { h } from '../jsx'
+import type { ComponentNode } from './ComponentNode'
 
 export interface MapItemProps<Item> {
   item: Item
@@ -24,44 +35,63 @@ export interface MapComponentProps<T> {
   render: FunctionalComponent<MapItemProps<T>>
 }
 
-interface ChildContext extends ComponentNode {
+interface ChildComponentNode extends ComponentNode {
   /**
    * mark this is a reuse element
    */
   _r?: boolean
+  _pEl?: DocumentFragment
   _props?: {
     item: Ref<unknown>
     index: Ref<number>
   }
 }
 
+interface MapComponentNode extends ComponentNode {
+  _el?: Comment
+  _renderedNodes?: ComponentNode[]
+}
+
 export const VMap = defineComponent(<T>(props: MapComponentProps<T>) => {})
 
 defineComponentName(VMap, 'VMap')
 
-export function isMapComponent(type: FunctionalComponent) {
+export const MapOps: InternalComponentOps = {
+  is: isMapComponent,
+  connect: connectMapNode,
+  move: moveMapNode,
+  getElementRange: getMapNodeElement,
+  disconnect: disconnectMapNode,
+}
+
+function isMapComponent(type: FunctionalComponent) {
   return type === VMap
 }
 
-export function connectMapNode(node: ComponentNode, parentEl?: ParentNode) {
+function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
   const ctx = node.context!
+  node._el = document.createComment('Map')
+  parentEl?.append(node._el)
+
   const props = (ctx.props || {}) as MapComponentProps<any>
 
-  let children: ChildContext[] = []
+  let children: ChildComponentNode[] = []
 
-  let dataContextMap = new Map<unknown, ChildContext[]>()
+  let dataContextMap = new Map<unknown, ChildComponentNode[]>()
 
   const childrenKeys = computed(() => props.list.map((item, idx) => getItemKey(item, idx)))
 
-  useWatch(childrenKeys, () => update(), {
+  const updateWithContext = (firstTime = false) => runWithContext(() => update(firstTime), ctx)
+
+  useWatch(childrenKeys, () => updateWithContext(), {
     scheduler: asyncWatcherScheduler,
   })
 
-  update(true)
+  updateWithContext(true)
 
   function update(firstTime = false) {
-    const c1: ChildContext[] = children
-    const c2: ChildContext[] = buildNewChildren()
+    const c1: ChildComponentNode[] = children
+    const c2: ChildComponentNode[] = buildNewChildren()
 
     let i = 0
     const l2 = c2.length
@@ -95,23 +125,20 @@ export function connectMapNode(node: ComponentNode, parentEl?: ParentNode) {
     if (i > e1) {
       while (i <= e2) {
         const n = c2[i]
-        const anchor = getFirstChildOfNode(c1[e1 + 1]?.instance) || anchorNode
+        const anchor = node._el
 
-        const nEl = n.instance.el
-        if (nEl) {
-          insertBefore(anchor, nEl)
-          dispatchAnchorMovedEvent(nEl)
+        if (n._pEl && anchor) {
+          insertBefore(anchor, n._pEl)
         }
 
-        if (ctx._mounted) {
-          mount(n.instance)
+        if (!firstTime) {
+          triggerEvent(ComponentContextEventNameMap.mounted, n.context!)
         }
 
         i++
       }
     } else if (i > e2) {
-      // already unmounted
-      // no need to do anything
+      // do nothing, already unmounted in `buildNewChildren`
     } else {
       const s1 = i
       const s2 = i
@@ -125,6 +152,7 @@ export function connectMapNode(node: ComponentNode, parentEl?: ParentNode) {
       for (let j = s2; j <= e2; j++) {
         const element = c2[j]
         const oldIdx = cc1.indexOf(element)
+
         if (oldIdx !== -1) {
           newSequence.push(oldIdx)
           oldToNew.set(oldIdx, j)
@@ -133,61 +161,38 @@ export function connectMapNode(node: ComponentNode, parentEl?: ParentNode) {
 
       const increasingNewIndexSequence = getSequence(newSequence)
 
-      let anchorPreviousNode =
-        c1[i - 1]?.instance.el ||
-        (c1[0] ? getFirstChildOfNode(c1[0]?.instance)?.previousSibling : anchorNode.previousSibling)
-
+      // todo, move component node
       for (i = s2; i <= e2; i++) {
         const n2 = c2[i]
+
+        // const anchor = getFirstChildOfNode(c2[i - 1])
 
         if (
           increasingNewIndexSequence.length &&
           oldToNew.get(newSequence[increasingNewIndexSequence[0]]) === i
         ) {
           n2._r = false
-          anchorPreviousNode = n2.instance.el
           increasingNewIndexSequence.shift()
           continue
         }
 
-        const n2El = n2.instance.el
-        if (n2El) {
-          const anchor =
-            (anchorPreviousNode
-              ? anchorPreviousNode.nextSibling
-              : c1[0]?.instance.el?.parentElement
-                ? getFirstChildOfNode(c1[0]?.instance)
-                : null) || anchorNode
-
-          insertBefore(anchor, n2El)
-          dispatchAnchorMovedEvent(n2El)
-
-          anchorPreviousNode = n2El
-        }
-
         if (n2._r) {
           n2._r = false
-        } else {
-          if (ctx._mounted) {
-            mount(n2.instance)
-          }
+        } else if (!firstTime) {
+          triggerEvent(ComponentContextEventNameMap.mounted, n2.context!)
         }
       }
     }
 
     children = c2
 
-    // update first child
-    {
-      const firstEl = children.find((child) => child.instance.el)?.instance.el
-      setAnchorNodeFirstChildren(anchorNode, firstEl)
-    }
+    node._renderedNodes = children
   }
 
   function buildNewChildren() {
-    const newChildren: ChildContext[] = []
+    const newChildren: ChildComponentNode[] = []
 
-    const newDataContextMap = new Map<unknown, ChildContext[]>()
+    const newDataContextMap = new Map<unknown, ChildComponentNode[]>()
 
     props.list.forEach((item, idx) => {
       const dataKey = childrenKeys.value[idx]
@@ -195,6 +200,7 @@ export function connectMapNode(node: ComponentNode, parentEl?: ParentNode) {
       if (dataContextMap.has(dataKey)) {
         const reuseCtx = popItemFromMap(dataContextMap, dataKey)
         reuseCtx._r = true
+
         if (reuseCtx._props) {
           reuseCtx._props.item.value = item
           reuseCtx._props.index.value = idx
@@ -212,25 +218,23 @@ export function connectMapNode(node: ComponentNode, parentEl?: ParentNode) {
         index: shallowRef(idx),
       }
 
-      const newCtx = createComponentNode(props.render, childProps, []) as ChildContext
+      const newCtx = h(props.render, childProps) as ChildComponentNode
+
+      const pEl = document.createDocumentFragment()
+      newCtx._pEl = pEl
+
+      connect(newCtx, pEl)
 
       newCtx._props = childProps
-
-      newCtx.mount()
-      newCtx.instance.name = 'VMap.item'
 
       appendItemToMap(newDataContextMap, dataKey, newCtx)
       newChildren.push(newCtx)
     })
 
     dataContextMap.values().forEach((ctxList) => {
-      ctxList.forEach((child) => {
-        if (child.instance) {
-          unmount(child.instance)
-        } else {
-          throw new Error('child without instance')
-        }
-      })
+      for (const child of ctxList) {
+        unmount(child)
+      }
     })
 
     dataContextMap = newDataContextMap
@@ -242,6 +246,39 @@ export function connectMapNode(node: ComponentNode, parentEl?: ParentNode) {
     return props.key ? props.key(item, idx) : item
   }
 }
+
+function disconnectMapNode(node: MapComponentNode) {
+  for (const child of node._renderedNodes || []) {
+    disconnect(child)
+  }
+}
+
+function moveMapNode(node: MapComponentNode, parentEl: ParentNode, anchor?: Node) {
+  const currentAnchor = node._el
+  if (!currentAnchor) {
+    throw new Error(`Map component not mounted!`)
+  }
+
+  moveTo(parentEl, currentAnchor, anchor)
+
+  for (const child of node._renderedNodes || []) {
+    moveNode(child, parentEl, currentAnchor)
+  }
+}
+
+function getMapNodeElement(node: MapComponentNode): NodeElementRange {
+  const first = node._renderedNodes?.at(0)
+  const last = node._renderedNodes?.at(-1)
+
+  const result = {
+    start: getNodeElement(first)?.start,
+    end: getNodeElement(last)?.end,
+  }
+
+  return result
+}
+
+// --------------
 
 function appendItemToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {
   let list = map.get(key)
@@ -304,14 +341,4 @@ function getSequence(arr: number[]): number[] {
     v = p[v]
   }
   return result
-}
-
-function getFirstChildOfNode(node?: DNodeContext) {
-  if (!node?.el) return
-
-  if (isAnchorNode(node.el)) {
-    return getAnchorFirstChildNode(node.el)
-  }
-
-  return node.el
 }

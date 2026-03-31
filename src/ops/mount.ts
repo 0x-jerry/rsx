@@ -1,14 +1,14 @@
-import { FunctionalComponent } from '../defineComponent'
+import type { FunctionalComponent } from '../defineComponent'
+import { type ComponentNode, isComponentNode } from '../internalComponents'
 import { h } from '../jsx'
 import {
   isNativeNode,
   connectNativeNode,
-  isComponentNode,
+  type AnyNode,
   connectComponentNode,
-  ComponentNode,
-  AnyNode,
+  triggerEvent,
+  ComponentContextEventNameMap,
 } from '../nodes'
-import { ComponentContextEventNameMap, triggerEvent } from '../nodes/ComponentContext'
 
 export function mount(node: ComponentNode, parentEl?: ParentNode): undefined {
   connect(node, parentEl)

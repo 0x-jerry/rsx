@@ -38,6 +38,16 @@ exports[`case context tree > reactive value > html 1`] = `
 </div>
 `;
 
+exports[`case context tree > should unmount > html 1`] = `
+<div
+  id="App"
+>
+  <div>
+    <!--Case-->
+  </div>
+</div>
+`;
+
 exports[`case context tree > static value > ctx tree 1`] = `
 {
   "children": [

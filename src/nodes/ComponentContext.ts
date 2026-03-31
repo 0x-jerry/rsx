@@ -1,6 +1,7 @@
 import { EventEmitter } from '@0x-jerry/utils'
-import type { AnyNode, ComponentNode } from '.'
-import { AnyProps } from '../props'
+import type { AnyProps } from '../props'
+import type { ComponentNode } from '../internalComponents'
+import type { AnyNode } from './node'
 
 export const ComponentContextEventNameMap = {
   mounted: 'm',
@@ -26,7 +27,7 @@ export interface ComponentContext<Events extends {} = {}> {
   id: number
   name?: string
   children?: Set<ComponentContext>
-  el?: HTMLElement
+
   parent?: ComponentContext | null
   node?: ComponentNode
 

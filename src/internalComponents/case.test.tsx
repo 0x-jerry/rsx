@@ -275,13 +275,14 @@ describe('case context tree', () => {
       )
     })
 
-    mountTestApp(App)
+    const root = mountTestApp(App)
 
     expect(fn).toHaveBeenCalledTimes(0)
 
     showA.value = false
     await nextTick()
     expect(fn).toHaveBeenCalledTimes(1)
+    expect(root).toMatchSnapshot('html')
   })
 
   it('lifecycle hook', async () => {

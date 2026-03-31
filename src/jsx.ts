@@ -2,14 +2,13 @@ import { isArray, isString } from '@0x-jerry/utils'
 import type { FunctionalComponent } from './defineComponent'
 import type { AnyProps } from './props'
 import {
-  AnyNode,
-  ComponentNode,
-  createComponentNode,
   createNativeNode,
   createNativeTextNode,
   isAnyNode,
-  NativeNode,
+  type AnyNode,
+  type NativeNode,
 } from './nodes'
+import { type ComponentNode, createComponentNode } from './internalComponents'
 
 export function h(
   type: string | FunctionalComponent,

@@ -1,7 +1,8 @@
 import { dc } from './defineComponent'
 import { useWatch } from './hook'
+import { isComponentNode } from './internalComponents'
 import { h } from './jsx'
-import { isNativeNode, isComponentNode } from './nodes'
+import { isNativeNode } from './nodes'
 import { $, nextTick, ref } from './reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from './test'
 

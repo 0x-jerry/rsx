@@ -1,16 +1,13 @@
+import { type ComponentNode, isComponentNode } from '../internalComponents'
 import {
-  AnyNode,
-  ComponentNode,
-  disconnectComponentNode,
-  disconnectNativeNode,
-  isComponentNode,
-  isNativeNode,
-} from '../nodes'
-import {
-  ComponentContextEventNameMap,
   triggerEvent,
+  ComponentContextEventNameMap,
   TriggerEventOrder,
-} from '../nodes/ComponentContext'
+  type AnyNode,
+  isNativeNode,
+  disconnectNativeNode,
+  disconnectComponentNode,
+} from '../nodes'
 
 export function unmount(node: ComponentNode) {
   disconnect(node)
@@ -22,13 +19,14 @@ export function unmount(node: ComponentNode) {
   triggerEvent(ComponentContextEventNameMap.unmounted, node.context, TriggerEventOrder.Postscript)
 }
 
-function disconnect(node: AnyNode): undefined {
+export function disconnect(node: AnyNode): undefined {
   if (isNativeNode(node)) {
-    disconnectNativeNode(node)
     for (const child of node.children || []) {
       disconnect(child)
       continue
     }
+
+    disconnectNativeNode(node)
   }
 
   if (isComponentNode(node)) {

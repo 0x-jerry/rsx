@@ -1,5 +1,5 @@
 import { dc } from '../defineComponent'
-import { onBeforeMount, onMounted, onUnmounted } from '../hook'
+import { onMounted, onUnmounted } from '../hook'
 import { $, nextTick, ref, toBindingRefs } from '../reactivity'
 import { contextToJson, defineComponentName, mountTestApp } from '../test'
 import { VMap } from './map'
@@ -1054,9 +1054,7 @@ describe('map with map', () => {
       onUnmounted(() => {
         lifecycle.push(`um-${props.item}`)
       })
-      onBeforeMount(() => {
-        lifecycle.push(`bm-${props.item}`)
-      })
+
       onMounted(() => {
         lifecycle.push(`m-${props.item}`)
       })

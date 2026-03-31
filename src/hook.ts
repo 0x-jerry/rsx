@@ -5,7 +5,7 @@ import {
   ComponentContextEventNameMap,
   type ComponentEvents,
   getCurrentContext,
-} from './nodes/ComponentContext'
+} from './nodes'
 import { isRef, type WatchHandle, type WatchOptions, watch } from './reactivity'
 
 export function useContext() {

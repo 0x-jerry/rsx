@@ -1,10 +1,10 @@
 import { defineComponentName } from '../test'
-import { defineComponent, FunctionalComponent } from '../defineComponent'
 import { onMounted, useWatch } from '../hook'
-import { ComponentNode } from '../nodes'
-import { connect } from '../ops'
-import { asyncWatcherScheduler, nextTick } from '../reactivity/scheduler'
-import { moveTo } from '../nodeOp'
+import { connect, disconnect } from '../ops'
+import { asyncWatcherScheduler } from '../reactivity/scheduler'
+import { defineComponent, type FunctionalComponent } from '../defineComponent'
+import { moveNode, type InternalComponentOps, type NodeElementRange } from '../nodes'
+import type { ComponentNode } from './ComponentNode'
 
 export interface TeleportProps {
   to?: string
@@ -14,25 +14,33 @@ export const Teleport = defineComponent<TeleportProps>((props, children) => {})
 
 defineComponentName(Teleport, 'Teleport')
 
-export function isTeleportComponent(type: FunctionalComponent) {
+export const TeleportOps: InternalComponentOps = {
+  is: isTeleportComponent,
+  connect: connectTeleportNode,
+  move: moveTeleportNode,
+  getElementRange: getTeleportNodeElement,
+  disconnect: disconnectTeleportNode,
+}
+
+function isTeleportComponent(type: FunctionalComponent) {
   return type === Teleport
 }
 
-export function connectTeleportNode(node: ComponentNode, _parentEl?: ParentNode) {
+interface TeleportComponentNode extends ComponentNode {
+  _el?: Comment
+}
+
+function connectTeleportNode(node: TeleportComponentNode, parentEl?: ParentNode) {
   const ctx = node.context!
   const props: TeleportProps = ctx.props!
 
-  const nonExistsContainer = document.createDocumentFragment()
+  const anchor = document.createComment('Teleport')
+  node._el = anchor
+  parentEl?.appendChild(anchor)
 
-  const initRootEl = init()
+  init()
 
-  onMounted(() => {
-    const targetEl = props.to ? document.querySelector(props.to) : undefined
-
-    if (targetEl) {
-      moveTo(targetEl, initRootEl)
-    }
-  })
+  onMounted(() => update())
 
   useWatch(
     () => props.to,
@@ -53,9 +61,28 @@ export function connectTeleportNode(node: ComponentNode, _parentEl?: ParentNode)
   }
 
   function update() {
-    const rootEl = props.to
-      ? document.querySelector(props.to) || nonExistsContainer
-      : nonExistsContainer
-    // todo
+    const rootEl = props.to ? document.querySelector(props.to) : undefined
+    const targetEl = rootEl || document.createDocumentFragment()
+
+    for (const child of node.children || []) {
+      moveNode(child, targetEl)
+    }
+  }
+}
+
+function moveTeleportNode(_node: TeleportComponentNode, _parentEl: ParentNode, _anchor?: Node) {}
+
+function getTeleportNodeElement(node: TeleportComponentNode) {
+  const r: NodeElementRange = {
+    start: node._el,
+    end: node._el,
+  }
+
+  return r
+}
+
+function disconnectTeleportNode(node: TeleportComponentNode) {
+  for (const child of node.children || []) {
+    disconnect(child)
   }
 }

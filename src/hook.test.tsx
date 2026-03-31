@@ -1,14 +1,4 @@
-import {
-  dc,
-  type InjectKey as InjectionKey,
-  inject,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  provide,
-  ref,
-  VIf,
-} from '.'
+import { dc, type InjectKey as InjectionKey, inject, onMounted, onUnmounted, provide } from '.'
 import { unmount } from './ops'
 import { mountTestApp } from './test'
 

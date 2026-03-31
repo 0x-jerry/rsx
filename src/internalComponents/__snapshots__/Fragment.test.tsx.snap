@@ -30,6 +30,5 @@ exports[`fragment context tree > static value > html 1`] = `
     </span>
   </div>
   2
-  <!--fragment-->
 </div>
 `;
