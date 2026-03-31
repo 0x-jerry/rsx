@@ -261,6 +261,8 @@ function disconnectMapNode(node: MapComponentNode) {
   for (const child of node._renderedNodes || []) {
     disconnect(child)
   }
+
+  node._el?.remove()
 }
 
 function moveMapNode(node: MapComponentNode, parentEl: ParentNode, anchor?: Node) {

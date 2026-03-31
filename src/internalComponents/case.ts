@@ -105,6 +105,8 @@ function disconnectCaseNode(node: CaseComponentNode) {
   if (node._renderedNode) {
     disconnect(node._renderedNode)
   }
+
+  node._el?.remove()
 }
 
 function moveCaseNode(node: CaseComponentNode, parentEl: ParentNode, anchor?: Node) {

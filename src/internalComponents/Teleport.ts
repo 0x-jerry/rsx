@@ -4,6 +4,7 @@ import { asyncWatcherScheduler } from '../reactivity/scheduler'
 import { defineComponent, defineComponentName, type FunctionalComponent } from '../defineComponent'
 import { moveNode, type InternalComponentOps, type NodeElementRange } from '../nodes'
 import type { ComponentNode } from './ComponentNode'
+import { moveTo } from '../nodeOp'
 
 export interface TeleportProps {
   to?: string
@@ -69,7 +70,11 @@ function connectTeleportNode(node: TeleportComponentNode, parentEl?: ParentNode)
   }
 }
 
-function moveTeleportNode(_node: TeleportComponentNode, _parentEl: ParentNode, _anchor?: Node) {}
+function moveTeleportNode(node: TeleportComponentNode, parentEl: ParentNode, anchor?: Node) {
+  if (node._el) {
+    moveTo(parentEl, node._el, anchor)
+  }
+}
 
 function getTeleportNodeElement(node: TeleportComponentNode) {
   const r: NodeElementRange = {
@@ -84,4 +89,6 @@ function disconnectTeleportNode(node: TeleportComponentNode) {
   for (const child of node.children || []) {
     disconnect(child)
   }
+
+  node._el?.remove()
 }
