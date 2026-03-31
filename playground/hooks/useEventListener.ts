@@ -1,21 +1,12 @@
 import type { Fn } from '@0x-jerry/utils'
-import { onUnmounted, useWatch } from '@/index'
-import { type MaybeRef, unref } from '@/reactivity'
+import { onUnmounted, unref, useWatch, type MaybeRef } from '../../src'
 
-export function useEventListener(
-  target: MaybeRef<EventTarget>,
-  event: string,
-  listener: Fn,
-): void
+export function useEventListener(target: MaybeRef<EventTarget>, event: string, listener: Fn): void
 export function useEventListener(event: string, listener: Fn): void
 export function useEventListener(...args: unknown[]) {
   const normalizedParameters = args.length === 3 ? args : [window, ...args]
 
-  const [t, eventName, listenerFn] = normalizedParameters as [
-    MaybeRef<EventTarget>,
-    string,
-    Fn,
-  ]
+  const [t, eventName, listenerFn] = normalizedParameters as [MaybeRef<EventTarget>, string, Fn]
 
   useWatch(
     () => unref(t),
@@ -36,14 +27,6 @@ export function useEventListener(...args: unknown[]) {
 }
 
 interface EventTarget {
-  addEventListener(
-    type: string,
-    listener: Fn,
-    options?: boolean | AddEventListenerOptions,
-  ): void
-  removeEventListener(
-    type: string,
-    listener: Fn,
-    options?: boolean | EventListenerOptions,
-  ): void
+  addEventListener(type: string, listener: Fn, options?: boolean | AddEventListenerOptions): void
+  removeEventListener(type: string, listener: Fn, options?: boolean | EventListenerOptions): void
 }

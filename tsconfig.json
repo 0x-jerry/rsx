@@ -14,7 +14,8 @@
     "jsx": "preserve",
     "strict": true,
     "types": [
-      "vitest/globals"
+      "vitest/globals",
+      "vite/client"
     ]
   },
   "include": [

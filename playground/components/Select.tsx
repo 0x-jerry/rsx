@@ -7,7 +7,7 @@ import {
   ref,
   toBindingRefs,
   VMap,
-} from '@/index'
+} from '../../src'
 import styles from './Select.module.css'
 import { Tooltip, type TooltipInstance, TooltipTriggerType } from './Tooltip'
 import type { CommonProps } from './utils'
@@ -21,9 +21,7 @@ export interface OptionItem<T extends OptionValue> {
   label: string
 }
 
-export type SelectOptionComponent<T extends OptionValue> = MapItemComponent<
-  OptionItem<T>
->
+export type SelectOptionComponent<T extends OptionValue> = MapItemComponent<OptionItem<T>>
 
 export interface SelectProps<Value extends OptionValue> extends CommonProps {
   $value?: Value
@@ -43,10 +41,7 @@ function SelectImpl<T extends OptionValue>(props: DefineProps<SelectProps<T>>) {
         const OptionComponent = (props.Option ?? OptionImpl) as typeof Option
 
         return (
-          <div
-            class={styles.optionWrapper}
-            onClick={() => handleChange(itemProps.item)}
-          >
+          <div class={styles.optionWrapper} onClick={() => handleChange(itemProps.item)}>
             <OptionComponent {...toBindingRefs(itemProps)} />
           </div>
         )
@@ -74,8 +69,7 @@ function SelectImpl<T extends OptionValue>(props: DefineProps<SelectProps<T>>) {
 
 export const Select = defineComponent(SelectImpl)
 
-interface OptionProps<T extends OptionValue>
-  extends MapItemProps<OptionItem<T>> {}
+interface OptionProps<T extends OptionValue> extends MapItemProps<OptionItem<T>> {}
 
 function OptionImpl<T extends OptionValue>(props: OptionProps<T>) {
   return (

@@ -1,6 +1,12 @@
-import { onMounted, onUnmounted } from '@/hook'
-import { $, defineComponent, useExpose } from '@/index'
-import { defineNamedSlot, useSlot } from '@/Slot'
+import {
+  defineComponent,
+  useSlot,
+  $,
+  useExpose,
+  onMounted,
+  onUnmounted,
+  defineNamedSlot,
+} from '../../src'
 import { useClickOutside } from '../hooks/useClickOutside'
 import { useTimeout } from '../hooks/useTimeout'
 import { FloatingUI, type FloatingUIOption } from './FloatingUI'

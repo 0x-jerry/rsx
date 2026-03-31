@@ -1,5 +1,4 @@
-import { dc, VIf } from '@/index'
-import { defineNamedSlot, useSlot } from '@/Slot'
+import { dc, defineNamedSlot, useSlot, VIf } from '../../src'
 
 export interface DemoSectionProps {
   _?: string

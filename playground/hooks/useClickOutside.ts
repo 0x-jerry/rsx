@@ -1,5 +1,5 @@
 import { type Arrayable, ensureArray } from '@0x-jerry/utils'
-import { type MaybeRef, unref } from '@/reactivity'
+import { type MaybeRef, unref } from '../../src'
 import { useEventListener } from './useEventListener'
 
 export type ClickOutsideCallback = () => void
@@ -14,12 +14,7 @@ export function useClickOutside(
       return
     }
 
-    if (
-      isInsideElement(
-        event.target as HTMLElement,
-        ensureArray(target).map(unref),
-      )
-    ) {
+    if (isInsideElement(event.target as HTMLElement, ensureArray(target).map(unref))) {
       return
     }
 

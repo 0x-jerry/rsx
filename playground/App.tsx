@@ -1,4 +1,4 @@
-import { ref } from '@/index'
+import { ref } from '../src'
 import { Button } from './components/Button'
 import { DemoSection } from './components/DemoSection'
 import { Input } from './components/Input'
@@ -70,8 +70,7 @@ export const App = () => {
               <span>{inputState.text}</span>
               <Button
                 onClick={() => {
-                  inputState.num.value = inputState.text
-                    .value as unknown as number
+                  inputState.num.value = inputState.text.value as unknown as number
                 }}
               >
                 Apply to InputNumber

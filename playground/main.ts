@@ -2,6 +2,6 @@ import { App } from './App'
 import './global.scss'
 import 'uno.css'
 
-import { mountApp } from '@/index'
+import { mountApp } from '../src'
 
-mountApp(App, '#app')
+mountApp(App, document.querySelector('#app')!)

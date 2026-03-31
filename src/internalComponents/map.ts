@@ -6,7 +6,7 @@ import {
   type ExposedFunctionalComponent,
   type FunctionalComponent,
 } from '../defineComponent'
-import { insertBefore, moveTo } from '../nodeOp'
+import { moveTo } from '../nodeOp'
 import { computed } from '../reactivity'
 import {
   ComponentContextEventNameMap,
@@ -51,7 +51,7 @@ interface MapComponentNode extends ComponentNode {
   _renderedNodes?: ComponentNode[]
 }
 
-export const VMap = defineComponent(<T>() => {})
+export const VMap = defineComponent(<T>(_props: MapComponentProps<T>) => {})
 
 defineComponentName(VMap, 'VMap')
 
@@ -272,7 +272,7 @@ function moveMapNode(node: MapComponentNode, parentEl: ParentNode, anchor?: Node
   moveTo(parentEl, currentAnchor, anchor)
 
   for (const child of node._renderedNodes || []) {
-    moveNode(child, parentEl, currentAnchor)
+    moveNode(child, parentEl, anchor)
   }
 }
 
@@ -291,15 +291,7 @@ function getMapNodeElement(node: MapComponentNode): NodeElementRange {
 // --------------
 
 function getLastElement(node: ChildComponentNode) {
-  const r = getNodeElement(node)
-
-  if (r?.end) {
-    if (!r.end.parentElement) {
-      throw new Error(`Node not attach to DOM`)
-    }
-
-    return r.end
-  }
+  return getNodeElement(node)?.end
 }
 
 function appendItemToMap<K, V>(map: Map<K, V[]>, key: K, value: V) {

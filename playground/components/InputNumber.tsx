@@ -1,4 +1,4 @@
-import { $, dc, ref, toBindingRefs, useWatch } from '@/index'
+import { $, dc, ref, toBindingRefs, useWatch } from '../../src'
 import styles from './Input.module.css'
 import type { CommonProps } from './utils'
 
@@ -27,13 +27,7 @@ export const InputNumber = dc<InputNumberProps>((props) => {
   )
 
   return (
-    <input
-      {...rest}
-      class={classes}
-      value={rawValue}
-      onInput={handleInput}
-      onBlur={handleBlur}
-    />
+    <input {...rest} class={classes} value={rawValue} onInput={handleInput} onBlur={handleBlur} />
   )
 
   function handleBlur(_event: Event) {

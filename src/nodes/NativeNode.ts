@@ -1,7 +1,7 @@
-import { AnyProps } from '../props'
 import { createNativeElement, createTextElement } from '../node'
-import { AnyNode, AnyNodeSymbol, AnyNodeType, isAnyNode, NodeElementRange } from './node'
+import { type AnyNode, AnyNodeSymbol, AnyNodeType, isAnyNode, type NodeElementRange } from './node'
 import { moveTo } from '../nodeOp'
+import type { AnyProps } from '../props'
 
 export interface NativeNodeContext {
   el: HTMLElement

@@ -1,6 +1,4 @@
-import { defineComponent } from '@/defineComponent'
-import { ref } from '@/reactivity'
-import { defineNamedSlot, useSlot } from '@/Slot'
+import { defineComponent, useSlot, defineNamedSlot, ref } from '../../src'
 import { useInterval } from '../hooks/useInterval'
 
 const AImpl = defineComponent((_, children) => {

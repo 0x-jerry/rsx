@@ -1,4 +1,4 @@
-import { $, dc, toBindingRefs } from '@/index'
+import { $, dc, toBindingRefs } from '../../src'
 import styles from './Input.module.css'
 import type { CommonProps } from './utils'
 
@@ -11,14 +11,7 @@ export const Input = dc<InputProps>((props) => {
 
   const classes = $(() => [styles.input, _class?.value])
 
-  return (
-    <input
-      {...rest}
-      class={classes}
-      value={value}
-      onInput={handleChangeEvent}
-    />
-  )
+  return <input {...rest} class={classes} value={value} onInput={handleChangeEvent} />
 
   function handleChangeEvent(event: Event) {
     const el = event.target as HTMLInputElement

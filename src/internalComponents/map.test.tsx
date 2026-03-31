@@ -1075,7 +1075,7 @@ describe('map with map', () => {
     mountTestApp(App)
     await nextTick()
 
-    expect(lifecycle).eql(['bm-1', 'm-1', 'bm-2', 'm-2', 'bm-3', 'm-3', 'um-2', 'bm-4', 'm-4'])
+    expect(lifecycle).eql(['m-1', 'm-2', 'm-3', 'um-2', 'm-4'])
   })
 })
 

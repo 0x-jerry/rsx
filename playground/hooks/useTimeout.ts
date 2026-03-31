@@ -1,15 +1,10 @@
-import { onUnmounted } from '@/hook'
-import { type MaybeRef, unref } from '@/reactivity'
+import { onUnmounted, unref, type MaybeRef } from '../../src'
 
 export interface UseTimeoutOption {
   immediate?: boolean
 }
 
-export function useTimeout(
-  cb: () => void,
-  ts: MaybeRef<number> = 0,
-  opt?: UseTimeoutOption,
-) {
+export function useTimeout(cb: () => void, ts: MaybeRef<number> = 0, opt?: UseTimeoutOption) {
   let handler: number = 0
 
   if (opt?.immediate) {
