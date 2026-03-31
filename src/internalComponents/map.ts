@@ -134,7 +134,7 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
         const anchor = lastFinishedAnchor?.nextSibling
 
         if (node._el?.parentElement) {
-          moveNode(n, node._el.parentElement, anchor)
+          moveNode(n, node._el.parentElement, anchor!)
         }
 
         lastFinishedAnchor = getLastElement(n) || lastFinishedAnchor
@@ -182,7 +182,7 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
           const anchor = lastFinishedAnchor?.nextSibling
 
           if (node._el?.parentElement) {
-            moveNode(n2, node._el.parentElement, anchor)
+            moveNode(n2, node._el.parentElement, anchor!)
           }
           if (n2._r) {
             n2._r = false
