@@ -2,7 +2,7 @@
 
 exports[`Slot > get slot content > html 1`] = `
 <div
-  id="app"
+  id="App"
 >
   <div>
     <div
@@ -12,8 +12,6 @@ exports[`Slot > get slot content > html 1`] = `
         class="title"
       >
         title
-        <!--fragment-->
-        <!--fragment-->
       </div>
       <span>
         -
@@ -22,8 +20,6 @@ exports[`Slot > get slot content > html 1`] = `
         class="content"
       >
         content
-        <!--fragment-->
-        <!--fragment-->
       </div>
       <span>
         1

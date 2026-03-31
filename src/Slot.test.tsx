@@ -1,9 +1,8 @@
 import { defineComponent } from './defineComponent'
-import { $, nextTick, ref } from './reactivity'
 import { defineNamedSlot, useSlot } from './Slot'
 import { mountTestApp } from './test'
 
-describe.skip('Slot', () => {
+describe('Slot', () => {
   it('get slot content', () => {
     const AImpl = defineComponent((_, children) => {
       const Title = useSlot(A.Title)
@@ -47,16 +46,14 @@ describe.skip('Slot', () => {
     expect(el).toMatchSnapshot('html')
   })
 
-  it('pass data through slot', async () => {
-    const count = ref(0)
-
-    const AImpl = defineComponent((_, children) => {
+  it('multiple instance', async () => {
+    const AImpl = defineComponent((_props, children) => {
       const Title = useSlot(A.Title)
 
       return (
         <div class="A">
           <div class="title">
-            <Title count={count} />
+            <Title />
           </div>
           {children}
         </div>
@@ -64,7 +61,7 @@ describe.skip('Slot', () => {
     })
 
     const A = Object.assign(AImpl, {
-      Title: defineNamedSlot<{ count: number }>('A.Title'),
+      Title: defineNamedSlot('A.Title'),
     })
 
     const App = () => {
@@ -72,52 +69,11 @@ describe.skip('Slot', () => {
         <div>
           <A>
             <span>1</span>
-            <A.Title>title {A.Title.count}</A.Title>
+            <A.Title>title 1</A.Title>
           </A>
-        </div>
-      )
-    }
-
-    const rootEl = mountTestApp(App)
-
-    let text = rootEl.querySelector('.title')?.textContent
-    expect(text).toBe('title 0')
-
-    count.value = 1
-    await nextTick()
-
-    text = rootEl.querySelector('.title')?.textContent
-    expect(text).toBe('title 1')
-  })
-
-  it('multiple instance', async () => {
-    const AImpl = defineComponent<{ count: number }>((props, children) => {
-      const Title = useSlot(A.Title)
-
-      return (
-        <div class="A">
-          <div class="title">
-            <Title count={$(() => props.count)} />
-          </div>
-          {children}
-        </div>
-      )
-    })
-
-    const A = Object.assign(AImpl, {
-      Title: defineNamedSlot<{ count: number }>('A.Title'),
-    })
-
-    const App = () => {
-      return (
-        <div>
-          <A count={1}>
+          <A>
             <span>1</span>
-            <A.Title>title {A.Title.count}</A.Title>
-          </A>
-          <A count={2}>
-            <span>1</span>
-            <A.Title>title {A.Title.count}</A.Title>
+            <A.Title>title 2</A.Title>
           </A>
         </div>
       )
@@ -134,13 +90,13 @@ describe.skip('Slot', () => {
   })
 
   it('sub child of a component', async () => {
-    const AImpl = defineComponent<{ count: number }>((props, children) => {
+    const AImpl = defineComponent((props, children) => {
       const Title = useSlot(A.Title)
 
       return (
         <div class="A">
           <div class="title">
-            <Title count={$(() => props.count)} />
+            <Title />
           </div>
           {children}
         </div>
@@ -148,7 +104,7 @@ describe.skip('Slot', () => {
     })
 
     const A = Object.assign(AImpl, {
-      Title: defineNamedSlot<{ count: number }>('A.Title'),
+      Title: defineNamedSlot('A.Title'),
     })
 
     const B = defineComponent((_, children) => {
@@ -158,15 +114,15 @@ describe.skip('Slot', () => {
     const App = () => {
       return (
         <div>
-          <A count={1}>
+          <A>
             <span>1</span>
             <A.Title>
-              <B>title {A.Title.count}</B>
+              <B>title 1</B>
             </A.Title>
           </A>
-          <A count={2}>
-            <span>1</span>
-            <A.Title>title {A.Title.count}</A.Title>
+          <A>
+            <span>2</span>
+            <A.Title>title 2</A.Title>
           </A>
         </div>
       )
@@ -182,17 +138,17 @@ describe.skip('Slot', () => {
     expect(text).eql(['title 1', 'title 2'])
   })
 
-  it.skip('multiple slot instance', async () => {
+  it('multiple slot instance', async () => {
     const AImpl = defineComponent<{ count: number }>((props, children) => {
       const Title = useSlot(A.Title)
 
       return (
         <div class="A">
           <div class="title">
-            <Title count={$(() => props.count)} />
+            <Title />
           </div>
           <div class="title">
-            <Title count={$(() => props.count + 1)} />
+            <Title />
           </div>
           {children}
         </div>
@@ -200,7 +156,7 @@ describe.skip('Slot', () => {
     })
 
     const A = Object.assign(AImpl, {
-      Title: defineNamedSlot<{ count: number }>('A.Title'),
+      Title: defineNamedSlot('A.Title'),
     })
 
     const B = defineComponent((_, children) => {
@@ -213,7 +169,7 @@ describe.skip('Slot', () => {
           <A count={1}>
             <span>1</span>
             <A.Title>
-              <B>title {A.Title.count}</B>
+              <B>title</B>
             </A.Title>
           </A>
         </div>
@@ -227,6 +183,6 @@ describe.skip('Slot', () => {
       .values()
       .map((item) => item.textContent)
       .toArray()
-    expect(text).eql(['title 1', 'title 2'])
+    expect(text).eql(['title', 'title'])
   })
 })

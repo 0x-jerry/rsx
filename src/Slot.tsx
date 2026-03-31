@@ -1,27 +1,13 @@
-import { remove } from '@0x-jerry/utils'
 import type { Ref } from '@vue/reactivity'
-import {
-  Fragment as _Fragment,
-  $,
-  type AnyProps,
-  defineComponent,
-  provide,
-  toBindingRefs,
-  useContext,
-  useRawChildren,
-} from '.'
+import { type AnyProps, defineComponent, toBindingRefs, useRawChildren, isComponentNode } from '.'
 import type { FunctionalComponent } from './defineComponent'
 import { defineComponentName } from './test'
 
 export type Slot = FunctionalComponent
 
-const SlotDataKey = '__slot_data'
-
-const SlotImpl = defineComponent((props, children) => {
-  provide(SlotDataKey, props)
-
-  return _Fragment(props, children)
-})
+const SlotImpl = () => {
+  return <></>
+}
 
 /**
  * Filter and remove raw children by Component
@@ -34,72 +20,28 @@ const SlotImpl = defineComponent((props, children) => {
 function useRawChildrenBySlot(SlotComponent: Slot) {
   const children = useRawChildren()
 
-  const Contents = remove(
-    children,
-    (child) => isComponentNode(child) && child.type === SlotComponent,
-  )
+  const Contents = children
+    .filter((child) => isComponentNode(child) && child.type === SlotComponent)
+    .flatMap((n) => n.children)
+    .filter((n) => n != null)
 
-  return Contents as ComponentNode[]
+  return Contents
 }
 
-export function defineNamedSlot<T extends AnyProps = AnyProps>(name?: string) {
+export function defineNamedSlot(name?: string) {
   const Component = SlotImpl.bind({})
 
   if (name) {
     defineComponentName(Component, name)
   }
 
-  return defineSlotProps<T>(Component)
+  return Component as Slot
 }
 
-type SlotWithData<T extends AnyProps> = Slot & { [key in keyof T]: Ref<T[key]> }
-
-function defineSlotProps<T extends AnyProps>(Slot: Slot) {
-  const createProp = (key: string) => {
-    let currentSlotCtx: DNodeContext | null = null
-    return $(() => {
-      if (!currentSlotCtx) {
-        currentSlotCtx = resolveContext()
-      }
-
-      const data = (currentSlotCtx.ex?.[SlotDataKey] as any)?.[key]
-
-      return data
-    })
-  }
-
-  const ProxiedSlot = new Proxy(Slot, {
-    get(_target, p, _receiver) {
-      const key = p as string
-
-      return createProp(key)
-    },
-  })
-
-  return ProxiedSlot as SlotWithData<T>
-
-  function resolveContext() {
-    let ctx: DNodeContext | undefined | null = useContext()
-
-    while (ctx) {
-      if (ctx._node?.type === ProxiedSlot) {
-        return ctx
-      }
-      ctx = ctx.parent
-    }
-
-    throw Error(`Slot data should only used inside the corelative Slot instance.`)
-  }
-}
-
-export function useSlot<T extends AnyProps>(SlotComponent: SlotWithData<T>) {
+export function useSlot<T extends AnyProps>(SlotComponent: Slot) {
   const rawChildren = useRawChildrenBySlot(SlotComponent)
 
   const Slot = defineComponent<T>((props) => {
-    rawChildren.forEach((child) => {
-      Object.assign(child.props, toBindingRefs(props))
-    })
-
     return <>{rawChildren}</>
   })
 

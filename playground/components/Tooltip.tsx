@@ -1,3 +1,4 @@
+import { shallowRef } from '@vue/reactivity'
 import {
   defineComponent,
   useSlot,
@@ -37,6 +38,9 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
     fitWidth: props.fitWidth,
   }
 
+  const refEl = shallowRef()
+  const contentEl = shallowRef()
+
   const hideHandler = useTimeout(
     fui.hide,
     $(() => props.delay ?? 100),
@@ -45,7 +49,7 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
   useExpose(fui)
 
   onMounted(async () => {
-    fui.init(Reference, TooltipContent)
+    fui.init(refEl.value, contentEl.value)
   })
 
   onUnmounted(() => {
@@ -54,6 +58,7 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
 
   const Reference = (
     <div
+      ref={refEl}
       class={styles.reference}
       aria-describedby="tooltip"
       onClick={toggleTooltip}
@@ -66,6 +71,7 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
 
   const TooltipContent = (
     <div
+      ref={contentEl}
       class={styles.tooltip}
       role="tooltip"
       onMouseenter={showTooltip}
@@ -75,7 +81,7 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
     </div>
   )
 
-  useClickOutside([TooltipContent, Reference], () => {
+  useClickOutside([refEl, contentEl], () => {
     fui.hide()
   })
 

@@ -1,19 +1,12 @@
-import { defineComponent, useSlot, defineNamedSlot, ref } from '../../src'
-import { useInterval } from '../hooks/useInterval'
+import { defineComponent, useSlot, defineNamedSlot } from '../../src'
 
 const AImpl = defineComponent((_, children) => {
   const Title = useSlot(A.Title)
 
-  const titleCount = ref(0)
-
-  useInterval(() => {
-    titleCount.value++
-  }, 1000)
-
   return (
     <div class="A">
       <div class="title">
-        <Title count={titleCount}></Title>
+        <Title></Title>
         <div>----</div>
         {children}
       </div>
@@ -22,7 +15,7 @@ const AImpl = defineComponent((_, children) => {
 })
 
 const A = Object.assign(AImpl, {
-  Title: defineNamedSlot<{ count: number }>('A.Title'),
+  Title: defineNamedSlot('A.Title'),
   Content: defineNamedSlot('A.Content'),
 })
 
@@ -31,10 +24,7 @@ export const TestSlotApp = () => {
     <div>
       <A>
         <span>1</span>
-        <A.Title>
-          title count:
-          {A.Title.count}
-        </A.Title>
+        <A.Title>title content</A.Title>
         <span>2</span>
         <A.Content>content</A.Content>
         <span>3</span>
