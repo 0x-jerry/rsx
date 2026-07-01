@@ -1,25 +1,24 @@
 import {
   createNodeContext,
   appendToCurrentContext,
-  setCurrentContext,
-  popCurrentContext,
+  runWithContext,
 } from './ComponentContext'
 import { normalizeProps } from '../props'
 import { getOps } from './ops'
 import type { ComponentNode } from '../internalComponents'
 
-export function connectComponentNode(node: ComponentNode, parentEl?: ParentNode) {
+export function connectComponentNode(node: ComponentNode, parentEl?: ParentNode, anchor?: Node | null) {
   const ctx = createNodeContext(node)
   ctx.props = normalizeProps(node.type, node.props)
   node.context = ctx
 
   appendToCurrentContext(ctx)
 
-  setCurrentContext(ctx)
-
-  getOps(node)?.connect(node, parentEl)
-
-  popCurrentContext()
+  // Use runWithContext so a throw inside the component setup can never corrupt
+  // the context stack — finally always pops.
+  runWithContext(() => {
+    getOps(node)?.connect(node, parentEl, anchor)
+  }, ctx)
 }
 
 export function disconnectComponentNode(node: ComponentNode) {

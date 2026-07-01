@@ -30,15 +30,22 @@ interface TeleportComponentNode extends ComponentNode {
   _el?: Comment
 }
 
-function connectTeleportNode(node: TeleportComponentNode, parentEl?: ParentNode) {
+function connectTeleportNode(node: TeleportComponentNode, parentEl?: ParentNode, anchor?: Node | null) {
   const ctx = node.context!
   const props: TeleportProps = ctx.props!
 
-  const anchor = document.createComment('Teleport')
-  node._el = anchor
-  parentEl?.appendChild(anchor)
+  const placeholder = document.createComment('Teleport')
+  node._el = placeholder
+  parentEl?.insertBefore(placeholder, anchor ?? null)
 
-  init()
+  // Children are first connected into a detached fragment; the first
+  // `update()` (run on mount, and again whenever `to` changes) moves them to
+  // the real target. Connect always into the same throwaway fragment — child
+  // contexts/refs stay valid across the subsequent `moveNode`.
+  const staging = document.createDocumentFragment()
+  for (const child of node.children || []) {
+    connect(child, staging)
+  }
 
   onMounted(() => update())
 
@@ -50,22 +57,11 @@ function connectTeleportNode(node: TeleportComponentNode, parentEl?: ParentNode)
     },
   )
 
-  function init() {
-    const rootEl = document.createDocumentFragment()
-
-    for (const child of node.children || []) {
-      connect(child, rootEl)
-    }
-
-    return rootEl
-  }
-
   function update() {
-    const rootEl = props.to ? document.querySelector(props.to) : undefined
-    const targetEl = rootEl || document.createDocumentFragment()
+    const target = (props.to && document.querySelector(props.to)) || document.createDocumentFragment()
 
     for (const child of node.children || []) {
-      moveNode(child, targetEl)
+      moveNode(child, target)
     }
   }
 }

@@ -40,6 +40,7 @@ export function isNativeNode(o: unknown): o is NativeNode {
 export function connectNativeNode(
   node: NativeNode,
   parentEl?: ParentNode,
+  anchor?: Node | null,
 ): HTMLElement | Text | undefined {
   const { el, cleanup } =
     node.type === TEXT_NODE_TYPE
@@ -51,7 +52,9 @@ export function connectNativeNode(
     cleanup,
   }
 
-  parentEl?.appendChild(el)
+  // insertBefore(node, null) is equivalent to appendChild, so when no anchor is
+  // given the behaviour is unchanged.
+  parentEl?.insertBefore(el, anchor ?? null)
 
   return el
 }

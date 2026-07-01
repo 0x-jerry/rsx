@@ -67,10 +67,10 @@ function isMapComponent(type: FunctionalComponent) {
   return type === VMap
 }
 
-function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
+function connectMapNode(node: MapComponentNode, parentEl?: ParentNode, anchor?: Node | null) {
   const ctx = node.context!
   node._el = document.createComment('Map')
-  parentEl?.append(node._el)
+  parentEl?.insertBefore(node._el, anchor ?? null)
 
   const props = (ctx.props || {}) as MapComponentProps<any>
 
@@ -151,6 +151,11 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
       const s1 = i
       const s2 = i
 
+      // `newSequence[k]` corresponds to c2[s2 + k]:
+      //   - reused item -> its relative old index (j - s1), >= 0
+      //   - new item     -> -1 (sentinel: "no old match")
+      // Using -1 instead of 0 disambiguates "first reused old item" from "new item",
+      // which Vue3's original `arrI !== 0` LIS check cannot do when reused oldIdx is 0.
       const newSequence: number[] = []
       const oldToNew = new Map<number, number>()
 
@@ -166,6 +171,8 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
         if (oldIdx !== undefined) {
           newSequence.push(oldIdx)
           oldToNew.set(oldIdx, j)
+        } else {
+          newSequence.push(-1)
         }
       }
 
@@ -320,17 +327,21 @@ function popItemFromMap<K, V>(map: Map<K, V[]>, key: K) {
 }
 
 // https://en.wikipedia.org/wiki/Longest_increasing_subsequence
-function getSequence(arr: number[]): number[] {
+//
+// Sentinel convention: `arr[i] === -1` means "no old match (new item)" and is
+// excluded from the LIS. All other values are reused-old-index (>= 0) and
+// participate in the LIS.
+export function getSequence(arr: number[]): number[] {
   const p = arr.slice()
-  const result = [0]
+  const result: number[] = []
   let i, j, u, v, c
   const len = arr.length
   for (i = 0; i < len; i++) {
     const arrI = arr[i]
-    if (arrI !== 0) {
+    if (arrI !== -1) {
       j = result[result.length - 1]
-      if (arr[j] < arrI) {
-        p[i] = j
+      if (j === undefined || arr[j] < arrI) {
+        p[i] = j === undefined ? -1 : j
         result.push(i)
         continue
       }

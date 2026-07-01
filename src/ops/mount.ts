@@ -20,9 +20,9 @@ export function mount(node: ComponentNode, parentEl?: ParentNode): undefined {
   triggerEvent(ComponentContextEventNameMap.mounted, node.context)
 }
 
-export function connect(node: AnyNode, parentEl?: ParentNode) {
+export function connect(node: AnyNode, parentEl?: ParentNode, anchor?: Node | null) {
   if (isNativeNode(node)) {
-    const el = connectNativeNode(node, parentEl)
+    const el = connectNativeNode(node, parentEl, anchor)
 
     if (el instanceof HTMLElement) {
       for (const child of node.children || []) {
@@ -32,7 +32,7 @@ export function connect(node: AnyNode, parentEl?: ParentNode) {
   }
 
   if (isComponentNode(node)) {
-    connectComponentNode(node, parentEl)
+    connectComponentNode(node, parentEl, anchor)
   }
 }
 

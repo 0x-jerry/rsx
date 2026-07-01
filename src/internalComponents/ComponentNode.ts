@@ -46,7 +46,7 @@ export const ComponentOps: InternalComponentOps = {
   getElementRange: _getComponentNodeElement,
 }
 
-function _connectComponentNode(node: ComponentNode, parentEl?: ParentNode) {
+function _connectComponentNode(node: ComponentNode, parentEl?: ParentNode, anchor?: Node | null) {
   const ctx = node.context!
 
   const componentRoot = node.type(ctx.props, node.children)
@@ -61,7 +61,7 @@ function _connectComponentNode(node: ComponentNode, parentEl?: ParentNode) {
     ctx?.parent?.children?.delete(ctx)
   })
 
-  connect(componentRoot, parentEl)
+  connect(componentRoot, parentEl, anchor)
 }
 
 function _disconnectComponentNode(node: ComponentNode) {

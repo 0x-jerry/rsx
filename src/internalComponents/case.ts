@@ -46,12 +46,12 @@ interface CaseComponentNode extends ComponentNode {
   _renderedNode?: ComponentNode | null
 }
 
-function connectCaseNode(node: CaseComponentNode, parentEl?: ParentNode) {
+function connectCaseNode(node: CaseComponentNode, parentEl?: ParentNode, anchor?: Node | null) {
   const ctx = node.context!
   const props = (ctx.props || {}) as CaseComponentProps<any>
 
   node._el = document.createComment('Case')
-  parentEl?.appendChild(node._el)
+  parentEl?.insertBefore(node._el, anchor ?? null)
 
   const ChildComponent = computed(() => {
     if (Array.isArray(props.cases)) {

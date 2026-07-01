@@ -6,6 +6,8 @@ import { InputNumber } from './components/InputNumber'
 import { Select } from './components/Select'
 import { TestSlotApp } from './components/TestSlot'
 import { Tooltip } from './components/Tooltip'
+import { Counter } from './Counter'
+import { TodoApp } from './Todo'
 
 export const App = () => {
   const inputState = {
@@ -34,6 +36,14 @@ export const App = () => {
       <h2>Components</h2>
 
       <div class="flex flex-col gap-1">
+        <DemoSection>
+          <DemoSection.Title>Counter</DemoSection.Title>
+          <Counter />
+        </DemoSection>
+        <DemoSection>
+          <DemoSection.Title>TODO</DemoSection.Title>
+          <TodoApp />
+        </DemoSection>
         <DemoSection>
           <DemoSection.Title>Button</DemoSection.Title>
           <DemoSection.Description>按钮组件预览</DemoSection.Description>

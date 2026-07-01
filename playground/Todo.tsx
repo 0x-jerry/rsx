@@ -34,7 +34,7 @@ export const TodoApp = dc(() => {
   })
 
   const Filter = (
-    <div className="flex">
+    <div class="flex">
       <VMap
         list={['all', 'completed', 'uncompleted']}
         render={({ item }) => (

@@ -24,9 +24,11 @@ function isFragmentComponent(type: FunctionalComponent) {
   return type === Fragment
 }
 
-function connectFragmentNode(node: ComponentNode, parentEl?: ParentNode) {
+function connectFragmentNode(node: ComponentNode, parentEl?: ParentNode, anchor?: Node | null) {
+  // Each child is inserted before the same `anchor`, which keeps them in
+  // order and ahead of the anchor node.
   for (const child of node.children || []) {
-    connect(child, parentEl)
+    connect(child, parentEl, anchor)
   }
 }
 

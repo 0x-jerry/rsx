@@ -62,7 +62,7 @@ export function getNodeElement(node?: AnyNode): Optional<NodeElementRange> {
 export interface InternalComponentOps {
   is: (type: FunctionalComponent) => boolean
 
-  connect: (node: ComponentNode, parentEl?: ParentNode) => void
+  connect: (node: ComponentNode, parentEl?: ParentNode, anchor?: Node | null) => void
   disconnect: (node: ComponentNode) => void
   move: (node: ComponentNode, parentEl: ParentNode, anchor?: Node) => void
   getElementRange: (node: ComponentNode) => Optional<NodeElementRange>

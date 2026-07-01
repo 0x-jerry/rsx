@@ -85,8 +85,6 @@ function defineContext<T>() {
 
       try {
         return fn()
-      } catch (error) {
-        throw error
       } finally {
         actions.pop()
       }
