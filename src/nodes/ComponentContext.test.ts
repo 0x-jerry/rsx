@@ -1,11 +1,11 @@
 import { EventEmitter } from '@0x-jerry/utils'
 import {
   appendToCurrentContext,
-  ComponentContext,
   getCurrentContext,
   popCurrentContext,
   runWithContext,
   setCurrentContext,
+  type ComponentContext,
 } from './ComponentContext'
 
 function createFakeContext(name: string) {

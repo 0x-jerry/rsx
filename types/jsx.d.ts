@@ -1320,7 +1320,7 @@ type EventHandlers<E> = {
     : (payload: E[K]) => void
 }
 
-import { MaybeRef, type ToMaybeRef } from '@/index'
+import { MaybeRef, type ToMaybeRef } from '../src'
 
 export type ReservedProps = {
   $?: any

@@ -1,6 +1,6 @@
 import { isFn } from '@0x-jerry/utils'
 import { ReactiveFlags, type Ref, unref } from '@vue/reactivity'
-import type { AnyProps } from '@/props'
+import type { AnyProps } from '../props'
 import type { UnRef } from './types'
 
 export { isRef, unref } from '@vue/reactivity'

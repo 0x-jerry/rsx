@@ -28,7 +28,7 @@ export function isAnyNode(node: unknown): node is AnyNode {
 }
 
 /**
- * Move node elements to anchor's before, is anchor is null, append to parentEl
+ * Move node elements to anchor's before, if anchor is null, append to parentEl
  *
  * @param node
  * @param anchor

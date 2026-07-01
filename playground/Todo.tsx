@@ -1,4 +1,4 @@
-import { $, computed, dc, reactive, VMap } from '@/index'
+import { $, computed, dc, reactive, VMap } from '../src'
 
 interface TodoOption {
   id: string

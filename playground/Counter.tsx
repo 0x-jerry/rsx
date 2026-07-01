@@ -1,4 +1,4 @@
-import { ref } from '@/reactivity'
+import { ref } from '../src'
 
 export const Counter = () => {
   const count = ref(0)

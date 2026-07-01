@@ -27,12 +27,8 @@ export function insertBefore(anchor: Node, node: Node) {
   }
 }
 
-export function moveChildren(parent: ParentNode, children?: unknown[], anchor?: Node) {
-  throw new Error('moveChildren is not implemented')
-}
-
 export function updateEl(el: HTMLElement, key: string, value: any, oldValue?: any) {
-  if (/^on/.test(key)) {
+  if (key.startsWith('on')) {
     const eventName = key.slice(2).toLowerCase()
 
     if (oldValue) {
