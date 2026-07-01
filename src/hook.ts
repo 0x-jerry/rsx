@@ -55,7 +55,7 @@ export function inject<T>(key: string | symbol | InjectKey<T>): T | undefined {
   let node = ctx.parent
 
   while (node) {
-    if (node.ex?.[key]) {
+    if (node.ex && key in node.ex) {
       return node.ex[key] as T
     }
 

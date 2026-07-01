@@ -154,14 +154,16 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode) {
       const newSequence: number[] = []
       const oldToNew = new Map<number, number>()
 
-      const cc1 = c1.slice(s1, e1 + 1)
+      const cc1IndexMap = new Map<ChildComponentNode, number>()
+      for (let j = s1; j <= e1; j++) {
+        cc1IndexMap.set(c1[j], j - s1)
+      }
 
-      // todo, move check
       for (let j = s2; j <= e2; j++) {
         const element = c2[j]
-        const oldIdx = cc1.indexOf(element)
+        const oldIdx = cc1IndexMap.get(element)
 
-        if (oldIdx !== -1) {
+        if (oldIdx !== undefined) {
           newSequence.push(oldIdx)
           oldToNew.set(oldIdx, j)
         }

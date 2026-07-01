@@ -1,7 +1,7 @@
 import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import { type ClassValue, clsx } from 'clsx'
 import { updateEl } from './nodeOp'
-import { type AnyProps, normalizeProps } from './props'
+import { type AnyProps, normalizeProps, RAW_PROPS_KEY } from './props'
 import { effect, isRef, unref } from './reactivity'
 
 export function createNativeElement(type: string, props?: AnyProps) {
@@ -9,7 +9,9 @@ export function createNativeElement(type: string, props?: AnyProps) {
 
   const { ref, ...otherProps } = props || {}
 
-  const cleanup = bindingProperties(el, normalizeProps(type, otherProps))
+  const normProps = normalizeProps(type, otherProps)
+
+  const cleanup = bindingProperties(el, normProps)
 
   // Respect `ref` prop
   if (isRef(ref)) {
@@ -26,25 +28,25 @@ function bindingProperties(el: HTMLElement, props: AnyProps) {
   const effects: ReactiveEffectRunner[] = []
   const previousProps = new Map()
 
-  for (const key in props) {
-    const runner = effect(() => {
-      const value = convertAttrValue(key, props[key])
+  const _raw: AnyProps = (props as any)[RAW_PROPS_KEY] || props
 
-      const old = previousProps.get(key)
+  for (const key in _raw) {
+    if (isRef(_raw[key])) {
+      const runner = effect(() => {
+        const value = convertAttrValue(key, props[key])
 
-      if (value !== old) {
-        updateEl(el, key, value, old)
-        previousProps.set(key, value)
-      }
-    })
+        const old = previousProps.get(key)
 
-    // stop it when don't have active deps
-    const hasDeps = 'deps' in runner.effect && runner.effect.deps
-    if (hasDeps) {
+        if (value !== old) {
+          updateEl(el, key, value, old)
+          previousProps.set(key, value)
+        }
+      })
+
       effects.push(runner)
     } else {
-      stop(runner)
-      previousProps.delete(key)
+      const value = convertAttrValue(key, _raw[key])
+      updateEl(el, key, value)
     }
   }
 
@@ -62,7 +64,7 @@ function convertAttrValue(attr: string, value: unknown) {
 }
 
 export function createTextElement(content: unknown) {
-  const el = document.createTextNode('') as any as HTMLElement
+  const el = document.createTextNode('')
 
   let cleanup
 

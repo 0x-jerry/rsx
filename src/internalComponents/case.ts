@@ -71,6 +71,10 @@ function connectCaseNode(node: CaseComponentNode, parentEl?: ParentNode) {
     const Component = ChildComponent.value
 
     if (node._renderedNode) {
+      if (node._renderedNode.type === Component) {
+        return
+      }
+
       unmount(node._renderedNode)
       node._renderedNode = null
     }

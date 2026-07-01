@@ -35,10 +35,14 @@ export type DefineProps<T extends {}> = Merge<CalcProps<T>, { [key in string]: a
 
 export type AnyProps = Record<string, any>
 
+export const RAW_PROPS_KEY = Symbol('raw_props')
+
 export function normalizeProps(type: string | FunctionalComponent, props?: AnyProps): AnyProps {
   const _raw: AnyProps = {}
 
   if (!props) return _raw
+
+  let hasRefs = false
 
   for (const key in props) {
     if (key.startsWith('__')) {
@@ -51,6 +55,7 @@ export function normalizeProps(type: string | FunctionalComponent, props?: AnyPr
       // Skip overridden event
       if (!_raw[key]) {
         _raw[key] = value
+        if (isRef(value)) hasRefs = true
       }
 
       continue
@@ -60,7 +65,10 @@ export function normalizeProps(type: string | FunctionalComponent, props?: AnyPr
       const newProps = isString(type) ? transformNativeBindingRef(type, value, props) : {}
 
       // todo, warning when key is duplicated
-      Object.assign(_raw, newProps)
+      for (const k in newProps) {
+        _raw[k] = newProps[k]
+        if (isRef(newProps[k])) hasRefs = true
+      }
       continue
     }
 
@@ -69,6 +77,7 @@ export function normalizeProps(type: string | FunctionalComponent, props?: AnyPr
     // todo, support modifier
     const [name, _modifier] = key.slice(1).split(':')
     _raw[camelCase(name)] = value
+    if (isRef(value)) hasRefs = true
 
     if (isRef(value)) {
       const evtKey = `onUpdate${PascalCase(name)}`
@@ -80,8 +89,12 @@ export function normalizeProps(type: string | FunctionalComponent, props?: AnyPr
     }
   }
 
+  if (!hasRefs) {
+    return _raw
+  }
+
   // return proxied object
-  return new Proxy(_raw, {
+  const proxy = new Proxy(_raw, {
     get(t, p, r) {
       return unref(Reflect.get(t, p, r))
     },
@@ -90,6 +103,13 @@ export function normalizeProps(type: string | FunctionalComponent, props?: AnyPr
       return true
     },
   })
+
+  Object.defineProperty(proxy, RAW_PROPS_KEY, {
+    value: _raw,
+    enumerable: false,
+  })
+
+  return proxy
 }
 
 /**

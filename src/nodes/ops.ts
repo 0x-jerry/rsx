@@ -17,6 +17,16 @@ const INTERNAL_COMPONENT_OPS: InternalComponentOps[] = [
   ComponentOps,
 ]
 
+const opsCache = new WeakMap<ComponentNode['type'], InternalComponentOps>()
+
 export function getOps(node: ComponentNode) {
-  return INTERNAL_COMPONENT_OPS.find((n) => n.is(node.type))
+  const cached = opsCache.get(node.type)
+  if (cached) return cached
+
+  const ops = INTERNAL_COMPONENT_OPS.find((n) => n.is(node.type))
+  if (ops) {
+    opsCache.set(node.type, ops)
+  }
+
+  return ops
 }

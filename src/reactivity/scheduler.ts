@@ -16,7 +16,11 @@ const queue = new Set<Job>()
 
 export function flushJobs() {
   for (const job of queue.values()) {
-    job()
+    try {
+      job()
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   queue.clear()

@@ -24,8 +24,10 @@ export function connect(node: AnyNode, parentEl?: ParentNode) {
   if (isNativeNode(node)) {
     const el = connectNativeNode(node, parentEl)
 
-    for (const child of node.children || []) {
-      connect(child, el)
+    if (el instanceof HTMLElement) {
+      for (const child of node.children || []) {
+        connect(child, el)
+      }
     }
   }
 

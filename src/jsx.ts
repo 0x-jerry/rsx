@@ -15,7 +15,7 @@ export function h(
   props?: AnyProps,
   ...children: unknown[]
 ): ComponentNode | NativeNode {
-  const normalizedChildren = normalizeChildren(children).toArray()
+  const normalizedChildren = normalizeChildren(children)
 
   if (isString(type)) {
     return createNativeNode(type, props, normalizedChildren)
@@ -24,18 +24,22 @@ export function h(
   return createComponentNode(type, props, normalizedChildren)
 }
 
-function* normalizeChildren(children?: unknown[]) {
-  const stack = children?.slice() || []
+function normalizeChildren(children?: unknown[]): AnyNode[] {
+  const result: AnyNode[] = []
+  if (!children) return result
 
-  while (stack.length) {
-    const child = stack.shift()
+  flattenChildren(children, result)
 
-    if (isArray(child)) {
-      stack.unshift(...child)
-      continue
+  return result
+}
+
+function flattenChildren(items: unknown[], result: AnyNode[]) {
+  for (const item of items) {
+    if (isArray(item)) {
+      flattenChildren(item, result)
+    } else {
+      result.push(normalizeNode(item))
     }
-
-    yield normalizeNode(child)
   }
 }
 

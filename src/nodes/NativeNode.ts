@@ -4,7 +4,7 @@ import { moveTo } from '../nodeOp'
 import type { AnyProps } from '../props'
 
 export interface NativeNodeContext {
-  el: HTMLElement
+  el: HTMLElement | Text
   cleanup?: () => void
 }
 
@@ -40,7 +40,7 @@ export function isNativeNode(o: unknown): o is NativeNode {
 export function connectNativeNode(
   node: NativeNode,
   parentEl?: ParentNode,
-): HTMLElement | undefined {
+): HTMLElement | Text | undefined {
   const { el, cleanup } =
     node.type === TEXT_NODE_TYPE
       ? createTextElement(node.props?.textContent)
