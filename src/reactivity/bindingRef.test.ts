@@ -1,4 +1,4 @@
-import { ref } from '.'
+import { signal } from '.'
 import { $, toBindingRefs } from './bindingRef'
 
 describe('binding ref', () => {
@@ -8,8 +8,8 @@ describe('binding ref', () => {
     }
     const a = $(data, 'a')
 
-    expect(a.value).toBe(1)
-    a.value = 2
+    expect(a()).toBe(1)
+    a(2)
     expect(data.a).toBe(2)
   })
 
@@ -19,20 +19,29 @@ describe('binding ref', () => {
     }
     const a = $(() => data.a)
 
-    expect(a.value).toBe(1)
-    a.value = 2
+    expect(a()).toBe(1)
+    a(2)
     expect(data.a).toBe(1)
   })
 
   it('binding ref data', () => {
-    const data = ref({
+    const data = signal({
       a: 1,
     })
     const a = $(data, 'a')
 
-    expect(a.value).toBe(1)
-    a.value = 2
-    expect(data.value.a).toBe(2)
+    expect(a()).toBe(1)
+    a(2)
+    expect(data().a).toBe(2)
+  })
+
+  it('binding signal write-through', () => {
+    const data = signal('1')
+    const a = $(data)
+
+    expect(a()).toBe('1')
+    a('2')
+    expect(data()).toBe('2')
   })
 
   it('toBindingRefs', () => {
@@ -44,16 +53,16 @@ describe('binding ref', () => {
 
     const { a, b, c } = toBindingRefs(data)
 
-    expect(a.value).toBe(1)
-    expect(b.value).toBe('1')
-    expect(c.value).toBe(false)
+    expect(a()).toBe(1)
+    expect(b()).toBe('1')
+    expect(c()).toBe(false)
 
-    a.value = 2
-    b.value = '2'
-    c.value = true
+    a(2)
+    b('2')
+    c(true)
 
-    expect(a.value).toBe(2)
-    expect(b.value).toBe('2')
-    expect(c.value).toBe(true)
+    expect(a()).toBe(2)
+    expect(b()).toBe('2')
+    expect(c()).toBe(true)
   })
 })

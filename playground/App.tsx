@@ -1,4 +1,4 @@
-import { ref } from '../src'
+import { signal } from '../src'
 import { Button } from './components/Button'
 import { DemoSection } from './components/DemoSection'
 import { Input } from './components/Input'
@@ -11,13 +11,13 @@ import { TodoApp } from './Todo'
 
 export const App = () => {
   const inputState = {
-    text: ref('text'),
-    num: ref(123),
+    text: signal('text'),
+    num: signal(123),
   }
 
   const selectState = {
-    value: ref(1),
-    options: ref([
+    value: signal(1),
+    options: signal([
       {
         label: '1',
         value: 1,
@@ -80,7 +80,7 @@ export const App = () => {
               <span>{inputState.text}</span>
               <Button
                 onClick={() => {
-                  inputState.num.value = inputState.text.value as unknown as number
+                  inputState.num(inputState.text())
                 }}
               >
                 Apply to InputNumber

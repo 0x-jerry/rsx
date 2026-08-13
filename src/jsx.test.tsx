@@ -3,7 +3,7 @@ import { useWatch } from './hook'
 import { isComponentNode } from './internalComponents'
 import { h } from './jsx'
 import { isNativeNode } from './nodes'
-import { $, nextTick, ref } from './reactivity'
+import { $, nextTick, signal } from './reactivity'
 import { contextToJson, mountTestApp } from './test'
 
 describe('jsx', () => {
@@ -30,14 +30,14 @@ describe('jsx', () => {
   })
 
   it('should update ref props', async () => {
-    const v = ref(0)
+    const v = signal(0)
 
     const Comp = () => h('div', { 'data-x': v, class: 'test' })
 
     const el = mountTestApp(Comp)
 
     expect(el.querySelector('.test')?.getAttribute('data-x')).toBe('0')
-    v.value++
+    v(v() + 1)
 
     await nextTick()
     expect(el.querySelector('.test')?.getAttribute('data-x')).toBe('1')
@@ -57,7 +57,7 @@ describe('jsx', () => {
 
   describe('handle $ binding prop', () => {
     it('should handle $ prop on input[text] element', () => {
-      const v = ref('123')
+      const v = signal('123')
 
       const Comp = () => h('input', { $: v })
 
@@ -66,14 +66,14 @@ describe('jsx', () => {
       expect(el.value).toBe('123')
 
       el.value = '12344'
-      expect(v.value).toBe('123')
+      expect(v()).toBe('123')
 
       el.dispatchEvent(new Event('input'))
-      expect(v.value).toBe('12344')
+      expect(v()).toBe('12344')
     })
 
     it('should handle $ prop on input[checkbox] element', () => {
-      const v = ref(true)
+      const v = signal(true)
 
       const Comp = () => h('input', { type: 'checkbox', $: v })
 
@@ -82,14 +82,14 @@ describe('jsx', () => {
       expect(el.checked).toBe(true)
 
       el.checked = false
-      expect(v.value).toBe(true)
+      expect(v()).toBe(true)
 
       el.dispatchEvent(new Event('change'))
-      expect(v.value).toBe(false)
+      expect(v()).toBe(false)
     })
 
     it('should handle $ prop on select element', () => {
-      const v = ref('1')
+      const v = signal('1')
 
       const Comp = () => (
         <select $={v}>
@@ -101,15 +101,15 @@ describe('jsx', () => {
       const el = mountTestApp(Comp).querySelector('select')!
 
       el.value = '2'
-      expect(v.value).toBe('1')
+      expect(v()).toBe('1')
 
       el.dispatchEvent(new Event('change'))
-      expect(v.value).toBe('2')
+      expect(v()).toBe('2')
     })
   })
 
   it('should render as text node', async () => {
-    const v = ref('hello')
+    const v = signal('hello')
 
     const Comp = () => h('div', {}, v)
 
@@ -119,7 +119,7 @@ describe('jsx', () => {
     expect(text).instanceOf(Text)
     expect(text.textContent).toBe('hello')
 
-    v.value = 'world'
+    v('world')
     expect(text.textContent).toBe('hello')
     await nextTick()
     expect(text.textContent).toBe('world')
@@ -146,20 +146,20 @@ describe('jsx', () => {
     })
 
     const props = {
-      v: ref('1'),
+      v: signal('1'),
       onUpdateV(v: string) {
-        props.v.value = v
+        props.v(v)
       },
     }
 
     const el = mountTestApp(() => h(Comp, props)).firstChild!
 
     expect(el.textContent).toBe('1')
-    expect(props.v.value).toBe('1')
+    expect(props.v()).toBe('1')
 
     el.dispatchEvent(new Event('click'))
 
-    expect(props.v.value).toBe('123')
+    expect(props.v()).toBe('123')
     expect(el.textContent).toBe('1')
     await nextTick()
     expect(el.textContent).toBe('123')
@@ -179,7 +179,7 @@ describe('jsx', () => {
     })
 
     const props = {
-      v: ref(1),
+      v: signal(1),
       x: 1,
     }
 
@@ -188,7 +188,7 @@ describe('jsx', () => {
     await nextTick()
     expect(fn).toHaveBeenCalledTimes(0)
 
-    props.v.value++
+    props.v(props.v() + 1)
     await nextTick()
     expect(fn).toHaveBeenCalledTimes(1)
   })

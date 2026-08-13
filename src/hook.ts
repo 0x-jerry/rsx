@@ -1,12 +1,20 @@
 import { type EmptyObject, type Fn } from '@0x-jerry/utils'
-import { readonly, type WatchCallback, type WatchEffect, type WatchSource } from '@vue/reactivity'
 import {
   type ComponentContext,
   ComponentContextEventNameMap,
   type ComponentEvents,
   getCurrentContext,
 } from './nodes'
-import { isRef, type WatchHandle, type WatchOptions, watch } from './reactivity'
+import {
+  isRef,
+  readonly,
+  watch,
+  type WatchCallback,
+  type WatchEffect,
+  type WatchHandle,
+  type WatchOptions,
+  type WatchSource,
+} from './reactivity'
 
 export function useContext() {
   const ctx = getCurrentContext()
@@ -73,7 +81,7 @@ export function useExpose<T extends EmptyObject>(exposed: T) {
   const ref = useRawProps().ref
 
   if (isRef(ref)) {
-    ref.value = readonly(exposed)
+    ref(readonly(exposed))
   }
 }
 

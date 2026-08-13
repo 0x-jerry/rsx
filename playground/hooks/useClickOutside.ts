@@ -5,7 +5,7 @@ import { useEventListener } from './useEventListener'
 export type ClickOutsideCallback = () => void
 
 export function useClickOutside(
-  target: Arrayable<MaybeRef<HTMLElement>>,
+  target: Arrayable<MaybeRef<HTMLElement | null | undefined>>,
   cb: ClickOutsideCallback,
 ) {
   useEventListener(window, 'click', (event: Event) => {
@@ -22,7 +22,7 @@ export function useClickOutside(
   })
 }
 
-function isInsideElement(current: HTMLElement, targets: HTMLElement[]) {
+function isInsideElement(current: HTMLElement, targets: Array<HTMLElement | null | undefined>) {
   let node: HTMLElement | null = current
 
   while (node) {

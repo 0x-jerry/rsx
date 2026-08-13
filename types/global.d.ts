@@ -1,4 +1,4 @@
-import { Ref } from '@vue/reactivity'
+import type { Signal } from '../src/reactivity'
 import type { NativeElements } from './jsx'
 
 declare global {
@@ -15,7 +15,7 @@ declare global {
     }
 
     interface IntrinsicAttributes {
-      ref?: Ref<any>
+      ref?: Signal<any>
     }
 
     interface IntrinsicElements extends NativeElements {

@@ -10,7 +10,7 @@ export interface ButtonProps extends CommonProps {
 export const Button = dc<ButtonProps>((props, children) => {
   const { class: _class, type, ...rest } = toBindingRefs(props)
 
-  const classes = $(() => [styles.btn, _class?.value, type?.value === 'link' && styles.btnLink])
+  const classes = $(() => [styles.btn, _class?.(), type?.() === 'link' && styles.btnLink])
 
   return (
     <button {...rest} class={classes}>

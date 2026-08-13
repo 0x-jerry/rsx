@@ -1,6 +1,6 @@
 import { dc, defineComponentName } from '../defineComponent'
 import { onMounted, onUnmounted } from '../hook'
-import { $, nextTick, ref } from '../reactivity'
+import { $, nextTick, signal } from '../reactivity'
 import { contextToJson, mountTestApp } from '../test'
 import { VCase, VIf } from './case'
 
@@ -34,10 +34,10 @@ describe('VCase', () => {
 
   it('reactivity data', async () => {
     const App = dc(() => {
-      const value = ref(0)
+      const value = signal(0)
 
       onMounted(() => {
-        value.value = 1
+        value(1)
       })
 
       return (
@@ -66,7 +66,7 @@ describe('VCase', () => {
   })
 
   it('where case condition', async () => {
-    const value = ref(7)
+    const value = signal(7)
 
     const App = dc(() => {
       return (
@@ -96,11 +96,11 @@ describe('VCase', () => {
 
     expect(getContent()).eql('7 3')
 
-    value.value = 11
+    value(11)
     await nextTick()
     expect(getContent()).eql('11 1')
 
-    value.value = 3
+    value(3)
     await nextTick()
     expect(getContent()).eql('3 2')
   })
@@ -134,10 +134,10 @@ describe('VIf', () => {
 
   it('reactivity data', async () => {
     const App = dc(() => {
-      const value = ref(0)
+      const value = signal(0)
 
       onMounted(() => {
-        value.value = 1
+        value(1)
       })
 
       return (
@@ -229,10 +229,10 @@ describe('case context tree', () => {
     defineComponentName(B, 'B')
 
     const App = dc(() => {
-      const value = ref(0)
+      const value = signal(0)
 
       onMounted(() => {
-        value.value = 1
+        value(1)
       })
 
       return (
@@ -266,7 +266,7 @@ describe('case context tree', () => {
       return <></>
     }
 
-    const showA = ref(true)
+    const showA = signal(true)
     const App = dc(() => {
       return (
         <div>
@@ -279,7 +279,7 @@ describe('case context tree', () => {
 
     expect(fn).toHaveBeenCalledTimes(0)
 
-    showA.value = false
+    showA(false)
     await nextTick()
     expect(fn).toHaveBeenCalledTimes(1)
     expect(root).toMatchSnapshot('html')
@@ -314,7 +314,7 @@ describe('case context tree', () => {
       )
     }
 
-    const value = ref(0)
+    const value = signal(0)
 
     const App = dc(() => {
       return (
@@ -342,7 +342,7 @@ describe('case context tree', () => {
     expect(mountedFnB).toHaveBeenCalledTimes(0)
     expect(unmountedFnB).toHaveBeenCalledTimes(0)
 
-    value.value = 1
+    value(1)
     await nextTick()
 
     expect(mountedFnA).toHaveBeenCalledTimes(1)

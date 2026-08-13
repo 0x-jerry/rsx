@@ -1,9 +1,9 @@
-import { ref } from './reactivity'
+import { signal } from './reactivity'
 import { mountTestApp } from './test'
 
 describe('node', () => {
   it('ref prop on native node', () => {
-    const value = ref()
+    const value = signal()
 
     const App = () => {
       return (
@@ -15,6 +15,6 @@ describe('node', () => {
 
     mountTestApp(App)
 
-    expect(value.value).instanceof(HTMLSpanElement)
+    expect(value()).instanceof(HTMLSpanElement)
   })
 })

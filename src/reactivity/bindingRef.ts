@@ -1,70 +1,67 @@
 import { isFn } from '@0x-jerry/utils'
-import { ReactiveFlags, type Ref, unref } from '@vue/reactivity'
+import { brandSignal, isRef, toValue } from './helpers'
 import type { AnyProps } from '../props'
-import type { UnRef } from './types'
-
-export { isRef, unref } from '@vue/reactivity'
+import type { Signal, UnRef } from './types'
 
 /**
- * @private
+ * Create a binding signal: a callable that reads (and optionally writes
+ * through) a property of an object, the result of a function, or a signal.
+ *
+ * - `$(obj, 'key')` — writable binding: `()` reads `obj.key`, `(v)` writes it.
+ * - `$(fn)` — read-only binding: `()` re-evaluates `fn()`; `(v)` is a no-op.
+ * - `$(signal)` — writable binding backed by the signal itself.
  */
-export class BindingRef {
-  readonly [ReactiveFlags.IS_REF] = true
+function toBindingRef<T extends {}, K extends keyof UnRef<T>>(
+  fn: () => T,
+  key: K,
+): Signal<UnRef<T>[K]>
+function toBindingRef<T extends {}, K extends keyof UnRef<T>>(
+  o: T,
+  key: K,
+): Signal<UnRef<T>[K]>
+function toBindingRef<T>(fn: () => T): Signal<UnRef<T>>
+function toBindingRef(fnOrObj: any, key?: string) {
+  const isFnValue = isFn(fnOrObj)
 
-  get value() {
-    const _value = this._getUnwrappedObject()
-
-    return this.key == null ? _value : _value[this.key]
+  const get = () => {
+    const value = toValue(isFnValue ? fnOrObj() : fnOrObj)
+    return key == null ? value : value[key]
   }
 
-  set value(value) {
-    if (this.key == null) {
+  const set = (value: any) => {
+    if (key != null) {
+      const obj = toValue(isFnValue ? fnOrObj() : fnOrObj)
+      obj[key] = value
       return
     }
 
-    const _value = this._getUnwrappedObject()
-    _value[this.key] = value
+    if (isRef(fnOrObj)) {
+      fnOrObj(value)
+    }
   }
 
-  constructor(
-    readonly objOrFn: any,
-    readonly key?: string,
-  ) {}
+  const s = ((...args: any[]) => {
+    if (args.length) {
+      set(args[0])
+      return
+    }
+    return get()
+  }) as Signal<any>
 
-  _getUnwrappedObject() {
-    const v = isFn(this.objOrFn) ? this.objOrFn() : this.objOrFn
-
-    return unref(v)
-  }
+  return brandSignal(s)
 }
 
 /**
- *
- * Generate a lightweight binding ref
- *
- * @param o
- * @param key
- */
-function toBindingRef<T extends {}, O extends UnRef<T>, K extends keyof O>(
-  o: T | (() => T),
-  key: K,
-): Ref<UnRef<O[K]>>
-function toBindingRef<T>(fn: () => T): Ref<UnRef<T>>
-function toBindingRef(fnOrObj: any, key?: string) {
-  return new BindingRef(fnOrObj, key) as unknown
-}
-
-/**
- * Binding function, convert data to reactive type
+ * Binding function, convert data to a reactive signal.
  */
 export const $ = toBindingRef
 
 export type BindingRefs<T extends AnyProps> = {
-  [key in keyof T]-?: Ref<UnRef<T[key]>>
+  [key in keyof T]-?: Signal<UnRef<T[key]>>
 }
 
 export function toBindingRefs<T extends AnyProps>(object: T): BindingRefs<T> {
-  const _cache = {} as Record<string, Ref>
+  const _cache = {} as Record<string, Signal<any>>
 
   /**
    * lazy initialize

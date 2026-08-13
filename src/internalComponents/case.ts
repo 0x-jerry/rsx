@@ -68,7 +68,7 @@ function connectCaseNode(node: CaseComponentNode, parentEl?: ParentNode, anchor?
   })
 
   function update(firstTime = false) {
-    const Component = ChildComponent.value
+    const Component = ChildComponent()
 
     if (node._renderedNode) {
       if (node._renderedNode.type === Component) {

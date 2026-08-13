@@ -1,7 +1,7 @@
 import { camelCase, type EmptyObject, isString, PascalCase } from '@0x-jerry/utils'
 import type { Merge, UnionToIntersection } from 'type-fest'
 import type { FunctionalComponent } from '.'
-import { isRef, unref } from './reactivity'
+import { isRef, toValue } from './reactivity'
 import { composeEventListeners } from './utils'
 
 type Compose<Key extends string, Value, Required extends boolean> = Required extends true
@@ -84,7 +84,7 @@ export function normalizeProps(type: string | FunctionalComponent, props?: AnyPr
       const existCallback = _raw[evtKey]
 
       _raw[evtKey] = composeEventListeners((v: unknown) => {
-        value.value = v
+        value(v)
       }, existCallback)
     }
   }
@@ -96,7 +96,7 @@ export function normalizeProps(type: string | FunctionalComponent, props?: AnyPr
   // return proxied object
   const proxy = new Proxy(_raw, {
     get(t, p, r) {
-      return unref(Reflect.get(t, p, r))
+      return toValue(Reflect.get(t, p, r))
     },
     set() {
       // Prevent change props directly.
@@ -125,11 +125,11 @@ function transformNativeBindingRef(type: string, value: unknown, allProps: AnyPr
   const props: AnyProps = {}
 
   if (type === 'input') {
-    if (unref(allProps.type) === 'checkbox') {
+    if (toValue(allProps.type) === 'checkbox') {
       props.checked = value
       if (isRef(value)) {
         props.onChange = composeEventListeners((e: InputEvent) => {
-          value.value = (e.target as HTMLInputElement).checked
+          value((e.target as HTMLInputElement).checked)
         }, allProps.onChange)
       }
     } else {
@@ -137,7 +137,7 @@ function transformNativeBindingRef(type: string, value: unknown, allProps: AnyPr
 
       if (isRef(value)) {
         props.onInput = composeEventListeners((e: InputEvent) => {
-          value.value = (e.target as HTMLInputElement).value
+          value((e.target as HTMLInputElement).value)
         }, allProps.onInput)
       }
     }
@@ -146,7 +146,7 @@ function transformNativeBindingRef(type: string, value: unknown, allProps: AnyPr
 
     if (isRef(value)) {
       props.onChange = composeEventListeners((e: InputEvent) => {
-        value.value = (e.target as HTMLSelectElement).value
+        value((e.target as HTMLSelectElement).value)
       }, allProps.onChange)
     }
   }

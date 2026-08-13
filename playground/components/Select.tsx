@@ -4,10 +4,11 @@ import {
   defineComponent,
   type MapItemComponent,
   type MapItemProps,
-  ref,
+  signal,
   toBindingRefs,
   VMap,
 } from '../../src'
+import type { MaybeRef } from '../../src'
 import styles from './Select.module.css'
 import { Tooltip, type TooltipInstance, TooltipTriggerType } from './Tooltip'
 import type { CommonProps } from './utils'
@@ -24,7 +25,7 @@ export interface OptionItem<T extends OptionValue> {
 export type SelectOptionComponent<T extends OptionValue> = MapItemComponent<OptionItem<T>>
 
 export interface SelectProps<Value extends OptionValue> extends CommonProps {
-  $value?: Value
+  $value?: MaybeRef<Value>
   options: OptionItem<Value>[]
   Option?: SelectOptionComponent<Value>
 }
@@ -32,7 +33,7 @@ export interface SelectProps<Value extends OptionValue> extends CommonProps {
 function SelectImpl<T extends OptionValue>(props: DefineProps<SelectProps<T>>) {
   const { options } = toBindingRefs(props)
 
-  const tooltip = ref<TooltipInstance>()
+  const tooltip = signal<TooltipInstance>()
 
   const Options = () => (
     <VMap
@@ -63,7 +64,7 @@ function SelectImpl<T extends OptionValue>(props: DefineProps<SelectProps<T>>) {
   function handleChange(item: OptionItem<T>) {
     props.onUpdateValue?.(item.value)
 
-    tooltip.value?.toggle()
+    tooltip()?.toggle()
   }
 }
 

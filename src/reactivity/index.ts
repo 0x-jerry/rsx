@@ -1,6 +1,6 @@
-export { computed, reactive, ref } from '@vue/reactivity'
+export { computed, effect, signal } from './system'
 export * from './bindingRef'
-export * from './effect'
+export * from './helpers'
 export { nextTick } from './scheduler'
 export * from './types'
 export * from './watch'

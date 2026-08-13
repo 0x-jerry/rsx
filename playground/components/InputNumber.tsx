@@ -1,28 +1,29 @@
-import { $, dc, ref, toBindingRefs, useWatch } from '../../src'
+import { $, dc, signal, toBindingRefs, toValue, useWatch } from '../../src'
+import type { MaybeRef } from '../../src'
 import styles from './Input.module.css'
 import type { CommonProps } from './utils'
 
 export interface InputNumberProps extends CommonProps {
-  $value?: number
+  $value?: MaybeRef<number>
 }
 
 export const InputNumber = dc<InputNumberProps>((props) => {
   const { class: _class, value: _, ...rest } = toBindingRefs(props)
 
-  const classes = $(() => [styles.input, _class?.value])
+  const classes = $(() => [styles.input, _class?.()])
 
-  const rawValue = ref(String(props.value ?? ''))
+  const rawValue = signal(String(toValue(props.value) ?? ''))
 
   let ignoreWatchHandle = false
 
   useWatch(
-    () => props.value,
+    () => toValue(props.value),
     () => {
       if (ignoreWatchHandle) {
         return
       }
 
-      updateValue(props.value)
+      updateValue(toValue(props.value))
     },
   )
 
@@ -31,7 +32,7 @@ export const InputNumber = dc<InputNumberProps>((props) => {
   )
 
   function handleBlur(_event: Event) {
-    const numValue = parseFloat(rawValue.value)
+    const numValue = parseFloat(rawValue())
     updateValue(numValue)
   }
 
@@ -39,7 +40,7 @@ export const InputNumber = dc<InputNumberProps>((props) => {
     const el = event.target as HTMLInputElement
 
     if (!isValidNumberStr(el.value)) {
-      el.value = rawValue.value
+      el.value = rawValue()
       return
     }
 
@@ -52,19 +53,19 @@ export const InputNumber = dc<InputNumberProps>((props) => {
     // console.warn('update', inputValue)
 
     if (inputValue == null) {
-      rawValue.value = ''
+      rawValue('')
       props.onUpdateValue?.(undefined)
       return
     }
 
     if (typeof inputValue === 'number') {
       if (Number.isNaN(inputValue)) {
-        rawValue.value = ''
+        rawValue('')
         props.onUpdateValue?.(undefined)
         return
       }
 
-      rawValue.value = inputValue.toString()
+      rawValue(inputValue.toString())
       props.onUpdateValue?.(inputValue)
       return
     }
@@ -73,7 +74,7 @@ export const InputNumber = dc<InputNumberProps>((props) => {
       inputValue = parseFloat(inputValue).toString()
     }
 
-    rawValue.value = inputValue
+    rawValue(inputValue)
 
     let num = inputValue.length === 0 ? undefined : parseFloat(inputValue)
     num = Number.isNaN(num) ? undefined : num

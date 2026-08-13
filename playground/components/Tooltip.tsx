@@ -1,4 +1,4 @@
-import { shallowRef } from '@vue/reactivity'
+import { signal } from '../../src'
 import {
   defineComponent,
   useSlot,
@@ -38,8 +38,8 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
     fitWidth: props.fitWidth,
   }
 
-  const refEl = shallowRef()
-  const contentEl = shallowRef()
+  const refEl = signal<HTMLElement>()
+  const contentEl = signal<HTMLElement>()
 
   const hideHandler = useTimeout(
     fui.hide,
@@ -49,7 +49,7 @@ const TooltipImpl = defineComponent<TooltipProps>((props, children) => {
   useExpose(fui)
 
   onMounted(async () => {
-    fui.init(refEl.value, contentEl.value)
+    fui.init(refEl()!, contentEl()!)
   })
 
   onUnmounted(() => {

@@ -1,11 +1,11 @@
 import { useContext, useExpose } from '../hook'
 import { defineComponentName } from '../defineComponent'
-import { nextTick, ref } from '../reactivity'
+import { nextTick, signal } from '../reactivity'
 import { mountTestApp } from '../test'
 
 describe('ComponentNode', () => {
   it('ref prop on a Component instance', async () => {
-    const value = ref()
+    const value = signal()
 
     const A = () => {
       useExpose({
@@ -26,7 +26,7 @@ describe('ComponentNode', () => {
     mountTestApp(App)
     await nextTick()
 
-    expect(value.value).eql({ a: 1 })
+    expect(value()).eql({ a: 1 })
   })
 
   it('does not corrupt context stack when a child setup throws', () => {

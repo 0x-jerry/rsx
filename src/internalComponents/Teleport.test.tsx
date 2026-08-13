@@ -1,5 +1,5 @@
 import { onMounted } from '../hook'
-import { nextTick, ref } from '../reactivity'
+import { nextTick, signal } from '../reactivity'
 import { dc } from '../defineComponent'
 import { mountTestApp } from '../test'
 import { Teleport } from './Teleport'
@@ -38,10 +38,10 @@ describe('Teleport', () => {
       </div>
     )
     const App = dc(() => {
-      const toValue = ref('#tp')
+      const toValue = signal('#tp')
 
       onMounted(() => {
-        toValue.value = '#tp2'
+        toValue('#tp2')
       })
 
       return (
@@ -70,10 +70,10 @@ describe('Teleport', () => {
       </div>
     )
     const App = dc(() => {
-      const toValue = ref('#tp')
+      const toValue = signal('#tp')
 
       onMounted(() => {
-        toValue.value = '#tp3'
+        toValue('#tp3')
       })
 
       return (

@@ -1,4 +1,5 @@
-import { type Ref, shallowRef } from '@vue/reactivity'
+import { signal, type Signal, type MaybeRef } from '../reactivity'
+import type { Fn } from '@0x-jerry/utils'
 import { asyncWatcherScheduler } from '../reactivity/scheduler'
 import {
   defineComponent,
@@ -35,14 +36,25 @@ export interface MapComponentProps<T> {
   render: FunctionalComponent<MapItemProps<T>>
 }
 
+/**
+ * JSX-visible props: value props accept signals (`MaybeRef`), function props
+ * stay plain so the generic `T` infers correctly through JSX. Derived from
+ * `MapComponentProps` so the two stay in sync.
+ */
+export type MapComponentJsxProps<T> = {
+  [K in keyof MapComponentProps<T>]: NonNullable<MapComponentProps<T>[K]> extends Fn
+    ? MapComponentProps<T>[K]
+    : MaybeRef<MapComponentProps<T>[K]>
+}
+
 interface ChildComponentNode extends ComponentNode {
   /**
    * mark this is a reuse element
    */
   _r?: boolean
   _props?: {
-    item: Ref<unknown>
-    index: Ref<number>
+    item: Signal<unknown>
+    index: Signal<number>
   }
 }
 
@@ -51,7 +63,9 @@ interface MapComponentNode extends ComponentNode {
   _renderedNodes?: ComponentNode[]
 }
 
-export const VMap = defineComponent(<T>(_props: MapComponentProps<T>) => {})
+export const VMap = defineComponent(<T>(_props: MapComponentProps<T>) => {}) as unknown as <T>(
+  props: MapComponentJsxProps<T>,
+) => any
 
 defineComponentName(VMap, 'VMap')
 
@@ -215,15 +229,15 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode, anchor?: 
     const newDataContextMap = new Map<unknown, ChildComponentNode[]>()
 
     props.list.forEach((item, idx) => {
-      const dataKey = childrenKeys.value[idx]
+      const dataKey = childrenKeys()[idx]
 
       if (dataContextMap.has(dataKey)) {
         const reuseNode = popItemFromMap(dataContextMap, dataKey)
         reuseNode._r = true
 
         if (reuseNode._props) {
-          reuseNode._props.item.value = item
-          reuseNode._props.index.value = idx
+          reuseNode._props.item(item)
+          reuseNode._props.index(idx)
         }
 
         appendItemToMap(newDataContextMap, dataKey, reuseNode)
@@ -234,8 +248,8 @@ function connectMapNode(node: MapComponentNode, parentEl?: ParentNode, anchor?: 
       }
 
       const childProps = {
-        item: shallowRef(item),
-        index: shallowRef(idx),
+        item: signal(item),
+        index: signal(idx),
       }
 
       const newCtx = h(props.render, childProps) as ChildComponentNode

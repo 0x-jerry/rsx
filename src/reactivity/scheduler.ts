@@ -1,4 +1,4 @@
-import type { WatchScheduler } from '@vue/reactivity'
+import type { WatchScheduler } from './types'
 
 const resolvedPromise = Promise.resolve()
 

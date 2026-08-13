@@ -1,8 +1,7 @@
-import { type ReactiveEffectRunner, stop } from '@vue/reactivity'
 import { type ClassValue, clsx } from 'clsx'
 import { updateEl } from './nodeOp'
 import { type AnyProps, normalizeProps, RAW_PROPS_KEY } from './props'
-import { effect, isRef, unref } from './reactivity'
+import { effect, isRef, toValue } from './reactivity'
 
 export function createNativeElement(type: string, props?: AnyProps) {
   const el = document.createElement(type)
@@ -15,7 +14,7 @@ export function createNativeElement(type: string, props?: AnyProps) {
 
   // Respect `ref` prop
   if (isRef(ref)) {
-    ref.value = el
+    ref(el)
   }
 
   return {
@@ -25,7 +24,7 @@ export function createNativeElement(type: string, props?: AnyProps) {
 }
 
 function bindingProperties(el: HTMLElement, props: AnyProps) {
-  const effects: ReactiveEffectRunner[] = []
+  const effects: Array<() => void> = []
   const previousProps = new Map()
 
   const _raw: AnyProps = (props as any)[RAW_PROPS_KEY] || props
@@ -51,7 +50,7 @@ function bindingProperties(el: HTMLElement, props: AnyProps) {
   }
 
   if (effects.length) {
-    return () => effects.forEach((item) => stop(item))
+    return () => effects.forEach((item) => item())
   }
 }
 
@@ -70,10 +69,10 @@ export function createTextElement(content: unknown) {
 
   if (isRef(content)) {
     const runner = effect(() => {
-      el.textContent = String(unref(content) ?? '')
+      el.textContent = String(toValue(content) ?? '')
     })
 
-    cleanup = () => stop(runner)
+    cleanup = () => runner()
   } else {
     el.textContent = String(content ?? '')
   }

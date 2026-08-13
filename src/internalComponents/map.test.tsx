@@ -1,6 +1,6 @@
 import { dc, defineComponentName } from '../defineComponent'
 import { onMounted, onUnmounted } from '../hook'
-import { $, nextTick, ref, toBindingRefs } from '../reactivity'
+import { $, nextTick, signal, toBindingRefs } from '../reactivity'
 import { contextToJson, mountTestApp } from '../test'
 import { VMap } from './map'
 
@@ -50,10 +50,10 @@ describe('map component', () => {
 
   it('reactivity data', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [4, 5, 6]
+        list([4, 5, 6])
       })
 
       return (
@@ -78,10 +78,10 @@ describe('map component', () => {
 
   it('reactivity data with index', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [2, 1, 3]
+        list([2, 1, 3])
       })
 
       return (
@@ -122,7 +122,7 @@ describe('map component', () => {
     }
 
     const App = dc(() => {
-      const list = ref<Item[]>([
+      const list = signal<Item[]>([
         {
           name: '1',
           key: 1,
@@ -138,7 +138,7 @@ describe('map component', () => {
       ])
 
       onMounted(() => {
-        list.value = [
+        list([
           {
             name: '2',
             key: 1,
@@ -151,7 +151,7 @@ describe('map component', () => {
             name: '4',
             key: 3,
           },
-        ]
+        ])
       })
 
       return (
@@ -182,10 +182,10 @@ describe('map component', () => {
 
   it('reuse node', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3, 4])
+      const list = signal([1, 2, 3, 4])
 
       onMounted(() => {
-        list.value = [4, 2, 3, 1]
+        list([4, 2, 3, 1])
       })
 
       return (
@@ -210,10 +210,10 @@ describe('map component', () => {
 
   it('add item to list', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [1, 4, 2, 3]
+        list([1, 4, 2, 3])
       })
 
       return (
@@ -238,10 +238,10 @@ describe('map component', () => {
 
   it('add item from start', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.unshift(4)
+        list([4, ...list()])
       })
 
       return (
@@ -266,10 +266,10 @@ describe('map component', () => {
 
   it('add item to the end', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.push(4)
+        list([...list(), 4])
       })
 
       return (
@@ -294,10 +294,10 @@ describe('map component', () => {
 
   it('delete item to list', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [1, 3]
+        list([1, 3])
       })
 
       return (
@@ -322,10 +322,10 @@ describe('map component', () => {
 
   it('delete item from start', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.shift()
+        list(list().slice(1))
       })
 
       return (
@@ -350,10 +350,10 @@ describe('map component', () => {
 
   it('delete item from end', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.pop()
+        list(list().slice(0, -1))
       })
 
       return (
@@ -446,10 +446,10 @@ describe('map component with fragment', () => {
 
   it('reactivity data', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [4, 5, 6]
+        list([4, 5, 6])
       })
 
       return (
@@ -482,10 +482,10 @@ describe('map component with fragment', () => {
 
   it('reuse node', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3, 4])
+      const list = signal([1, 2, 3, 4])
 
       onMounted(() => {
-        list.value = [4, 2, 3, 1]
+        list([4, 2, 3, 1])
       })
 
       return (
@@ -518,10 +518,10 @@ describe('map component with fragment', () => {
 
   it('reuse node 1', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3, 4])
+      const list = signal([1, 2, 3, 4])
 
       onMounted(() => {
-        list.value = [4, 2, 3, 1]
+        list([4, 2, 3, 1])
       })
 
       return (
@@ -556,10 +556,10 @@ describe('map component with fragment', () => {
 
   it('add item to list', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [1, 4, 2, 3]
+        list([1, 4, 2, 3])
       })
 
       return (
@@ -592,10 +592,10 @@ describe('map component with fragment', () => {
 
   it('add item from start', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.unshift(4)
+        list([4, ...list()])
       })
 
       return (
@@ -628,10 +628,10 @@ describe('map component with fragment', () => {
 
   it('add item to the end', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.push(4)
+        list([...list(), 4])
       })
 
       return (
@@ -664,10 +664,10 @@ describe('map component with fragment', () => {
 
   it('delete item to list', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [1, 3]
+        list([1, 3])
       })
 
       return (
@@ -700,10 +700,10 @@ describe('map component with fragment', () => {
 
   it('delete item from start', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.shift()
+        list(list().slice(1))
       })
 
       return (
@@ -736,10 +736,10 @@ describe('map component with fragment', () => {
 
   it('delete item from end', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.pop()
+        list(list().slice(0, -1))
       })
 
       return (
@@ -821,10 +821,10 @@ describe('map with map', () => {
 
   it('reactivity data', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [4, 5, 6]
+        list([4, 5, 6])
       })
 
       return (
@@ -875,10 +875,10 @@ describe('map with map', () => {
 
   it('add item to list', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [1, 4, 2, 3]
+        list([1, 4, 2, 3])
       })
 
       return (
@@ -933,10 +933,10 @@ describe('map with map', () => {
 
   it('add item from start', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.unshift(4)
+        list([4, ...list()])
       })
 
       return (
@@ -991,10 +991,10 @@ describe('map with map', () => {
 
   it('add item to the end', async () => {
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value.push(4)
+        list([...list(), 4])
       })
 
       return (
@@ -1063,10 +1063,10 @@ describe('map with map', () => {
     })
 
     const App = dc(() => {
-      const list = ref([1, 2, 3])
+      const list = signal([1, 2, 3])
 
       onMounted(() => {
-        list.value = [3, 1, 4]
+        list([3, 1, 4])
       })
 
       return <VMap list={list} render={Item} />
@@ -1136,10 +1136,10 @@ describe('map context tree', () => {
     defineComponentName(B, 'B')
 
     const App = dc(() => {
-      const data = ref([1, 2, 3])
+      const data = signal([1, 2, 3])
 
       onMounted(() => {
-        data.value = [2, 1, 4, 3]
+        data([2, 1, 4, 3])
       })
 
       return (

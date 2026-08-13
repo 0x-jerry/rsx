@@ -1,4 +1,4 @@
-import { $, computed, dc, reactive, VMap } from '../src'
+import { $, computed, dc, signal, VMap } from '../src'
 
 interface TodoOption {
   id: string
@@ -15,34 +15,32 @@ const TodoItem = dc<{ item: TodoOption; $completed: boolean }>((props) => {
   )
 })
 
+type TodoFilter = 'all' | 'completed' | 'uncompleted'
+
 export const TodoApp = dc(() => {
-  const state = reactive({
-    items: [] as TodoOption[],
-    type: 'all',
-    content: '',
-  })
+  const items = signal<TodoOption[]>([])
+  const filter = signal<TodoFilter>('all')
+  const content = signal('')
 
   const filteredItems = computed(() => {
-    const isCompleted = state.type === 'completed'
+    const isCompleted = filter() === 'completed'
 
-    const items =
-      state.type === 'all'
-        ? state.items
-        : state.items.filter((item) => isCompleted === !!item.completed)
+    const list =
+      filter() === 'all' ? items() : items().filter((item) => isCompleted === !!item.completed)
 
-    return items
+    return list
   })
 
   const Filter = (
     <div class="flex">
       <VMap
-        list={['all', 'completed', 'uncompleted']}
+        list={['all', 'completed', 'uncompleted'] as TodoFilter[]}
         render={({ item }) => (
           <button
             onClick={() => {
-              state.type = item
+              filter(item)
             }}
-            class={$(() => (state.type === item ? 'bg-green' : ''))}
+            class={$(() => (filter() === item ? 'bg-green' : ''))}
           >
             {item}
           </button>
@@ -54,13 +52,13 @@ export const TodoApp = dc(() => {
   const Toolbar = (
     <div>
       <button onClick={sort}> sort </button>
-      {$(() => state.items.length)}
+      {$(() => items().length)}
     </div>
   )
 
   const AddBar = (
     <div class="flex">
-      <input type="text" $={$(state, 'content')} />
+      <input type="text" $={$(content)} />
       <button onClick={addBatchTodo}>add</button>
     </div>
   )
@@ -91,26 +89,27 @@ export const TodoApp = dc(() => {
   )
 
   function addBatchTodo() {
-    if (!state.content) return
+    if (!content()) return
+
+    const newItems: TodoOption[] = []
 
     for (let index = 0; index < 10; index++) {
-      const item: TodoOption = {
+      newItems.push({
         id: Math.random().toString(),
-        content: `${state.content}-${index}`,
+        content: `${content()}-${index}`,
         completed: false,
-      }
-
-      state.items.push(item)
+      })
     }
 
-    state.content = ''
+    items([...items(), ...newItems])
+    content('')
   }
 
   function sort() {
-    state.items.sort((a, b) => a.content.localeCompare(b.content))
+    items([...items()].sort((a, b) => a.content.localeCompare(b.content)))
     console.log(
       'sort',
-      state.items.map((n) => n.content),
+      items().map((n) => n.content),
     )
   }
 })

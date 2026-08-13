@@ -2,18 +2,18 @@
 
 > This is an experiment library.
 
-A library try to convert `jsx` to dom, and combine with `@vue/reactivity`'s reactive system.
+A library try to convert `jsx` to dom, and combine with `alien-signals`'s signal system.
 
 # Counter Demo
 
 ```jsx
-import { ref, mountApp } from './core'
+import { signal, mountApp } from './core'
 
 const Counter = () => {
-  const count = ref(0)
+  const count = signal(0)
 
   return (
-    <button onClick={() => count.value++} data-count={count}>
+    <button onClick={() => count(count() - 1)} data-count={count}>
       count: {count}
     </button>
   )

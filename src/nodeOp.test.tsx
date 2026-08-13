@@ -1,4 +1,4 @@
-import { ref } from './reactivity'
+import { signal } from './reactivity'
 import { mountTestApp } from './test'
 import { updateEl } from './nodeOp'
 
@@ -88,7 +88,7 @@ describe('updateEl', () => {
 
 describe('node binding (boolean + style reactive)', () => {
   it('reactive boolean attribute', async () => {
-    const disabled = ref(false)
+    const disabled = signal(false)
 
     const App = () => (
       <button disabled={disabled}>
@@ -101,26 +101,26 @@ describe('node binding (boolean + style reactive)', () => {
 
     expect(btn.hasAttribute('disabled')).toBe(false)
 
-    disabled.value = true
+    disabled(true)
     await Promise.resolve()
     expect(btn.hasAttribute('disabled')).toBe(true)
 
-    disabled.value = false
+    disabled(false)
     await Promise.resolve()
     expect(btn.hasAttribute('disabled')).toBe(false)
   })
 
   it('reactive style string', async () => {
-    const color = ref('red')
+    const color = signal('red')
 
     // NOTE: passing a function directly is not supported by bindingProperties;
     // verify via direct updateEl instead.
     const el = document.createElement('div')
-    updateEl(el, 'style', `color: ${color.value}`)
+    updateEl(el, 'style', `color: ${color()}`)
     expect(el.style.color).toBe('red')
 
-    color.value = 'blue'
-    updateEl(el, 'style', `color: ${color.value}`)
+    color('blue')
+    updateEl(el, 'style', `color: ${color()}`)
     expect(el.style.color).toBe('blue')
   })
 })
